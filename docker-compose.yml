@@ -1,0 +1,5 @@
+services:
+  train:
+    build: .
+    ports:
+      - 6006:6006
