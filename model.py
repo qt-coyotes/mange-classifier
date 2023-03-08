@@ -38,7 +38,6 @@ class Module(LightningModule):
                 BinaryAveragePrecision(),
             ]
         )
-        self.bcm = BinaryConfusionMatrix()
 
     def forward(self, x: Tensor):
         self.feature_extractor.eval()
@@ -56,12 +55,6 @@ class Module(LightningModule):
         self.log("train_loss", loss)
         metric = self.metrics(yhat, y)
         self.log("train_metric", metric)
-        bcm = self.bcm(yhat, y)
-        tn, fp, fn, tp = bcm.float().flatten()
-        self.log("train_tn", tn)
-        self.log("train_fp", fp)
-        self.log("train_fn", fn)
-        self.log("train_tp", tp)
         return loss
 
     def validation_step(self, batch: Tuple[Tensor], batch_idx):

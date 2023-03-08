@@ -51,7 +51,6 @@ def main():
         trainer = Trainer(
             accelerator=args.accelerator,
             devices=1,
-            limit_train_batches=100,
             max_epochs=args.max_epochs,
             log_every_n_steps=1
         )

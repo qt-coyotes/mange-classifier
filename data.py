@@ -15,7 +15,7 @@ class COCOImageDataset(Dataset):
             data_path,
             transform=None,
             target_transform=None
-        ):
+    ):
         self.images = images
         self.labels = labels
         self.data_path = data_path
@@ -126,7 +126,6 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
             val_y,
             self.data_path
         )
-
 
     def train_dataloader(self):
         return DataLoader(self.dataset_test, batch_size=self.batch_size, num_workers=self.num_workers)
