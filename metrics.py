@@ -17,7 +17,10 @@ class BinaryExpectedCost(BinaryStatScores):
     ):
         """
         Args:
-            costs: A 1D tensor of the costs of: TN, FP, FN, TP.
+            ctp: Cost of true positive
+            cfp: Cost of false positive
+            cfn: Cost of false negative
+            ctn: Cost of true negative
         """
         super().__init__()
         self.ctp = ctp
