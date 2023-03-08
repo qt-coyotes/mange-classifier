@@ -26,7 +26,7 @@ def main():
     parser.add_argument(
         "--batch_size",
         type=int,
-        default=32
+        default=16
     )
     parser.add_argument(
         "--num_workers",
@@ -41,7 +41,7 @@ def main():
     parser.add_argument(
         "--max_epochs",
         type=int,
-        default=10
+        default=1
     )
     args = parser.parse_args()
 

@@ -34,8 +34,8 @@ class Module(LightningModule):
                 BinaryAccuracy(),
                 BinaryF1Score(),
                 BinaryFBetaScore(beta=2.0),
-                BinaryAUROC(),
-                BinaryAveragePrecision(),
+                # BinaryAUROC(),
+                # BinaryAveragePrecision(),
             ]
         )
 
