@@ -1,1 +1,8 @@
 dvc[gdrive]
+matplotlib
+scikit-learn
+lightning
+torch
+torchmetrics
+torchvision
+tensorboard
