@@ -122,8 +122,8 @@ def run(args):
     cv_metrics = {}
     for test_metric in test_metrics:
         test_metric = test_metric[0]
-        test_metric = test_metric["test_metric"]
-        for key, value in test_metric.items():
+        test_metric_metric = test_metric["test_metric"]
+        for key, value in test_metric_metric.items():
             key = key.replace("Binary", "")
             cv_metrics[key] = cv_metrics.get(key, 0) + value.item()
         cv_metrics["loss"] = (
