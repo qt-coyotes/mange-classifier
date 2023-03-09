@@ -122,13 +122,13 @@ def run(args):
     cv_metrics = {}
     for test_metric in test_metrics:
         test_metric = test_metric[0]
-        cv_metrics["loss"] = (
-            cv_metrics.get("loss", 0) + test_metric["test_loss"]
-        )
         test_metric = test_metric["test_metric"]
         for key, value in test_metric.items():
             key = key.replace("Binary", "")
             cv_metrics[key] = cv_metrics.get(key, 0) + value.item()
+        cv_metrics["loss"] = (
+            cv_metrics.get("loss", 0) + test_metric["test_loss"]
+        )
 
     for metric in cv_metrics:
         cv_metrics[metric] /= k
