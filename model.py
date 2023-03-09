@@ -12,8 +12,8 @@ from torchmetrics.classification import (
     BinaryAveragePrecision,
     BinaryF1Score,
     BinaryFBetaScore,
-    Recall,
-    Precision
+    BinaryRecall,
+    BinaryPrecision
 )
 
 from metrics import BinaryExpectedCost
@@ -49,8 +49,8 @@ class Module(LightningModule):
                         BinaryExpectedCost(),
                         BinaryFBetaScore(beta=2.0),
                         BinaryF1Score(),
-                        Recall(),
-                        Precision(),
+                        BinaryRecall(),
+                        BinaryPrecision(),
                         BinaryAccuracy(),
                         # BinaryAUROC(),
                         # BinaryAveragePrecision(),
