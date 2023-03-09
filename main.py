@@ -72,7 +72,7 @@ def main():
         "--patience",
         help="Number of checks with no improvement after which training will be stopped.",
         type=int,
-        default=5,
+        default=10,
     )
     args = parser.parse_args()
     torch.backends.cudnn.deterministic = args.deterministic
