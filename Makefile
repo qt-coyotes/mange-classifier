@@ -1,4 +1,7 @@
-run:
+4090:
+	python3 main.py --batch_size 63 --learning_rate 0.00002 --num_sanity_val_steps 1
+
+auto:
 	python3 main.py --auto_scale_batch_size true --auto_lr_find true --num_sanity_val_steps 1
 
 fast:

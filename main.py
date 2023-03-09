@@ -1,4 +1,6 @@
 import argparse
+import json
+from datetime import datetime
 from pathlib import Path
 
 import torch
@@ -79,19 +81,18 @@ def main():
 
 def run(args):
     # cross validation
-    metrics = []
+    test_metrics = []
     for i in range(args.k):
         seed_everything(args.random_state, workers=True)
         model = Module(
             batch_size=args.batch_size, learning_rate=args.learning_rate
         )
-        trainer = Trainer.from_argparse_args(args, callbacks=[
-            EarlyStopping(
-                "val_loss",
-                patience=args.patience,
-                mode="min"
-            )
-        ])
+        trainer = Trainer.from_argparse_args(
+            args,
+            callbacks=[
+                EarlyStopping("val_loss", patience=args.patience, mode="min")
+            ],
+        )
         trainer.logger._log_graph = True
         datamodule = StratifiedGroupKFoldDataModule(
             args.k,
@@ -104,9 +105,34 @@ def run(args):
             args.random_state,
         )
         trainer.tune(model, datamodule=datamodule)
+        if args.auto_scale_batch_size or args.auto_lr_find:
+            print("Automatically found batch size and learning rate")
+            print("Replace --auto_scale_batch_size and --auto_lr_find with:")
+            print(f"--batch_size {model.batch_size}")
+            print(f"--learning_rate {model.learning_rate}")
+            break
         trainer.fit(model=model, train_dataloaders=datamodule)
-        metric = trainer.test(ckpt_path="best", dataloaders=datamodule)
-        metrics.append(metric)
+        test_metric = trainer.test(ckpt_path="best", dataloaders=datamodule)
+        test_metrics.append(test_metric)
+
+    k = 5
+
+    cv_metrics = {}
+    for test_metric in test_metrics:
+        test_metric = test_metric[0]
+        cv_metrics["loss"] = (
+            cv_metrics.get("loss", 0) + test_metric["test_loss"]
+        )
+        test_metric = test_metric["test_metric"]
+        for key, value in test_metric.items():
+            cv_metrics[key] = cv_metrics.get(key, 0) + test_metric[key].item()
+
+    for metric in cv_metrics:
+        cv_metrics[metric] /= k
+
+    timestamp = datetime.now().strftime("%Y%-m-%d-%H-%M-%S")
+    with open(f"cv_metrics_{timestamp}.json", "w") as f:
+        json.dump(cv_metrics, f, indent=4)
 
     # TODO: train final model
 
