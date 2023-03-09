@@ -20,21 +20,23 @@ from metrics import BinaryExpectedCost
 class Module(LightningModule):
     def __init__(self, batch_size: int, learning_rate: float = 1e-3):
         super().__init__()
-        # weights = models.ViT_B_16_Weights.DEFAULT
-        # backbone = models.vit_b_16(weights=weights)
-        weights = models.ResNet18_Weights.DEFAULT
+        weights = models.ViT_B_16_Weights.DEFAULT
+        # weights = models.ResNet18_Weights.DEFAULT
         self.transforms = weights.transforms()
+        # backbone = models.resnet18(weights=weights)
+        backbone = models.vit_b_16(weights=weights)
 
         # self.example_input_array = torch.zeros(
         #     batch_size, 3, 1746, 2592, dtype=torch.float
         # )
 
-        backbone = models.resnet18(weights=weights)
         children = list(backbone.children())
         layers = children[:-1]
         last_layer = children[-1]
         self.feature_extractor = nn.Sequential(*layers)
         self.flatten = nn.Flatten()
+        while isinstance(last_layer, nn.Sequential):
+            last_layer = last_layer[-1]
         self.classifier = nn.Sequential(
             nn.Linear(last_layer.in_features, 1), nn.Sigmoid()
         )
