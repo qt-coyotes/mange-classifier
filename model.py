@@ -13,20 +13,28 @@ from torchmetrics.classification import (
     BinaryF1Score,
     BinaryFBetaScore,
     BinaryRecall,
-    BinaryPrecision
+    BinaryPrecision,
 )
 
 from metrics import BinaryExpectedCost
-from torchvision.models.feature_extraction import create_feature_extractor, get_graph_node_names
+from torchvision.models.feature_extraction import (
+    create_feature_extractor,
+    get_graph_node_names,
+)
 
 
 class Module(LightningModule):
-    def __init__(self, batch_size: int, learning_rate: float = 1e-3):
+    def __init__(
+        self,
+        batch_size: int,
+        learning_rate: float,
+        pretrained: bool,
+    ):
         super().__init__()
         weights = models.ResNet18_Weights.DEFAULT
         self.transforms = weights.transforms()
-        backbone = models.resnet18(weights=weights)
-        self.graph_node_name = 'fc'
+        backbone = models.resnet18(weights=weights if pretrained else None)
+        self.graph_node_name = "fc"
         self.feature_extractor = create_feature_extractor(
             backbone, return_nodes=[self.graph_node_name]
         )

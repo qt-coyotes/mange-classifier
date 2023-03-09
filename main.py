@@ -69,6 +69,12 @@ def main():
         default=True,
     )
     group.add_argument(
+        "--pretrained",
+        help="This flag uses pretrained weights.",
+        type=bool,
+        default=True,
+    )
+    group.add_argument(
         "--patience",
         help="Number of checks with no improvement after which training will be stopped.",
         type=int,
@@ -87,7 +93,9 @@ def run(args):
     for i in range(args.k):
         seed_everything(args.random_state, workers=True)
         model = Module(
-            batch_size=args.batch_size, learning_rate=args.learning_rate
+            batch_size=args.batch_size,
+            learning_rate=args.learning_rate,
+            pretrained=args.pretrained,
         )
         trainer = Trainer.from_argparse_args(
             args,
