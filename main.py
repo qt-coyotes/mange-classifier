@@ -14,7 +14,6 @@ from model import Module
 def main():
     parser = argparse.ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
-    parser.
     group = parser.add_argument_group("qt.coyote")
     group.add_argument("--batch_size", help="Batch size", type=int, default=32)
     group.add_argument(
