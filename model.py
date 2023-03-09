@@ -1,5 +1,6 @@
 from typing import Tuple
 
+import torch
 import torch.nn.functional as F
 import torchvision.models as models
 from lightning.pytorch import LightningModule
@@ -24,6 +25,8 @@ class Module(LightningModule):
         weights = models.ResNet18_Weights.DEFAULT
         self.transforms = weights.transforms()
 
+        self.example_input_array = torch.zeros(batch_size, 3, 1746, 2592)
+
         backbone = models.resnet18(weights=weights)
         children = list(backbone.children())
         layers = children[:-1]
@@ -33,8 +36,10 @@ class Module(LightningModule):
         self.classifier = nn.Sequential(
             nn.Linear(last_layer.in_features, 1), nn.Sigmoid()
         )
+
         self.batch_size = batch_size
         self.learning_rate = learning_rate
+
         self.metrics = nn.ModuleDict(
             {
                 f"{stage}_metric": MetricCollection(
