@@ -4,7 +4,7 @@ services:
     container_name: coyote_learning
     working_dir: /mange-classifier
     build: .
-    shm_size: "2gb"
+    shm_size: "8gb"
     privileged: true
     tty: true
     volumes:
