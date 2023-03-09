@@ -130,7 +130,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
 
     def train_dataloader(self):
         return DataLoader(
-            self.dataset_test,
+            self.dataset_train,
             batch_size=self.batch_size,
             num_workers=self.num_workers
         )
