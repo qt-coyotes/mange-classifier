@@ -62,7 +62,7 @@ class Module(LightningModule):
 
     def forward(self, x: Tensor):
         x = self.transforms(x)
-        representations = self.feature_extractor(x)[self.graph_node_name]
+        representations = self.feature_extractor(x)
         x = self.flatten(representations)
         x = self.classifier(x)
         x = x.flatten()
