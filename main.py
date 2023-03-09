@@ -14,6 +14,7 @@ from model import Module
 def main():
     parser = argparse.ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
+    parser.
     group = parser.add_argument_group("qt.coyote")
     group.add_argument("--batch_size", help="Batch size", type=int, default=32)
     group.add_argument(
@@ -41,7 +42,7 @@ def main():
         "--num_workers",
         help="Number of workers for dataloader",
         type=int,
-        default=8,
+        default=16,
     )
     group.add_argument(
         "--shuffle",
@@ -76,6 +77,8 @@ def main():
     )
     args = parser.parse_args()
     torch.backends.cudnn.deterministic = args.deterministic
+    if args.accelerator is None:
+        args.accelerator = "auto"
     run(args)
 
 
