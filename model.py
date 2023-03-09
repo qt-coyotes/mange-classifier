@@ -23,12 +23,12 @@ from torchvision.models.feature_extraction import create_feature_extractor, get_
 class Module(LightningModule):
     def __init__(self, batch_size: int, learning_rate: float = 1e-3):
         super().__init__()
-        weights = models.ViT_B_16_Weights.DEFAULT
+        weights = models.ResNet18_Weights.DEFAULT
         self.transforms = weights.transforms()
-        backbone = models.vit_b_16(weights=weights)
-
+        backbone = models.resnet18(weights=weights)
+        self.graph_node_name = 'fc'
         self.feature_extractor = create_feature_extractor(
-            backbone, return_nodes=['getitem_5']
+            backbone, return_nodes=[self.graph_node_name]
         )
         children = list(backbone.children())
         last_layer = children[-1]
@@ -62,7 +62,7 @@ class Module(LightningModule):
 
     def forward(self, x: Tensor):
         x = self.transforms(x)
-        representations = self.feature_extractor(x)['getitem_5']
+        representations = self.feature_extractor(x)[self.graph_node_name]
         x = self.flatten(representations)
         x = self.classifier(x)
         x = x.flatten()
