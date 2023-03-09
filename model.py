@@ -37,7 +37,7 @@ class Module(LightningModule):
         self.learning_rate = learning_rate
         self.metrics = nn.ModuleDict(
             {
-                stage: MetricCollection(
+                f"{stage}_metric": MetricCollection(
                     [
                         BinaryExpectedCost(),
                         BinaryAccuracy(),
@@ -65,7 +65,7 @@ class Module(LightningModule):
         yhat = self.forward(x)
         loss = F.binary_cross_entropy(yhat, y.float())
         self.log(f"{stage}_loss", loss, on_epoch=True)
-        metric = self.metrics[stage](yhat, y)
+        metric = self.metrics[f"{stage}_metric"](yhat, y)
         self.log(f"{stage}_metric", metric)
         return loss
 
