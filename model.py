@@ -1,6 +1,5 @@
 from typing import Tuple
 
-import torch
 import torch.nn.functional as F
 import torchvision.models as models
 from lightning.pytorch import LightningModule
@@ -10,7 +9,6 @@ from torchmetrics.classification import (
     BinaryAccuracy,
     BinaryAUROC,
     BinaryAveragePrecision,
-    BinaryConfusionMatrix,
     BinaryF1Score,
     BinaryFBetaScore,
 )
@@ -19,62 +17,67 @@ from metrics import BinaryExpectedCost
 
 
 class Module(LightningModule):
-    def __init__(self):
+    def __init__(self, batch_size: int, learning_rate: float = 1e-3):
         super().__init__()
+        # weights = models.ViT_B_16_Weights.DEFAULT
+        # backbone = models.vit_b_16(weights=weights)
         weights = models.ResNet18_Weights.DEFAULT
-        backbone = models.resnet18(weights=weights)
-        layers = list(backbone.children())[:-1]
         self.transforms = weights.transforms()
+
+        backbone = models.resnet18(weights=weights)
+        children = list(backbone.children())
+        layers = children[:-1]
+        last_layer = children[-1]
         self.feature_extractor = nn.Sequential(*layers)
-        num_filters = backbone.fc.in_features
-        self.classifier = nn.Sequential(nn.Linear(num_filters, 1), nn.Sigmoid())
-        self.metrics = MetricCollection(
-            [
-                BinaryExpectedCost(),
-                BinaryAccuracy(),
-                BinaryF1Score(),
-                BinaryFBetaScore(beta=2.0),
-                # BinaryAUROC(),
-                # BinaryAveragePrecision(),
-            ]
+        self.flatten = nn.Flatten()
+        self.classifier = nn.Sequential(
+            nn.Linear(last_layer.in_features, 1), nn.Sigmoid()
+        )
+        self.batch_size = batch_size
+        self.learning_rate = learning_rate
+        self.metrics = nn.ModuleDict(
+            {
+                stage: MetricCollection(
+                    [
+                        BinaryExpectedCost(),
+                        BinaryAccuracy(),
+                        BinaryF1Score(),
+                        BinaryFBetaScore(beta=2.0),
+                        # BinaryAUROC(),
+                        # BinaryAveragePrecision(),
+                    ]
+                )
+                for stage in ["train", "test", "val"]
+            }
         )
 
     def forward(self, x: Tensor):
         self.feature_extractor.eval()
         x = self.transforms(x)
-        with torch.no_grad():
-            representations = self.feature_extractor(x).flatten(1)
-        x = self.classifier(representations)
+        representations = self.feature_extractor(x)
+        x = self.flatten(representations)
+        x = self.classifier(x)
         x = x.flatten()
         return x
 
-    def training_step(self, batch: Tuple[Tensor], batch_idx):
+    def step(self, batch: Tuple[Tensor], batch_idx: int, stage: str):
         x, y = batch
         yhat = self.forward(x)
         loss = F.binary_cross_entropy(yhat, y.float())
-        self.log("train_loss", loss)
-        metric = self.metrics(yhat, y)
-        self.log("train_metric", metric)
+        self.log(f"{stage}_loss", loss, on_epoch=True)
+        metric = self.metrics[stage](yhat, y)
+        self.log(f"{stage}_metric", metric)
         return loss
+
+    def training_step(self, batch: Tuple[Tensor], batch_idx):
+        return self.step(batch, batch_idx, "train")
 
     def validation_step(self, batch: Tuple[Tensor], batch_idx):
-        x, y = batch
-        yhat = self.forward(x)
-        loss = F.binary_cross_entropy(yhat, y.float())
-        self.log("val_loss", loss)
-        metric = self.metrics(yhat, y)
-        self.log("val_metric", metric)
-        return loss
+        return self.step(batch, batch_idx, "val")
 
     def test_step(self, batch: Tuple[Tensor], batch_idx):
-        x, y = batch
-        yhat = self.forward(x)
-        loss = F.binary_cross_entropy(yhat, y.float())
-        self.log("test_loss", loss)
-        metric = self.metrics(yhat, y)
-        self.log("test_metric", metric)
-        return loss
+        return self.step(batch, batch_idx, "test")
 
     def configure_optimizers(self):
-        optimizer = optim.Adam(self.parameters(), lr=1e-3)
+        optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
         return optimizer

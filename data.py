@@ -38,7 +38,7 @@ class COCOImageDataset(Dataset):
 
 
 class StratifiedGroupKFoldDataModule(LightningDataModule):
-    def __init__(self, k: int, i: int, data_path: Path, metadata_path: Path, batch_size: int, num_workers: int):
+    def __init__(self, k: int, i: int, data_path: Path, metadata_path: Path, batch_size: int, num_workers: int, shuffle: bool, random_state: int):
         super().__init__()
         self.k = k
         self.i = i
@@ -46,7 +46,8 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
         self.metadata_path = metadata_path
         self.batch_size = batch_size
         self.num_workers = num_workers
-        self.state = None
+        self.shuffle = shuffle
+        self.random_state = random_state
 
     def prepare_data(self):
         pass
@@ -84,8 +85,8 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
 
         trainvaltest_sgkf = StratifiedGroupKFold(
             n_splits=self.k,
-            shuffle=False,
-            random_state=None
+            shuffle=self.shuffle,
+            random_state=self.random_state
         )
         trainvaltest_splits = list(trainvaltest_sgkf.split(X, y, groups=groups))
         trainval_indexes, test_indexes = trainvaltest_splits[self.i]
@@ -128,13 +129,25 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
         )
 
     def train_dataloader(self):
-        return DataLoader(self.dataset_test, batch_size=self.batch_size, num_workers=self.num_workers)
+        return DataLoader(
+            self.dataset_test,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers
+        )
 
     def val_dataloader(self):
-        return DataLoader(self.dataset_val, batch_size=self.batch_size, num_workers=self.num_workers)
+        return DataLoader(
+            self.dataset_val,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers
+        )
 
     def test_dataloader(self):
-        return DataLoader(self.dataset_test, batch_size=self.batch_size, num_workers=self.num_workers)
+        return DataLoader(
+            self.dataset_test,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers
+        )
 
     def teardown(self, stage):
         pass
