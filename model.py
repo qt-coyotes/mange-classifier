@@ -25,7 +25,9 @@ class Module(LightningModule):
         weights = models.ResNet18_Weights.DEFAULT
         self.transforms = weights.transforms()
 
-        self.example_input_array = torch.zeros(batch_size, 3, 1746, 2592)
+        self.example_input_array = torch.zeros(
+            batch_size, 3, 1746, 2592, dtype=torch.float
+        )
 
         backbone = models.resnet18(weights=weights)
         children = list(backbone.children())
