@@ -141,7 +141,7 @@ def run(args):
     for metric in cv_metrics:
         cv_metrics[metric] /= k
 
-    timestamp = datetime.now().strftime("%Y%-m-%d-%H-%M-%S")
+    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     with open(f"cv_metrics_{timestamp}.json", "w") as f:
         json.dump(cv_metrics, f, indent=4)
 
