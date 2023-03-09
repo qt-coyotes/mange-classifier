@@ -79,7 +79,7 @@ class Module(LightningModule):
         logits = self.forward(x)
         loss = self.criterion(logits, y.float())
         self.log(f"{stage}_loss", loss, on_epoch=True)
-        yhat = F.sigmoid(logits)
+        yhat = torch.sigmoid(logits)
         metric = self.metrics[f"{stage}_metric"](yhat, y)
         self.log(f"{stage}_metric", metric)
         return loss
