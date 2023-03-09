@@ -31,10 +31,10 @@ class Module(LightningModule):
             backbone, return_nodes=[self.graph_node_name]
         )
         children = list(backbone.children())
+        layers = children[:-1]
         last_layer = children[-1]
+        self.feature_extractor = nn.Sequential(*layers)
         self.flatten = nn.Flatten()
-        while isinstance(last_layer, nn.Sequential):
-            last_layer = last_layer[-1]
         self.classifier = nn.Sequential(
             nn.Linear(last_layer.in_features, 1), nn.Sigmoid()
         )
