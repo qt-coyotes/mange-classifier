@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  qt_coyotes:
+    container_name: coyote_learning
+    working_dir: /mange-classifier
+    build: .
+    shm_size: "2gb"
+    privileged: true
+    tty: true
+    volumes:
+      - .:/mange-classifier
+    ports:
+      - 6006:6006
