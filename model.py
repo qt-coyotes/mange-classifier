@@ -15,25 +15,21 @@ from torchmetrics.classification import (
 )
 
 from metrics import BinaryExpectedCost
+from torchvision.models.feature_extraction import create_feature_extractor, get_graph_node_names
 
 
 class Module(LightningModule):
     def __init__(self, batch_size: int, learning_rate: float = 1e-3):
         super().__init__()
         weights = models.ViT_B_16_Weights.DEFAULT
-        # weights = models.ResNet18_Weights.DEFAULT
         self.transforms = weights.transforms()
-        # backbone = models.resnet18(weights=weights)
         backbone = models.vit_b_16(weights=weights)
 
-        # self.example_input_array = torch.zeros(
-        #     batch_size, 3, 1746, 2592, dtype=torch.float
-        # )
-
+        self.feature_extractor = create_feature_extractor(
+            backbone, return_nodes=['getitem_5']
+        )
         children = list(backbone.children())
-        layers = children[:-1]
         last_layer = children[-1]
-        self.feature_extractor = nn.Sequential(*layers)
         self.flatten = nn.Flatten()
         while isinstance(last_layer, nn.Sequential):
             last_layer = last_layer[-1]
@@ -61,9 +57,8 @@ class Module(LightningModule):
         )
 
     def forward(self, x: Tensor):
-        self.feature_extractor.eval()
         x = self.transforms(x)
-        representations = self.feature_extractor(x)
+        representations = self.feature_extractor(x)['getitem_5']
         x = self.flatten(representations)
         x = self.classifier(x)
         x = x.flatten()

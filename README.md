@@ -6,7 +6,16 @@
 python3 -m venv env
 source env/bin/activate
 pip install -r requirements.txt
+dvc pull
 ```
+
+## Training
+
+```bash
+make run
+```
+
+Observe outputted `cv-metrics-*.json` for CV metrics.
 
 ## DVC
 
