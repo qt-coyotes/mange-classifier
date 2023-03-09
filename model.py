@@ -43,10 +43,8 @@ class Module(LightningModule):
         last_layer = children[-1]
         self.feature_extractor = nn.Sequential(*layers)
         self.flatten = nn.Flatten()
-        self.classifier = nn.Sequential(
-            nn.Linear(last_layer.in_features, 1), nn.Sigmoid()
-        )
-
+        self.classifier = nn.Linear(last_layer.in_features, 1)
+        self.criterion = nn.BCEWithLogitsLoss()
         self.batch_size = batch_size
         self.learning_rate = learning_rate
 
@@ -78,9 +76,10 @@ class Module(LightningModule):
 
     def step(self, batch: Tuple[Tensor], batch_idx: int, stage: str):
         x, y = batch
-        yhat = self.forward(x)
-        loss = F.binary_cross_entropy(yhat, y.float())
+        logits = self.forward(x)
+        loss = self.criterion(logits, y.float())
         self.log(f"{stage}_loss", loss, on_epoch=True)
+        yhat = F.sigmoid(logits)
         metric = self.metrics[f"{stage}_metric"](yhat, y)
         self.log(f"{stage}_metric", metric)
         return loss
