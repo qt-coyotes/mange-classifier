@@ -11,22 +11,19 @@ jobs:
     runs-on: self-hosted
 
     steps:
-    - name: git pull
-      run: git reset --hard HEAD && git pull
-
-    - name: dvc pull
-      run: dvc pull
+    - name: Checkout
+      uses: actions/checkout@v3
 
     - name: Run clean
       run: make clean
 
-    - name: Run fast_dev_run
-      run: make fast
+    - name: dvc pull
+      run: dvc pull
 
     - name: Run experiment
       run: make
 
-    - name: Upload artifacts
+    - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
         name: cv_metrics
