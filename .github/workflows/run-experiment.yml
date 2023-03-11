@@ -1,0 +1,33 @@
+name: run-experiment
+
+on:
+  push:
+    branches:
+      - run-experiment
+
+jobs:
+  build:
+
+    runs-on: self-hosted
+
+    steps:
+    - name: git pull
+      run: git reset --hard HEAD && git pull
+
+    - name: dvc pull
+      run: dvc pull
+
+    - name: Run clean
+      run: make clean
+
+    - name: Run fast_dev_run
+      run: make fast
+
+    - name: Run experiment
+      run: make
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: cv_metrics
+        path: cv_metrics_*.json

@@ -9,3 +9,6 @@ auto:
 
 fast:
 	python3 main.py --fast_dev_run
+
+clean:
+	rm -f cv_metrics_*.json
