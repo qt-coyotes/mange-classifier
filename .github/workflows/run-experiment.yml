@@ -26,6 +26,9 @@ jobs:
       env:
         GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
 
+    - name: Install python dependencies
+      run: pip install -U -r requirements.txt
+
     - name: Run experiment
       run: make 4090
 
