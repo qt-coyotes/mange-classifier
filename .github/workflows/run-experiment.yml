@@ -25,6 +25,7 @@ jobs:
           dvc pull
       env:
         GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Install python dependencies
       run: pip install -U -r requirements.txt
