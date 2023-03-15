@@ -44,6 +44,7 @@ class BaseModel(LightningModule):
         )
 
     def forward(self, x: Tensor):
+        x = x.float()
         x = self.transforms(x)
         x = self.feature_extractor(x)
         if self.return_node:

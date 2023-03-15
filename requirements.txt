@@ -1,8 +1,10 @@
 dvc[gdrive]
 matplotlib
+opencv-python
 scikit-learn
 lightning
 torch
 torchmetrics
 torchvision
 tensorboard
+ultralytics

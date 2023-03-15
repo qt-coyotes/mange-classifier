@@ -12,6 +12,7 @@ from data import StratifiedGroupKFoldDataModule
 from models.base import BaseModel
 from models.resnet import ResNetModel
 from models.vit import ViTModel
+from models.yolo import YoloModel
 
 
 def main():
@@ -22,7 +23,7 @@ def main():
         "--model",
         help="Which model to use",
         type=str,
-        choices=["ViT", "ResNet"],
+        choices=["ViT", "ResNet", "YOLO"],
         default='ResNet'
     )
     group.add_argument("--batch_size", help="Batch size", type=int, default=32)
@@ -88,6 +89,12 @@ def main():
         type=int,
         default=10,
     )
+    group.add_argument(
+        "--yolo_model",
+        help="Yolo pretrained model",
+        type=str,
+        default="yolov8n-cls.pt"
+    )
     args = parser.parse_args()
     if args.accelerator is None:
         args.accelerator = "auto"
@@ -95,7 +102,8 @@ def main():
     torch.backends.cudnn.deterministic = not args.nondeterministic
     models = {
         'ResNet': ResNetModel,
-        'ViT': ViTModel
+        'ViT': ViTModel,
+        'YOLO': YoloModel
     }
     Model = models[args.model]
     cross_validate(Model, args)
