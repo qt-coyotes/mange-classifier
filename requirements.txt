@@ -96,10 +96,10 @@ jupyter_client==8.0.3
 jupyter_core==5.2.0
 kiwisolver==1.4.4
 kombu==5.2.4
-lightning==1.8.0
+lightning==1.9.4
 lightning-cloud==0.5.31
 lightning-lite==1.8.6
-lightning-utilities==0.3.0
+lightning-utilities==0.8.0
 Markdown==3.4.1
 markdown-it-py==2.2.0
 MarkupSafe==2.1.2
@@ -118,7 +118,7 @@ omegaconf==2.3.0
 opencv-python==4.7.0.72
 ordered-set==4.1.0
 orjson==3.8.7
-packaging==23.0
+packaging==22.0
 pandas==1.5.3
 parso==0.8.3
 pathspec==0.11.0
