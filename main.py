@@ -40,13 +40,13 @@ def main():
         "--data_path",
         help="Path to images",
         type=str,
-        default="data/CHIL/images",
+        default="data",
     )
     group.add_argument(
         "--metadata_path",
         help="Path to COCO metadata file",
         type=str,
-        default="data/CHIL/CHIL_uwin_mange_Marit_07242020.json",
+        default="data/qt-coyotes-merged.json",
     )
     group.add_argument(
         "--num_workers",
