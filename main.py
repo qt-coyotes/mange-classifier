@@ -93,6 +93,11 @@ def main():
         action='store_true',
     )
     group.add_argument(
+        "--compile",
+        help="Compile the model",
+        action='store_true',
+    )
+    group.add_argument(
         "--patience",
         help="Number of checks with no improvement after which training will be stopped.",
         type=int,
@@ -132,7 +137,7 @@ def cross_validate(Model: BaseModel, args: argparse.Namespace):
             ],
         )
         model = Model(args)
-        if isinstance(trainer.accelerator, CUDAAccelerator):
+        if args.compile and isinstance(trainer.accelerator, CUDAAccelerator):
             model = torch.compile(model)
 
         if args.auto_scale_batch_size or args.auto_lr_find:
