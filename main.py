@@ -12,12 +12,19 @@ from lightning.pytorch.callbacks import EarlyStopping
 
 from data import StratifiedGroupKFoldDataModule
 from models.base import BaseModel
+from models.densenet import DenseNetModel
 from models.resnet import ResNetModel
 from models.vit import ViTModel
 from models.yolo import YoloModel
 
 
 def main():
+    models = {
+        'DenseNet': DenseNetModel,
+        'ResNet': ResNetModel,
+        'ViT': ViTModel,
+        'YOLO': YoloModel
+    }
     parser = argparse.ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
     group = parser.add_argument_group("qt.coyote")
@@ -25,7 +32,7 @@ def main():
         "--model",
         help="Which model to use",
         type=str,
-        choices=["ViT", "ResNet", "YOLO"],
+        choices=list(models.keys()),
         default='ResNet'
     )
     group.add_argument("--batch_size", help="Batch size", type=int, default=32)
@@ -115,11 +122,6 @@ def main():
         args.accelerator = "auto"
     print(args)
     torch.backends.cudnn.deterministic = not args.nondeterministic
-    models = {
-        'ResNet': ResNetModel,
-        'ViT': ViTModel,
-        'YOLO': YoloModel
-    }
     Model = models[args.model]
     cross_validate(Model, args)
     # TODO: train final model
