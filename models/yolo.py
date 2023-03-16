@@ -14,6 +14,5 @@ class YoloModel(BaseModel):
         model = YOLO(args.yolo_model).model
         list(
             list(model.children())[0].children()
-        )[-1].linear.out_features = 1
+        )[-1].linear = nn.Identity()
         self.feature_extractor = model.model
-        self.classifier = nn.Identity()
