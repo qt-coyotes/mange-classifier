@@ -53,7 +53,15 @@ def main():
         "--num_workers",
         help="Number of workers for dataloader",
         type=int,
-        default=os.cpu_count(),
+        default=os.cpu_count() - 2,
+    )
+    group.add_argument(
+        "--persistent_workers",
+        help="If True, the data loader will not shutdown the worker processes "
+        "after a dataset has been consumed once. This allows to maintain the "
+        "workers Dataset instances alive.",
+        type=int,
+        default=True,
     )
     group.add_argument(
         "--shuffle",
