@@ -5,7 +5,7 @@ import torch
 from lightning.pytorch import LightningModule
 from torch import Tensor, nn, optim
 from torchmetrics import MetricCollection
-from torchmetrics.classification import BinaryAccuracy, BinaryF1Score, BinaryFBetaScore, BinaryPrecision, BinaryRecall
+from torchmetrics.classification import BinaryAccuracy, BinaryAUROC, BinaryF1Score, BinaryFBetaScore, BinaryPrecision, BinaryRecall
 
 from metrics import BinaryExpectedCost
 
@@ -35,7 +35,7 @@ class BaseModel(LightningModule):
                         BinaryRecall(),
                         BinaryPrecision(),
                         BinaryAccuracy(),
-                        # BinaryAUROC(),
+                        BinaryAUROC(),
                         # BinaryAveragePrecision(),
                     ]
                 )
