@@ -1,20 +1,16 @@
-
-from sklearn.model_selection import StratifiedGroupKFold
-from lightning.pytorch import LightningDataModule
+import argparse
 import json
 from pathlib import Path
-from torch.utils.data import Dataset, DataLoader
+
+from lightning.pytorch import LightningDataModule
+from sklearn.model_selection import StratifiedGroupKFold
+from torch.utils.data import DataLoader, Dataset
 from torchvision.io import read_image
 
 
 class COCOImageDataset(Dataset):
     def __init__(
-            self,
-            images,
-            labels,
-            data_path,
-            transform=None,
-            target_transform=None
+        self, images, labels, data_path, transform=None, target_transform=None
     ):
         self.images = images
         self.labels = labels
@@ -38,7 +34,18 @@ class COCOImageDataset(Dataset):
 
 
 class StratifiedGroupKFoldDataModule(LightningDataModule):
-    def __init__(self, k: int, i: int, data_path: Path, metadata_path: Path, batch_size: int, num_workers: int, shuffle: bool, random_state: int):
+    def __init__(
+        self,
+        k: int,
+        i: int,
+        data_path: Path,
+        metadata_path: Path,
+        batch_size: int,
+        num_workers: int,
+        shuffle: bool,
+        random_state: int,
+        args: argparse.Namespace,
+    ):
         super().__init__()
         self.k = k
         self.i = i
@@ -86,7 +93,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
         trainvaltest_sgkf = StratifiedGroupKFold(
             n_splits=self.k,
             shuffle=self.shuffle,
-            random_state=self.random_state
+            random_state=self.random_state,
         )
         trainvaltest_splits = list(trainvaltest_sgkf.split(X, y, groups=groups))
         trainval_indexes, test_indexes = trainvaltest_splits[self.i]
@@ -94,22 +101,18 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
         test_X = [X[i] for i in test_indexes]
         test_y = [y[i] for i in test_indexes]
 
-        self.dataset_test = COCOImageDataset(
-            test_X,
-            test_y,
-            self.data_path
-        )
+        self.dataset_test = COCOImageDataset(test_X, test_y, self.data_path)
 
         X_trainval = [X[i] for i in trainval_indexes]
         y_trainval = [y[i] for i in trainval_indexes]
         groups_trainval = [groups[i] for i in trainval_indexes]
 
         trainval_sgkf = StratifiedGroupKFold(
-            n_splits=self.k,
-            shuffle=False,
-            random_state=None
+            n_splits=self.k, shuffle=False, random_state=None
         )
-        trainval_splits = list(trainval_sgkf.split(X_trainval, y_trainval, groups=groups_trainval))
+        trainval_splits = list(
+            trainval_sgkf.split(X_trainval, y_trainval, groups=groups_trainval)
+        )
         train_indexes, val_indexes = trainval_splits[0]
 
         train_X = [X_trainval[i] for i in train_indexes]
@@ -117,36 +120,31 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
         val_X = [X_trainval[i] for i in val_indexes]
         val_y = [y_trainval[i] for i in val_indexes]
 
-        self.dataset_train = COCOImageDataset(
-            train_X,
-            train_y,
-            self.data_path
-        )
-        self.dataset_val = COCOImageDataset(
-            val_X,
-            val_y,
-            self.data_path
-        )
+        self.dataset_train = COCOImageDataset(train_X, train_y, self.data_path)
+        self.dataset_val = COCOImageDataset(val_X, val_y, self.data_path)
 
     def train_dataloader(self):
         return DataLoader(
             self.dataset_train,
             batch_size=self.batch_size,
-            num_workers=self.num_workers
+            num_workers=self.num_workers,
+            persistent_workers=self.args.persistent_workers,
         )
 
     def val_dataloader(self):
         return DataLoader(
             self.dataset_val,
             batch_size=self.batch_size,
-            num_workers=self.num_workers
+            num_workers=self.num_workers,
+            persistent_workers=self.args.persistent_workers,
         )
 
     def test_dataloader(self):
         return DataLoader(
             self.dataset_test,
             batch_size=self.batch_size,
-            num_workers=self.num_workers
+            num_workers=self.num_workers,
+            persistent_workers=self.args.persistent_workers,
         )
 
     def teardown(self, stage):
