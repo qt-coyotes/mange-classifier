@@ -5,8 +5,8 @@ from datetime import datetime
 from pathlib import Path
 
 import torch
-from lightning.pytorch.accelerators import CUDAAccelerator
 from lightning.pytorch import Trainer, seed_everything
+from lightning.pytorch.accelerators import CUDAAccelerator
 from lightning.pytorch.callbacks import EarlyStopping
 
 from data import StratifiedGroupKFoldDataModule
@@ -157,10 +157,10 @@ def cross_validate(Model: BaseModel, args: argparse.Namespace):
         if args.fast_dev_run:
             break
 
-    save_cv_metrics(test_metrics, args)
+    save_logs(test_metrics, args)
 
 
-def save_cv_metrics(test_metrics, args: argparse.Namespace):
+def save_logs(test_metrics, args: argparse.Namespace):
     cv_metrics = {}
     for test_metric in test_metrics:
         test_metric = test_metric[0]
@@ -175,13 +175,16 @@ def save_cv_metrics(test_metrics, args: argparse.Namespace):
     for metric in cv_metrics:
         cv_metrics[metric] /= args.k
 
-    print(cv_metrics)
-
     timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    logs = {
+        "args": vars(args),
+        "cv_metrics": cv_metrics,
+    }
+    print(logs)
     if args.fast_dev_run:
         return
-    with open(f"cv_metrics_{timestamp}.json", "w") as f:
-        json.dump(cv_metrics, f, indent=4)
+    with open(f"logs_{timestamp}.json", "w") as f:
+        json.dump(logs, f, indent=4)
 
 
 if __name__ == "__main__":
