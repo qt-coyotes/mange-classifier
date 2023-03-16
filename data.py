@@ -56,8 +56,8 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
         images = coco["images"]
         image_id_to_image = {image["id"]: image for image in images}
 
-        no_mange_category_ids = [2, 5]
-        mange_category_ids = [1, 4]
+        mange_category_ids = {1}
+        no_mange_category_ids = {2}
 
         no_mange_annotations = []
         mange_annotations = []
