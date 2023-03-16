@@ -1,5 +1,6 @@
 import argparse
 import json
+import gc
 import os
 from datetime import datetime
 from pathlib import Path
@@ -161,6 +162,9 @@ def cross_validate(Model: BaseModel, args: argparse.Namespace):
         test_metrics.append(test_metric)
         if args.fast_dev_run:
             break
+        del trainer
+        del model
+        gc.collect()
 
     save_logs(test_metrics, args)
 
