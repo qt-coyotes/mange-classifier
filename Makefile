@@ -15,3 +15,4 @@ fast:
 
 clean:
 	rm -f logs_*.json
+	rm -rf lightning_logs
