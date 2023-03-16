@@ -1,7 +1,10 @@
 4090:
-	python3 main.py --batch_size 64 --learning_rate 0.00002 --num_sanity_val_steps 1 --model ResNet
-	python3 main.py --batch_size 64 --learning_rate 0.00002 --num_sanity_val_steps 1 --model ViT
-	python3 main.py --batch_size 64 --learning_rate 0.00002 --num_sanity_val_steps 1 --model YOLO
+	python3 main.py --auto_scale_batch_size true --num_sanity_val_steps 1 --model ResNet
+	python3 main.py --auto_scale_batch_size true --num_sanity_val_steps 1 --model ViT
+	python3 main.py --auto_scale_batch_size true --num_sanity_val_steps 1 --model YOLO
+# python3 main.py --batch_size 64 --learning_rate 0.00002 --num_sanity_val_steps 1 --model ResNet
+# python3 main.py --batch_size 64 --learning_rate 0.00002 --num_sanity_val_steps 1 --model ViT
+# python3 main.py --batch_size 64 --learning_rate 0.00002 --num_sanity_val_steps 1 --model YOLO
 
 M2:
 	python3 main.py --batch_size 32 --learning_rate 0.00002 --num_sanity_val_steps 1
