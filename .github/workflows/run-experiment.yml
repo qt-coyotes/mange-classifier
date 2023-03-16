@@ -39,5 +39,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
-        name: cv_metrics
-        path: cv_metrics_*.json
+        name: logs
+        path: |
+          logs_*.json
+          lightning_logs

@@ -13,4 +13,4 @@ fast:
 	python3 main.py --fast_dev_run --model ResNet
 
 clean:
-	rm -f cv_metrics_*.json
+	rm -f logs_*.json
