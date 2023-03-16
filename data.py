@@ -1,7 +1,9 @@
 import argparse
 import json
+from math import inf
 from pathlib import Path
 
+import torchvision
 from lightning.pytorch import LightningDataModule
 from sklearn.model_selection import StratifiedGroupKFold
 from torch.utils.data import DataLoader, Dataset
@@ -59,6 +61,20 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
         mange_category_ids = {1}
         no_mange_category_ids = {2}
 
+        min_image_shape = None
+        min_image_area = inf
+        for image in images:
+            width = image["width"]
+            height = image["height"]
+            area = width * height
+            if area < min_image_area:
+                min_image_shape = (height, width)
+                min_image_area = area
+
+        equal_size_transform = torchvision.transforms.Resize(
+            min_image_shape
+        )
+
         no_mange_annotations = []
         mange_annotations = []
         for annotation in coco["annotations"]:
@@ -84,9 +100,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
             random_state=self.args.random_state,
         )
 
-        trainvaltest_splits = list(
-            trainvaltest_sgkf.split(X, y, groups=groups)
-        )
+        trainvaltest_splits = list(trainvaltest_sgkf.split(X, y, groups=groups))
         for i in range(self.args.k):
             trainval_indexes, test_indexes = trainvaltest_splits[i]
 
@@ -94,7 +108,9 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
             test_y = [y[i] for i in test_indexes]
 
             self.dataset_test.append(
-                COCOImageDataset(test_X, test_y, self.data_path)
+                COCOImageDataset(
+                    test_X, test_y, self.data_path, equal_size_transform
+                )
             )
 
             X_trainval = [X[i] for i in trainval_indexes]
@@ -117,10 +133,14 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
             val_y = [y_trainval[i] for i in val_indexes]
 
             self.dataset_train.append(
-                COCOImageDataset(train_X, train_y, self.data_path)
+                COCOImageDataset(
+                    train_X, train_y, self.data_path, equal_size_transform
+                )
             )
             self.dataset_val.append(
-                COCOImageDataset(val_X, val_y, self.data_path)
+                COCOImageDataset(
+                    val_X, val_y, self.data_path, equal_size_transform
+                )
             )
 
     def train_dataloader(self):
