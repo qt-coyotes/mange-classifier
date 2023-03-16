@@ -34,27 +34,15 @@ class COCOImageDataset(Dataset):
 
 
 class StratifiedGroupKFoldDataModule(LightningDataModule):
-    def __init__(
-        self,
-        k: int,
-        i: int,
-        data_path: Path,
-        metadata_path: Path,
-        batch_size: int,
-        num_workers: int,
-        shuffle: bool,
-        random_state: int,
-        args: argparse.Namespace,
-    ):
+    def __init__(self, args: argparse.Namespace):
         super().__init__()
-        self.k = k
-        self.i = i
-        self.data_path = data_path
-        self.metadata_path = metadata_path
-        self.batch_size = batch_size
-        self.num_workers = num_workers
-        self.shuffle = shuffle
-        self.random_state = random_state
+        self.i = 0
+        self.data_path = Path(args.data_path)
+        self.metadata_path = Path(args.metadata_path)
+        self.args = args
+        self.dataset_train = []
+        self.dataset_val = []
+        self.dataset_test = []
 
     def prepare_data(self):
         pass
@@ -91,61 +79,84 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
             groups.append(image["location"])
 
         trainvaltest_sgkf = StratifiedGroupKFold(
-            n_splits=self.k,
-            shuffle=self.shuffle,
-            random_state=self.random_state,
+            n_splits=self.args.k,
+            shuffle=self.args.shuffle,
+            random_state=self.args.random_state,
         )
-        trainvaltest_splits = list(trainvaltest_sgkf.split(X, y, groups=groups))
-        trainval_indexes, test_indexes = trainvaltest_splits[self.i]
 
-        test_X = [X[i] for i in test_indexes]
-        test_y = [y[i] for i in test_indexes]
-
-        self.dataset_test = COCOImageDataset(test_X, test_y, self.data_path)
-
-        X_trainval = [X[i] for i in trainval_indexes]
-        y_trainval = [y[i] for i in trainval_indexes]
-        groups_trainval = [groups[i] for i in trainval_indexes]
-
-        trainval_sgkf = StratifiedGroupKFold(
-            n_splits=self.k, shuffle=False, random_state=None
+        trainvaltest_splits = list(
+            trainvaltest_sgkf.split(X, y, groups=groups)
         )
-        trainval_splits = list(
-            trainval_sgkf.split(X_trainval, y_trainval, groups=groups_trainval)
-        )
-        train_indexes, val_indexes = trainval_splits[0]
+        for i in range(self.args.k):
+            trainval_indexes, test_indexes = trainvaltest_splits[i]
 
-        train_X = [X_trainval[i] for i in train_indexes]
-        train_y = [y_trainval[i] for i in train_indexes]
-        val_X = [X_trainval[i] for i in val_indexes]
-        val_y = [y_trainval[i] for i in val_indexes]
+            test_X = [X[i] for i in test_indexes]
+            test_y = [y[i] for i in test_indexes]
 
-        self.dataset_train = COCOImageDataset(train_X, train_y, self.data_path)
-        self.dataset_val = COCOImageDataset(val_X, val_y, self.data_path)
+            self.dataset_test.append(
+                COCOImageDataset(test_X, test_y, self.data_path)
+            )
+
+            X_trainval = [X[i] for i in trainval_indexes]
+            y_trainval = [y[i] for i in trainval_indexes]
+            groups_trainval = [groups[i] for i in trainval_indexes]
+
+            trainval_sgkf = StratifiedGroupKFold(
+                n_splits=self.args.k, shuffle=False, random_state=None
+            )
+            trainval_splits = list(
+                trainval_sgkf.split(
+                    X_trainval, y_trainval, groups=groups_trainval
+                )
+            )
+            train_indexes, val_indexes = trainval_splits[0]
+
+            train_X = [X_trainval[i] for i in train_indexes]
+            train_y = [y_trainval[i] for i in train_indexes]
+            val_X = [X_trainval[i] for i in val_indexes]
+            val_y = [y_trainval[i] for i in val_indexes]
+
+            self.dataset_train.append(
+                COCOImageDataset(train_X, train_y, self.data_path)
+            )
+            self.dataset_val.append(
+                COCOImageDataset(val_X, val_y, self.data_path)
+            )
 
     def train_dataloader(self):
         return DataLoader(
-            self.dataset_train,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
+            self.dataset_train[self.i],
+            batch_size=self.args.batch_size,
+            num_workers=self.args.num_workers,
             persistent_workers=self.args.persistent_workers,
         )
 
     def val_dataloader(self):
         return DataLoader(
-            self.dataset_val,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
+            self.dataset_val[self.i],
+            batch_size=self.args.batch_size,
+            num_workers=self.args.num_workers,
             persistent_workers=self.args.persistent_workers,
         )
 
     def test_dataloader(self):
         return DataLoader(
-            self.dataset_test,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
+            self.dataset_test[self.i],
+            batch_size=self.args.batch_size,
+            num_workers=self.args.num_workers,
             persistent_workers=self.args.persistent_workers,
         )
 
     def teardown(self, stage):
         pass
+
+    def __iter__(self):
+        self.i = 0
+        return self
+
+    def __next__(self):
+        if self.i < self.args.k:
+            self.i += 1
+            return self
+        else:
+            raise StopIteration

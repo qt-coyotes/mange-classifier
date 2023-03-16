@@ -122,7 +122,8 @@ def main():
 def cross_validate(Model: BaseModel, args: argparse.Namespace):
     # cross validation
     test_metrics = []
-    for i in range(args.k):
+    datamodule = StratifiedGroupKFoldDataModule(args)
+    for datamodule_i in datamodule:
         seed_everything(args.random_state, workers=True)
         trainer = Trainer.from_argparse_args(
             args,
@@ -133,24 +134,15 @@ def cross_validate(Model: BaseModel, args: argparse.Namespace):
         model = Model(args)
         if isinstance(trainer.accelerator, CUDAAccelerator):
             model = torch.compile(model)
-        datamodule = StratifiedGroupKFoldDataModule(
-            args.k,
-            i,
-            Path(args.data_path),
-            Path(args.metadata_path),
-            args.batch_size,
-            args.num_workers,
-            args.shuffle,
-            args.random_state,
-        )
+
         if args.auto_scale_batch_size or args.auto_lr_find:
-            trainer.tune(model, datamodule=datamodule)
+            trainer.tune(model, datamodule=datamodule_i)
             print("Automatically found batch size and learning rate")
             print("Replace --auto_scale_batch_size and --auto_lr_find with:")
             print(f"--batch_size {model.batch_size}")
             print(f"--learning_rate {model.learning_rate}")
             break
-        trainer.fit(model=model, train_dataloaders=datamodule)
+        trainer.fit(model=model, train_dataloaders=datamodule_i)
         if args.fast_dev_run:
             test_metric = trainer.test(
                 model,
