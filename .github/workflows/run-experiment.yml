@@ -22,14 +22,16 @@ jobs:
     # https://github.com/iterative/dvc/pull/7213/
     - name: Pull data
       run: |
-          dvc remote modify gdrive --local gdrive_use_service_account true
-          dvc pull
+        dvc remote modify gdrive --local gdrive_use_service_account true
+        dvc pull
       env:
         GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Install python dependencies
-      run: pip install -r requirements.txt
+      run: |
+        python3 -m pip install -U pip
+        python3 -m pip install -r requirements.txt
 
     - name: Run experiment
       run: make 4090
