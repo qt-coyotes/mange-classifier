@@ -43,7 +43,7 @@ class BaseModel(LightningModule):
             }
         )
 
-    def forward(self, x: Tensor):
+    def y(self, x: Tensor):
         x = x.float()
         x = self.transforms(x)
         x = self.feature_extractor(x)
@@ -51,12 +51,12 @@ class BaseModel(LightningModule):
             x = x[self.return_node]
         x = self.flatten(x)
         x = self.classifier(x)
-        x = x.flatten()
-        return x
+        y = x.flatten()
+        return y
 
     def step(self, batch: Tuple[Tensor], batch_idx: int, stage: str):
         x, y = batch
-        logits = self.forward(x)
+        logits = self.y(x)
         loss = self.criterion(logits, y.float())
         self.log(f"{stage}_loss", loss, on_epoch=True)
         yhat = torch.sigmoid(logits)

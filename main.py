@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 import torch
+from lightning.pytorch.accelerators import CUDAAccelerator
 from lightning.pytorch import Trainer, seed_everything
 from lightning.pytorch.callbacks import EarlyStopping
 
@@ -115,13 +116,15 @@ def cross_validate(Model: BaseModel, args: argparse.Namespace):
     test_metrics = []
     for i in range(args.k):
         seed_everything(args.random_state, workers=True)
-        model = Model(args)
         trainer = Trainer.from_argparse_args(
             args,
             callbacks=[
                 EarlyStopping("val_loss", patience=args.patience, mode="min")
             ],
         )
+        model = Model(args)
+        if isinstance(trainer.accelerator, CUDAAccelerator):
+            model = torch.compile(model)
         datamodule = StratifiedGroupKFoldDataModule(
             args.k,
             i,
