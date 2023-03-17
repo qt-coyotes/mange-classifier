@@ -1,4 +1,5 @@
 import argparse
+import csv
 import gc
 import json
 import os
@@ -216,6 +217,33 @@ def save_logs(test_metrics, time_elapsed: timedelta, args: argparse.Namespace):
         return
     with open(f"logs_{timestamp}.json", "w") as f:
         json.dump(logs, f, indent=4)
+
+    with open(f"logs_{timestamp}.tsv", "w") as f:
+        writer = csv.writer(f, delimiter="\t")
+        writer.writerow([not logs["args"]["nonpretrained"]])
+        patience = []
+        max_epochs = []
+        if logs["args"]["no_early_stopping"]:
+            max_epochs.append(logs["args"]["max_epochs"])
+        else:
+            patience.append(logs["args"]["patience"])
+        writer.writerow(patience)
+        writer.writerow(max_epochs)
+        writer.writerow([logs["args"]["batch_size"]])
+        writer.writerow([logs["args"]["learning_rate"]])
+        writer.writerow([])
+        writer.writerow([logs["cv_metrics"]["ExpectedCost"]])
+        writer.writerow([logs["cv_metrics"]["FBetaScore"]])
+        writer.writerow([logs["cv_metrics"]["F1Score"]])
+        writer.writerow([logs["cv_metrics"]["Recall"]])
+        writer.writerow([logs["cv_metrics"]["Precision"]])
+        writer.writerow([logs["cv_metrics"]["AveragePrecision"]])
+        writer.writerow([logs["cv_metrics"]["Accuracy"]])
+        writer.writerow([logs["cv_metrics"]["AUROC"]])
+        writer.writerow([json.dumps(logs["cv_metrics"]["metric_confusion_matrix"])])
+        writer.writerow([logs["cv_metrics"]["loss"]])
+        writer.writerow([])
+        writer.writerow([logs["time_elapsed"]])
 
 
 if __name__ == "__main__":
