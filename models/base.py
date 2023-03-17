@@ -8,6 +8,7 @@ from torchmetrics import MetricCollection
 from torchmetrics.classification import (
     BinaryAccuracy,
     BinaryAUROC,
+    BinaryAveragePrecision,
     BinaryF1Score,
     BinaryFBetaScore,
     BinaryPrecision,
@@ -39,9 +40,9 @@ class BaseModel(LightningModule):
                         BinaryF1Score(),
                         BinaryRecall(),
                         BinaryPrecision(),
+                        BinaryAveragePrecision(),
                         BinaryAccuracy(),
                         BinaryAUROC()
-                        # BinaryAveragePrecision(),
                     ]
                 )
                 for stage in ["train", "test", "val"]
