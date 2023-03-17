@@ -30,25 +30,22 @@ class BaseModel(LightningModule):
         self.batch_size = args.batch_size
         self.learning_rate = args.learning_rate
         self.return_node = None
-
-        self.metrics = nn.ModuleDict(
-            {
-                f"{stage}_metric": MetricCollection(
-                    [
-                        BinaryExpectedCost(),
-                        BinaryFBetaScore(beta=2.0),
-                        BinaryF1Score(),
-                        BinaryRecall(),
-                        BinaryPrecision(),
-                        BinaryAveragePrecision(),
-                        BinaryAccuracy(),
-                        BinaryAUROC()
-                    ]
-                )
-                for stage in ["train", "test", "val"]
-            }
-        )
-        self.confusion_matrix = BinaryConfusionMatrix()
+        metrics = {}
+        for stage in ["train", "test", "val"]:
+            metrics[f"{stage}_confusion_matrix"] = BinaryConfusionMatrix()
+            metrics[f"{stage}_metric"] = MetricCollection(
+                [
+                    BinaryExpectedCost(),
+                    BinaryFBetaScore(beta=2.0),
+                    BinaryF1Score(),
+                    BinaryRecall(),
+                    BinaryPrecision(),
+                    BinaryAveragePrecision(),
+                    BinaryAccuracy(),
+                    BinaryAUROC()
+                ]
+            )
+        self.metrics = nn.ModuleDict(metrics)
 
     def y(self, x: Tensor):
         x = x.float()
@@ -68,7 +65,7 @@ class BaseModel(LightningModule):
         self.log(f"{stage}_loss", loss, on_epoch=True)
         yhat = torch.sigmoid(logits)
         self.metrics[f"{stage}_metric"].update(yhat, y)
-        self.confusion_matrix.update(yhat, y)
+        self.metrics[f"{stage}_confusion_matrix"].update(yhat, y)
         return loss
 
     def training_step(self, batch: Tuple[Tensor], batch_idx):
@@ -83,7 +80,7 @@ class BaseModel(LightningModule):
     def epoch_end(self, outputs, stage: str):
         metrics = self.metrics[f"{stage}_metric"].compute()
         self.log(f"{stage}_metric", metrics)
-        confmat = self.confusion_matrix.compute().float()
+        confmat = self.metrics[f"{stage}_confusion_matrix"].compute().float()
         (tn, fp), (fn, tp) = confmat
         self.log(f"{stage}_confusion_matrix_tn", tn, reduce_fx=torch.sum)
         self.log(f"{stage}_confusion_matrix_fp", fp, reduce_fx=torch.sum)
