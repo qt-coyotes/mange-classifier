@@ -5,16 +5,21 @@ import torch
 from lightning.pytorch import LightningModule
 from torch import Tensor, nn, optim
 from torchmetrics import MetricCollection
-from torchmetrics.classification import BinaryAccuracy, BinaryAUROC, BinaryF1Score, BinaryFBetaScore, BinaryPrecision, BinaryRecall
+from torchmetrics.classification import (
+    BinaryAccuracy,
+    BinaryAUROC,
+    BinaryF1Score,
+    BinaryFBetaScore,
+    BinaryPrecision,
+    BinaryRecall,
+    BinaryConfusionMatrix,
+)
 
 from metrics import BinaryExpectedCost
 
 
 class BaseModel(LightningModule):
-    def __init__(
-        self,
-        args: argparse.Namespace
-    ):
+    def __init__(self, args: argparse.Namespace):
         super().__init__()
         self.transforms = nn.Identity()
         self.feature_extractor = NotImplementedError()
@@ -35,13 +40,14 @@ class BaseModel(LightningModule):
                         BinaryRecall(),
                         BinaryPrecision(),
                         BinaryAccuracy(),
-                        BinaryAUROC(),
+                        BinaryAUROC()
                         # BinaryAveragePrecision(),
                     ]
                 )
                 for stage in ["train", "test", "val"]
             }
         )
+        self.confusion_matrix = BinaryConfusionMatrix()
 
     def y(self, x: Tensor):
         x = x.float()
@@ -62,6 +68,12 @@ class BaseModel(LightningModule):
         yhat = torch.sigmoid(logits)
         metric = self.metrics[f"{stage}_metric"](yhat, y)
         self.log(f"{stage}_metric", metric)
+        confmat = self.confusion_matrix(yhat, y)
+        (tn, fp), (fn, tp) = confmat.float()
+        self.log(f"{stage}_confusion_matrix_tn", tn)
+        self.log(f"{stage}_confusion_matrix_fp", fp)
+        self.log(f"{stage}_confusion_matrix_fn", fn)
+        self.log(f"{stage}_confusion_matrix_tp", tp)
         return loss
 
     def training_step(self, batch: Tuple[Tensor], batch_idx):

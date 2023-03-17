@@ -20,10 +20,10 @@ from models.yolo import YoloModel
 
 def main():
     models = {
-        'DenseNet': DenseNetModel,
-        'ResNet': ResNetModel,
-        'ViT': ViTModel,
-        'YOLO': YoloModel
+        "DenseNet": DenseNetModel,
+        "ResNet": ResNetModel,
+        "ViT": ViTModel,
+        "YOLO": YoloModel,
     }
     parser = argparse.ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
@@ -33,7 +33,7 @@ def main():
         help="Which model to use",
         type=str,
         choices=list(models.keys()),
-        default='ResNet'
+        default="ResNet",
     )
     group.add_argument("--batch_size", help="Batch size", type=int, default=32)
     group.add_argument(
@@ -68,7 +68,7 @@ def main():
         help="If True, the data loader will not shutdown the worker processes "
         "after a dataset has been consumed once. This allows to maintain the "
         "workers Dataset instances alive.",
-        type=int,
+        type=bool,
         default=True,
     )
     group.add_argument(
@@ -93,17 +93,22 @@ def main():
     group.add_argument(
         "--nondeterministic",
         help="This flag sets the torch.backends.cudnn.deterministic flag to false",
-        action='store_true',
+        action="store_true",
     )
     group.add_argument(
         "--nonpretrained",
         help="Do not use pretrained weights, train from scratch",
-        action='store_true',
+        action="store_true",
     )
     group.add_argument(
         "--compile",
         help="Compile the model",
-        action='store_true',
+        action="store_true",
+    )
+    group.add_argument(
+        "--no_early_stopping",
+        help="Disable early stopping",
+        action="store_true",
     )
     group.add_argument(
         "--patience",
@@ -115,7 +120,7 @@ def main():
         "--yolo_model",
         help="Yolo pretrained model",
         type=str,
-        default="yolov8n-cls.pt"
+        default="yolov8n-cls.pt",
     )
     args = parser.parse_args()
     if args.accelerator is None:
@@ -131,13 +136,16 @@ def cross_validate(Model: BaseModel, args: argparse.Namespace):
     # cross validation
     test_metrics = []
     datamodule = StratifiedGroupKFoldDataModule(args)
+    callbacks = []
+    if not args.no_early_stopping:
+        callbacks.append(
+            EarlyStopping("val_loss", patience=args.patience, mode="min")
+        )
     for datamodule_i in datamodule:
         seed_everything(args.random_state, workers=True)
         trainer = Trainer.from_argparse_args(
             args,
-            callbacks=[
-                EarlyStopping("val_loss", patience=args.patience, mode="min")
-            ],
+            callbacks=callbacks,
         )
         model = Model(args)
         if args.compile and isinstance(trainer.accelerator, CUDAAccelerator):
@@ -152,15 +160,9 @@ def cross_validate(Model: BaseModel, args: argparse.Namespace):
             break
         trainer.fit(model=model, train_dataloaders=datamodule_i)
         if args.fast_dev_run:
-            test_metric = trainer.test(
-                model,
-                dataloaders=datamodule
-            )
+            test_metric = trainer.test(model, dataloaders=datamodule)
         else:
-            test_metric = trainer.test(
-                ckpt_path="best",
-                dataloaders=datamodule
-            )
+            test_metric = trainer.test(ckpt_path="best", dataloaders=datamodule)
         test_metrics.append(test_metric)
         if args.fast_dev_run:
             break
@@ -172,18 +174,32 @@ def cross_validate(Model: BaseModel, args: argparse.Namespace):
 
 
 def save_logs(test_metrics, args: argparse.Namespace):
-    cv_metrics = {}
+    cv_metrics = {"metric_confusion_matrix": []}
     for test_metric in test_metrics:
         test_metric = test_metric[0]
         test_metric_metric = test_metric["test_metric"]
         for key, value in test_metric_metric.items():
             key = key.replace("Binary", "")
             cv_metrics[key] = cv_metrics.get(key, 0) + value.item()
+        cv_metrics["metric_confusion_matrix"].append(
+            [
+                [
+                    int(test_metric["test_confusion_matrix_tn"]),
+                    int(test_metric["test_confusion_matrix_fp"]),
+                ],
+                [
+                    int(test_metric["test_confusion_matrix_fn"]),
+                    int(test_metric["test_confusion_matrix_tp"]),
+                ],
+            ]
+        )
         cv_metrics["loss"] = (
             cv_metrics.get("loss", 0) + test_metric["test_loss"]
         )
 
     for metric in cv_metrics:
+        if isinstance(cv_metrics[metric], list):
+            continue
         cv_metrics[metric] /= args.k
 
     timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
