@@ -66,14 +66,8 @@ class BaseModel(LightningModule):
         loss = self.criterion(logits, y.float())
         self.log(f"{stage}_loss", loss, on_epoch=True)
         yhat = torch.sigmoid(logits)
-        metric = self.metrics[f"{stage}_metric"](yhat, y)
-        self.log(f"{stage}_metric", metric)
-        confmat = self.confusion_matrix(yhat, y)
-        (tn, fp), (fn, tp) = confmat.float()
-        self.log(f"{stage}_confusion_matrix_tn", tn, reduce_fx=torch.sum)
-        self.log(f"{stage}_confusion_matrix_fp", fp, reduce_fx=torch.sum)
-        self.log(f"{stage}_confusion_matrix_fn", fn, reduce_fx=torch.sum)
-        self.log(f"{stage}_confusion_matrix_tp", tp, reduce_fx=torch.sum)
+        self.metrics[f"{stage}_metric"].update(yhat, y)
+        self.confusion_matrix.update(yhat, y)
         return loss
 
     def training_step(self, batch: Tuple[Tensor], batch_idx):
@@ -84,6 +78,25 @@ class BaseModel(LightningModule):
 
     def test_step(self, batch: Tuple[Tensor], batch_idx):
         return self.step(batch, batch_idx, "test")
+
+    def epoch_end(self, outputs, stage: str):
+        metrics = self.metrics[f"{stage}_metric"].compute()
+        self.log(f"{stage}_metric", metrics)
+        confmat = self.confusion_matrix.compute().float()
+        (tn, fp), (fn, tp) = confmat
+        self.log(f"{stage}_confusion_matrix_tn", tn, reduce_fx=torch.sum)
+        self.log(f"{stage}_confusion_matrix_fp", fp, reduce_fx=torch.sum)
+        self.log(f"{stage}_confusion_matrix_fn", fn, reduce_fx=torch.sum)
+        self.log(f"{stage}_confusion_matrix_tp", tp, reduce_fx=torch.sum)
+
+    def training_epoch_end(self, outputs):
+        self.epoch_end(outputs, "train")
+
+    def validation_epoch_end(self, outputs):
+        self.epoch_end(outputs, "val")
+
+    def test_epoch_end(self, outputs):
+        self.epoch_end(outputs, "test")
 
     def configure_optimizers(self):
         optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
