@@ -1,9 +1,9 @@
 import argparse
-import json
 import gc
+import json
 import os
-from datetime import datetime
-from pathlib import Path
+import time
+from datetime import datetime, timedelta
 
 import torch
 from lightning.pytorch import Trainer, seed_everything
@@ -134,6 +134,7 @@ def main():
 
 def cross_validate(Model: BaseModel, args: argparse.Namespace):
     # cross validation
+    start_time = time.perf_counter()
     test_metrics = []
     datamodule = StratifiedGroupKFoldDataModule(args)
     callbacks = []
@@ -170,10 +171,12 @@ def cross_validate(Model: BaseModel, args: argparse.Namespace):
         del model
         gc.collect()
 
-    save_logs(test_metrics, args)
+    end_time = time.perf_counter()
+    time_elapsed = timedelta(seconds=end_time - start_time)
+    save_logs(test_metrics, time_elapsed, args)
 
 
-def save_logs(test_metrics, args: argparse.Namespace):
+def save_logs(test_metrics, time_elapsed: timedelta, args: argparse.Namespace):
     cv_metrics = {"metric_confusion_matrix": []}
     for test_metric in test_metrics:
         test_metric = test_metric[0]
@@ -206,6 +209,7 @@ def save_logs(test_metrics, args: argparse.Namespace):
     logs = {
         "args": vars(args),
         "cv_metrics": cv_metrics,
+        "time_elapsed": str(time_elapsed),
     }
     print(logs)
     if args.fast_dev_run:
