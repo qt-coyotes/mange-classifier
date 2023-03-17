@@ -70,10 +70,10 @@ class BaseModel(LightningModule):
         self.log(f"{stage}_metric", metric)
         confmat = self.confusion_matrix(yhat, y)
         (tn, fp), (fn, tp) = confmat.float()
-        self.log(f"{stage}_confusion_matrix_tn", tn)
-        self.log(f"{stage}_confusion_matrix_fp", fp)
-        self.log(f"{stage}_confusion_matrix_fn", fn)
-        self.log(f"{stage}_confusion_matrix_tp", tp)
+        self.log(f"{stage}_confusion_matrix_tn", tn, reduce_fx=torch.sum)
+        self.log(f"{stage}_confusion_matrix_fp", fp, reduce_fx=torch.sum)
+        self.log(f"{stage}_confusion_matrix_fn", fn, reduce_fx=torch.sum)
+        self.log(f"{stage}_confusion_matrix_tp", tp, reduce_fx=torch.sum)
         return loss
 
     def training_step(self, batch: Tuple[Tensor], batch_idx):
