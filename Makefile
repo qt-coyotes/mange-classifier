@@ -15,4 +15,5 @@ fast:
 
 clean:
 	rm -f logs_*.json
+	rm -f logs_*.tsv
 	rm -rf lightning_logs
