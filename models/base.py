@@ -20,13 +20,13 @@ from metrics import BinaryExpectedCost
 
 
 class BaseModel(LightningModule):
-    def __init__(self, args: argparse.Namespace):
+    def __init__(self, criterion: nn.Module, args: argparse.Namespace):
         super().__init__()
         self.transforms = nn.Identity()
         self.feature_extractor = NotImplementedError()
         self.flatten = nn.Flatten()
         self.classifier = nn.LazyLinear(1)
-        self.criterion = nn.BCEWithLogitsLoss()
+        self.criterion = criterion
         self.batch_size = args.batch_size
         self.learning_rate = args.learning_rate
         self.return_node = None
@@ -42,7 +42,7 @@ class BaseModel(LightningModule):
                     BinaryPrecision(),
                     BinaryAveragePrecision(),
                     BinaryAccuracy(),
-                    BinaryAUROC()
+                    BinaryAUROC(),
                 ]
             )
         self.metrics = nn.ModuleDict(metrics)
@@ -61,9 +61,12 @@ class BaseModel(LightningModule):
     def step(self, batch: Tuple[Tensor], batch_idx: int, stage: str):
         x, y = batch
         logits = self.y(x)
-        loss = self.criterion(logits, y.float())
-        self.log(f"{stage}_loss", loss, on_epoch=True)
         yhat = torch.sigmoid(logits)
+        if isinstance(self.criterion, nn.BCEWithLogitsLoss):
+            loss = self.criterion(logits, y.float())
+        else:
+            loss = self.criterion(yhat, y.float())
+        self.log(f"{stage}_loss", loss, on_epoch=True)
         self.metrics[f"{stage}_metric"].update(yhat, y)
         self.metrics[f"{stage}_confusion_matrix"].update(yhat, y)
         return loss
