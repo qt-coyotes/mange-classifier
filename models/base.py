@@ -1,6 +1,8 @@
 import argparse
 from typing import Tuple
 
+from ..transforms import CoyoteCrop
+
 import torch
 from lightning.pytorch import LightningModule
 from torch import Tensor, nn, optim
@@ -29,6 +31,7 @@ class BaseModel(LightningModule):
         self.criterion = criterion
         self.batch_size = args.batch_size
         self.learning_rate = args.learning_rate
+        self.crop_coyote = CoyoteCrop() if args.crop_coyote else nn.Identity()
         self.return_node = None
         metrics = {}
         for stage in ["train", "test", "val"]:
@@ -51,6 +54,7 @@ class BaseModel(LightningModule):
 
     def y(self, x: Tensor):
         x = x.float()
+        x = self.crop_coyote(x)
         x = self.transforms(x)
         x = self.feature_extractor(x)
         if self.return_node:
