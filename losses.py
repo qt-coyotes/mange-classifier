@@ -25,7 +25,7 @@ class BinaryExpectedCostLoss(nn.Module):
             self,
             ctp: float = 0.,
             cfp: float = 1.,
-            cfn: float = 5.,
+            cfn: float = 50.,
             ctn: float = 0.
     ):
         """

@@ -34,16 +34,17 @@ class BaseModel(LightningModule):
         for stage in ["train", "test", "val"]:
             metrics[f"{stage}_confusion_matrix"] = BinaryConfusionMatrix()
             metrics[f"{stage}_metric"] = MetricCollection(
-                [
-                    BinaryExpectedCost(),
-                    BinaryFBetaScore(beta=2.0),
-                    BinaryF1Score(),
-                    BinaryRecall(),
-                    BinaryPrecision(),
-                    BinaryAveragePrecision(),
-                    BinaryAccuracy(),
-                    BinaryAUROC(),
-                ]
+                {
+                    "ExpectedCost5": BinaryExpectedCost(),
+                    "ExpectedCost50": BinaryExpectedCost(cfn=50.),
+                    "F2": BinaryFBetaScore(beta=2.0),
+                    "F1": BinaryF1Score(),
+                    "Recall": BinaryRecall(),
+                    "Precision": BinaryPrecision(),
+                    "AveragePrecision": BinaryAveragePrecision(),
+                    "Accuracy": BinaryAccuracy(),
+                    "AUROC": BinaryAUROC(),
+                }
             )
         self.metrics = nn.ModuleDict(metrics)
 
