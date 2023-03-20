@@ -7,11 +7,13 @@ import time
 from datetime import datetime, timedelta
 
 import torch
+from torch import nn
 from lightning.pytorch import Trainer, seed_everything
 from lightning.pytorch.accelerators import CUDAAccelerator
 from lightning.pytorch.callbacks import EarlyStopping
 
 from data import StratifiedGroupKFoldDataModule
+from losses import MacroSoftFBetaLoss
 from models.base import BaseModel
 from models.densenet import DenseNetModel
 from models.resnet import ResNetModel
@@ -26,6 +28,10 @@ def main():
         "ViT": ViTModel,
         "YOLO": YoloModel,
     }
+    criterions = {
+        "BCEWithLogitsLoss": nn.BCEWithLogitsLoss(),
+        "MacroSoftFBetaLoss": MacroSoftFBetaLoss(2),
+    }
     parser = argparse.ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
     group = parser.add_argument_group("qt.coyote")
@@ -35,6 +41,13 @@ def main():
         type=str,
         choices=list(models.keys()),
         default="ResNet",
+    )
+    group.add_argument(
+        "--criterion",
+        help="Which criterion to use",
+        type=str,
+        choices=list(criterions.keys()),
+        default="MacroSoftFBetaLoss",
     )
     group.add_argument("--batch_size", help="Batch size", type=int, default=32)
     group.add_argument(
@@ -129,11 +142,12 @@ def main():
     print(args)
     torch.backends.cudnn.deterministic = not args.nondeterministic
     Model = models[args.model]
-    cross_validate(Model, args)
+    criterion = criterions[args.criterion]
+    cross_validate(Model, criterion, args)
     # TODO: train final model
 
 
-def cross_validate(Model: BaseModel, args: argparse.Namespace):
+def cross_validate(Model: BaseModel, criterion: nn.Module, args: argparse.Namespace):
     # cross validation
     start_time = time.perf_counter()
     test_metrics = []
@@ -149,7 +163,7 @@ def cross_validate(Model: BaseModel, args: argparse.Namespace):
             args,
             callbacks=callbacks,
         )
-        model = Model(args)
+        model = Model(criterion, args)
         if args.compile and isinstance(trainer.accelerator, CUDAAccelerator):
             model = torch.compile(model)
 
