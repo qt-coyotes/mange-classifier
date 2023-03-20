@@ -7,13 +7,13 @@ import time
 from datetime import datetime, timedelta
 
 import torch
-from torch import nn
 from lightning.pytorch import Trainer, seed_everything
 from lightning.pytorch.accelerators import CUDAAccelerator
 from lightning.pytorch.callbacks import EarlyStopping
+from torch import nn
 
 from data import StratifiedGroupKFoldDataModule
-from losses import MacroSoftFBetaLoss
+from losses import BinaryExpectedCostLoss, BinaryMacroSoftFBetaLoss
 from models.base import BaseModel
 from models.densenet import DenseNetModel
 from models.resnet import ResNetModel
@@ -30,7 +30,8 @@ def main():
     }
     criterions = {
         "BCEWithLogitsLoss": nn.BCEWithLogitsLoss(),
-        "MacroSoftFBetaLoss": MacroSoftFBetaLoss(2),
+        "MacroSoftFBetaLoss": BinaryMacroSoftFBetaLoss(2),
+        "ExpectedCostLoss": BinaryExpectedCostLoss(),
     }
     parser = argparse.ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
@@ -47,7 +48,7 @@ def main():
         help="Which criterion to use",
         type=str,
         choices=list(criterions.keys()),
-        default="MacroSoftFBetaLoss",
+        default="ExpectedCostLoss",
     )
     group.add_argument("--batch_size", help="Batch size", type=int, default=32)
     group.add_argument(
