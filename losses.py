@@ -30,7 +30,7 @@ class BinarySurrogateFBetaLoss(nn.Module):
         self.clip_log_x = torch.exp(torch.tensor(-100.0))
 
     def forward(self, yhat: Tensor, y: Tensor):
-        p = y.sum(axis=0)
+        p = y.mean(axis=0)
         return (
             -y * self.log(yhat)
             - (1 - y)
