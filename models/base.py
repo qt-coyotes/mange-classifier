@@ -64,11 +64,8 @@ class BaseModel(LightningModule):
         x, y = batch
         logits = self.y(x)
         yhat = torch.sigmoid(logits)
-        if isinstance(self.criterion, nn.BCEWithLogitsLoss):
-            loss = self.criterion(logits, y.float())
-        else:
-            loss = self.criterion(yhat, y.float())
-        self.log(f"{stage}_loss", loss, prog_bar=True, on_epoch=True)
+        loss = self.criterion(yhat, y.float())
+        self.log(f"{stage}_loss", loss, on_epoch=True)
         self.metrics[f"{stage}_metric"].update(yhat, y)
         self.metrics[f"{stage}_confusion_matrix"].update(yhat, y)
         return loss
