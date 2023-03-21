@@ -23,19 +23,22 @@ class BinaryMacroSoftFBetaLoss(nn.Module):
 
 
 class BinarySurrogateFBetaLoss(nn.Module):
-    def __init__(self, beta=1, eps=torch.finfo(torch.float32).eps):
+    def __init__(self, beta=1):
         super().__init__()
         self.beta = beta
         self.beta2 = beta**2
-        self.eps = eps
+        self.clip_log_x = torch.exp(torch.tensor(-100.0))
 
     def forward(self, yhat: Tensor, y: Tensor):
         p = y.sum(axis=0)
         return (
-            -y * torch.log(yhat + self.eps)
+            -y * self.log(yhat)
             - (1 - y)
-            * torch.log(self.beta2 * p / (1 - p + self.eps) + yhat + self.eps)
+            * self.log(self.beta2 * p / (1 - p) + yhat)
         ).mean()
+
+    def log(self, x: Tensor):
+        return torch.log(torch.max(x, self.clip_log_x))
 
 
 class BinaryExpectedCostLoss(nn.Module):
