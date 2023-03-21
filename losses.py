@@ -34,7 +34,7 @@ class BinarySurrogateFBetaLoss(nn.Module):
         p = y.mean(axis=0)
         return (
             -y * self.log(yhat)
-            - (1 - y)
+            + (1 - y)
             * self.log(self.beta2 * p / (1 - p + self.eps) + yhat)
         ).mean()
 
