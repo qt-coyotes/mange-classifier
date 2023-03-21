@@ -33,7 +33,7 @@ def main():
         "YOLO": YoloModel,
     }
     criterions = {
-        "BCEWithLogitsLoss": nn.BCEWithLogitsLoss(),
+        "BCELoss": nn.BCELoss(),
         "MacroSoftFBetaLoss": BinaryMacroSoftFBetaLoss(2),
         "ExpectedCostLoss": BinaryExpectedCostLoss(),
         "SurrogateFBetaLoss": BinarySurrogateFBetaLoss(2)
