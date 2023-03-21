@@ -36,6 +36,7 @@ class BaseModel(LightningModule):
             metrics[f"{stage}_metric"] = MetricCollection(
                 {
                     "ExpectedCost5": BinaryExpectedCost(),
+                    "ExpectedCost10": BinaryExpectedCost(cfn=10.),
                     "ExpectedCost50": BinaryExpectedCost(cfn=50.),
                     "F2": BinaryFBetaScore(beta=2.0),
                     "F1": BinaryF1Score(),

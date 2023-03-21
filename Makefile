@@ -1,5 +1,8 @@
 4090:
-	python3 main.py --batch_size 64 --learning_rate 0.00002 --num_sanity_val_steps 1 --patience 5 --model ResNet
+	python3 main.py --batch_size 64 --learning_rate 0.00002 --num_sanity_val_steps 1 --patience 5 --model ResNet --loss BCEWithLogitsLoss
+# python3 main.py --batch_size 32 --learning_rate 0.0001 --num_sanity_val_steps 1 --max_epochs 20 --min_epochs 20 --model DenseNet
+# python3 main.py --batch_size 64 --learning_rate 0.00002 --num_sanity_val_steps 1 --patience 5 --model ViT
+# python3 main.py --batch_size 64 --learning_rate 0.0002 --num_sanity_val_steps 1 --patience 5 --model YOLO --yolo_model yolov8s-cls --max_epochs 100
 
 M2:
 	python3 main.py --batch_size 32 --learning_rate 0.00002 --num_sanity_val_steps 1
