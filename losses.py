@@ -32,8 +32,9 @@ class BinarySurrogateFBetaLoss(nn.Module):
     def forward(self, yhat: Tensor, y: Tensor):
         p = y.sum(axis=0)
         return (
-            -y * torch.log(yhat)
-            - (1 - y) * torch.log(self.beta2 * p / (1 - p) + yhat)
+            -y * torch.log(yhat + self.eps)
+            - (1 - y)
+            * torch.log(self.beta2 * p / (1 - p + self.eps) + yhat + self.eps)
         ).mean()
 
 
