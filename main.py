@@ -153,13 +153,13 @@ def cross_validate(Model: BaseModel, criterion: nn.Module, args: argparse.Namesp
     start_time = time.perf_counter()
     test_metrics = []
     datamodule = StratifiedGroupKFoldDataModule(args)
-    callbacks = []
-    if not args.no_early_stopping:
-        callbacks.append(
-            EarlyStopping("val_loss", patience=args.patience, mode="min")
-        )
     for datamodule_i in datamodule:
         seed_everything(args.random_state, workers=True)
+        callbacks = []
+        if not args.no_early_stopping:
+            callbacks.append(
+                EarlyStopping("val_loss", patience=args.patience, mode="min")
+            )
         trainer = Trainer.from_argparse_args(
             args,
             callbacks=callbacks,
