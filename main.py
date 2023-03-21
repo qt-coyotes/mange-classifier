@@ -248,6 +248,7 @@ def save_logs(test_metrics, time_elapsed: timedelta, args: argparse.Namespace):
         writer.writerow([logs["args"]["learning_rate"]])
         writer.writerow([])
         writer.writerow([logs["cv_metrics"]["ExpectedCost50"]])
+        writer.writerow([logs["cv_metrics"]["ExpectedCost10"]])
         writer.writerow([logs["cv_metrics"]["ExpectedCost5"]])
         writer.writerow([logs["cv_metrics"]["F2"]])
         writer.writerow([logs["cv_metrics"]["F1"]])
