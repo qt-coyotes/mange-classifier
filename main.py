@@ -31,7 +31,7 @@ def main():
     criterions = {
         "BCEWithLogitsLoss": nn.BCEWithLogitsLoss(),
         "MacroSoftFBetaLoss": BinaryMacroSoftFBetaLoss(2),
-        "ExpectedCostLoss": BinaryExpectedCostLoss(10),
+        "ExpectedCostLoss": BinaryExpectedCostLoss(cfn=5),
     }
     parser = argparse.ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
