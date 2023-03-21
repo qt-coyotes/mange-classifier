@@ -13,7 +13,11 @@ from lightning.pytorch.callbacks import EarlyStopping
 from torch import nn
 
 from data import StratifiedGroupKFoldDataModule
-from losses import BinaryExpectedCostLoss, BinaryMacroSoftFBetaLoss
+from losses import (
+    BinaryExpectedCostLoss,
+    BinaryMacroSoftFBetaLoss,
+    BinarySurrogateFBetaLoss,
+)
 from models.base import BaseModel
 from models.densenet import DenseNetModel
 from models.resnet import ResNetModel
@@ -32,6 +36,7 @@ def main():
         "BCEWithLogitsLoss": nn.BCEWithLogitsLoss(),
         "MacroSoftFBetaLoss": BinaryMacroSoftFBetaLoss(2),
         "ExpectedCostLoss": BinaryExpectedCostLoss(cfn=10),
+        "SurrogateFBetaLoss": BinarySurrogateFBetaLoss(2)
     }
     parser = argparse.ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
@@ -148,7 +153,9 @@ def main():
     # TODO: train final model
 
 
-def cross_validate(Model: BaseModel, criterion: nn.Module, args: argparse.Namespace):
+def cross_validate(
+    Model: BaseModel, criterion: nn.Module, args: argparse.Namespace
+):
     # cross validation
     start_time = time.perf_counter()
     test_metrics = []
@@ -257,7 +264,9 @@ def save_logs(test_metrics, time_elapsed: timedelta, args: argparse.Namespace):
         writer.writerow([logs["cv_metrics"]["AveragePrecision"]])
         writer.writerow([logs["cv_metrics"]["Accuracy"]])
         writer.writerow([logs["cv_metrics"]["AUROC"]])
-        writer.writerow([json.dumps(logs["cv_metrics"]["metric_confusion_matrix"])])
+        writer.writerow(
+            [json.dumps(logs["cv_metrics"]["metric_confusion_matrix"])]
+        )
         writer.writerow([logs["cv_metrics"]["loss"]])
         writer.writerow([])
         writer.writerow([logs["time_elapsed"]])
