@@ -165,7 +165,12 @@ def cross_validate(
         callbacks = []
         if not args.no_early_stopping:
             callbacks.append(
-                EarlyStopping("val_loss", patience=args.patience, mode="min")
+                EarlyStopping(
+                    "val_loss",
+                    min_delta=0.001,
+                    patience=args.patience,
+                    mode="min"
+                )
             )
         trainer = Trainer.from_argparse_args(
             args,
