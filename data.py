@@ -38,7 +38,7 @@ class COCOImageDataset(Dataset):
 class StratifiedGroupKFoldDataModule(LightningDataModule):
     def __init__(self, args: argparse.Namespace):
         super().__init__()
-        self.i = 0
+        self.i = -1
         self.data_path = Path(args.data_path)
         self.metadata_path = Path(args.metadata_path)
         self.args = args
@@ -171,12 +171,12 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
         pass
 
     def __iter__(self):
-        self.i = 0
+        self.i = -1
         return self
 
     def __next__(self):
+        self.i += 1
         if self.i < self.args.k:
-            self.i += 1
             return self
         else:
             raise StopIteration
