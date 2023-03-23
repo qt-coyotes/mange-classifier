@@ -14,4 +14,6 @@ class YoloModel(BaseModel):
         super().__init__(criterion, args)
         model = YOLO(args.yolo_model).model
         list(list(model.children())[0].children())[-1].linear = nn.Identity()
+        for k, v in model.named_parameters():
+            v.requires_grad = True
         self.feature_extractor = model.model
