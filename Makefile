@@ -1,5 +1,5 @@
 4090:
-	python3 main.py --batch_size 32 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model YOLO --criterion BCELoss --num_workers 12 --min_epochs 10 --yolo_model yolov8s-cls.pt
+	python3 main.py --batch_size 32 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model YOLO --criterion ExpectedCostLoss --num_workers 12 --min_epochs 10 --yolo_model yolov8s-cls.pt
 
 M2:
 	python3 main.py --batch_size 32 --learning_rate 0.00002 --num_sanity_val_steps 1
