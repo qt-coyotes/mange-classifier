@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import torch
 from lightning.pytorch import Trainer, seed_everything
 from lightning.pytorch.accelerators import CUDAAccelerator
-from lightning.pytorch.callbacks import EarlyStopping
+from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from torch import nn
 
 from data import StratifiedGroupKFoldDataModule
@@ -172,6 +172,10 @@ def cross_validate(
                     mode="min"
                 )
             )
+            model_checkpoint = ModelCheckpoint(
+                monitor="val_loss"
+            )
+            callbacks.append(model_checkpoint)
         trainer = Trainer.from_argparse_args(
             args,
             callbacks=callbacks,
@@ -190,6 +194,11 @@ def cross_validate(
         trainer.fit(model=model, train_dataloaders=datamodule_i)
         if args.fast_dev_run:
             test_metric = trainer.test(model, dataloaders=datamodule)
+        elif not args.no_early_stopping:
+            test_metric = trainer.test(
+                ckpt_path=model_checkpoint.best_model_path,
+                dataloaders=datamodule
+            )
         else:
             test_metric = trainer.test(ckpt_path="best", dataloaders=datamodule)
         test_metrics.append(test_metric)
