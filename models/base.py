@@ -4,6 +4,7 @@ from typing import Tuple
 import torch
 from lightning.pytorch import LightningModule
 from torch import Tensor, nn, optim
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchmetrics import MetricCollection
 from torchmetrics.classification import (
     BinaryAccuracy,
@@ -100,4 +101,10 @@ class BaseModel(LightningModule):
 
     def configure_optimizers(self):
         optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
-        return optimizer
+        scheduler = ReduceLROnPlateau(
+            optimizer,
+            mode="min",
+            factor=self.args.scheduler_factor,
+            patience=self.args.scheduler_patience
+        )
+        return scheduler
