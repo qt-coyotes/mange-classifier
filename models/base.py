@@ -30,6 +30,8 @@ class BaseModel(LightningModule):
         self.criterion = criterion
         self.batch_size = args.batch_size
         self.learning_rate = args.learning_rate
+        self.scheduler_patience = args.scheduler_patience
+        self.scheduler_factor = args.scheduler_factor
         self.return_node = None
         metrics = {}
         for stage in ["train", "test", "val"]:
@@ -104,7 +106,7 @@ class BaseModel(LightningModule):
         scheduler = ReduceLROnPlateau(
             optimizer,
             mode="min",
-            factor=self.args.scheduler_factor,
-            patience=self.args.scheduler_patience
+            factor=self.scheduler_factor,
+            patience=self.scheduler_patience
         )
         return scheduler
