@@ -109,4 +109,4 @@ class BaseModel(LightningModule):
             factor=self.scheduler_factor,
             patience=self.scheduler_patience
         )
-        return scheduler
+        return [optimizer], [scheduler]
