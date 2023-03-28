@@ -1,7 +1,10 @@
 4090:
+	python3 main.py --batch_size 64 --learning_rate 1 --num_sanity_val_steps 1 --patience 5 --model ResNet --criterion ExpectedCostLoss --internal_k 5 --num_workers 12
+	python3 main.py --batch_size 64 --learning_rate 0.1 --num_sanity_val_steps 1 --patience 5 --model ResNet --criterion ExpectedCostLoss --internal_k 5 --num_workers 12
+	python3 main.py --batch_size 64 --learning_rate 0.01 --num_sanity_val_steps 1 --patience 5 --model ResNet --criterion ExpectedCostLoss --internal_k 5 --num_workers 12
+	python3 main.py --batch_size 64 --learning_rate 0.001 --num_sanity_val_steps 1 --patience 5 --model ResNet --criterion ExpectedCostLoss --internal_k 5 --num_workers 12
+	python3 main.py --batch_size 64 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --criterion ExpectedCostLoss --internal_k 5 --num_workers 12
 	python3 main.py --batch_size 64 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --criterion ExpectedCostLoss --internal_k 5 --num_workers 12
-	python3 main.py --batch_size 64 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --criterion ExpectedCostLoss --internal_k 10 --num_workers 12
-	python3 main.py --batch_size 64 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --criterion ExpectedCostLoss --internal_k 20 --num_workers 12
 
 M2:
 	python3 main.py --batch_size 32 --learning_rate 0.00002 --num_sanity_val_steps 1
