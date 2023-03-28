@@ -140,7 +140,19 @@ def main():
         "--patience",
         help="Number of checks with no improvement after which training will be stopped.",
         type=int,
-        default=10,
+        default=5,
+    )
+    group.add_argument(
+        "--scheduler_factor",
+        help="Factor by which the lr will be decreased",
+        type=float,
+        default=0.5,
+    )
+    group.add_argument(
+        "--scheduler_patience",
+        help="Number of checks with no improvement after which lr will decrease",
+        type=int,
+        default=4,
     )
     group.add_argument(
         "--yolo_model",
