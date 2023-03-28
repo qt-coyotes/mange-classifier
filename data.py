@@ -118,7 +118,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
             groups_trainval = [groups[i] for i in trainval_indexes]
 
             trainval_sgkf = StratifiedGroupKFold(
-                n_splits=self.args.k, shuffle=False, random_state=None
+                n_splits=self.args.internal_k, shuffle=False, random_state=None
             )
             trainval_splits = list(
                 trainval_sgkf.split(

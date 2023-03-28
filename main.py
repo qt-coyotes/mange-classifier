@@ -66,6 +66,12 @@ def main():
         default=5,
     )
     group.add_argument(
+        "--internal_k",
+        help="Number of folds for train/test split",
+        type=int,
+        default=5,
+    )
+    group.add_argument(
         "--data_path",
         help="Path to images",
         type=str,
