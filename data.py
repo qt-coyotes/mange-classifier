@@ -25,8 +25,12 @@ class COCOImageDataset(Dataset):
 
     def __getitem__(self, idx):
         image = self.images[idx]
+        cropped_image_path = self.data_path / "megadetected" / image["file_name"]
         image_path = self.data_path / image["file_name"]
-        img = read_image(str(image_path))
+        try:
+            img = read_image(str(cropped_image_path))
+        except Exception:
+            img = read_image(str(image_path))
         label = self.labels[idx]
         if self.transform:
             img = self.transform(img)
