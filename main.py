@@ -131,6 +131,11 @@ def main():
         action="store_true",
     )
     group.add_argument(
+        "--no_crop",
+        help="Disabl cropping",
+        action="store_true",
+    )
+    group.add_argument(
         "--patience",
         help="Number of checks with no improvement after which training will be stopped.",
         type=int,
