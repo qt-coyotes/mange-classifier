@@ -11,6 +11,9 @@ auto:
 fast:
 	python3 main.py --fast_dev_run --model ResNet
 
+number:
+	python3 main.py --model ResNet --metadata_path data/numbers.json --patience 5 --batch_size 16 --learning_rate 0.001 --criterion BCELoss
+
 clean:
 	rm -f logs_*.json
 	rm -f logs_*.tsv

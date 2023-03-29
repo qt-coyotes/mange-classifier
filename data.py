@@ -7,7 +7,7 @@ import torchvision
 from lightning.pytorch import LightningDataModule
 from sklearn.model_selection import StratifiedGroupKFold
 from torch.utils.data import DataLoader, Dataset
-from torchvision.io import read_image
+from torchvision.io import read_image, ImageReadMode
 
 
 class COCOImageDataset(Dataset):
@@ -34,16 +34,16 @@ class COCOImageDataset(Dataset):
         image = self.images[idx]
         if self.args.no_crop:
             image_path = self.data_path / image["file_name"]
-            img = read_image(str(image_path))
+            img = read_image(str(image_path), ImageReadMode.RGB)
         else:
             try:
                 cropped_image_path = (
                     self.data_path / "megadetected" / image["file_name"]
                 )
-                img = read_image(str(cropped_image_path))
+                img = read_image(str(cropped_image_path), ImageReadMode.RGB)
             except Exception:
                 image_path = self.data_path / image["file_name"]
-                img = read_image(str(image_path))
+                img = read_image(str(image_path), ImageReadMode.RGB)
         label = self.labels[idx]
         if self.transform:
             img = self.transform(img)
