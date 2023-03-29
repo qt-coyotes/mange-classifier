@@ -29,6 +29,8 @@ class BaseModel(LightningModule):
         self.criterion = criterion
         self.batch_size = args.batch_size
         self.learning_rate = args.learning_rate
+        self.scheduler_patience = args.scheduler_patience
+        self.scheduler_factor = args.scheduler_factor
         self.return_node = None
         metrics = {}
         for stage in ["train", "test", "val"]:
@@ -100,4 +102,14 @@ class BaseModel(LightningModule):
 
     def configure_optimizers(self):
         optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
-        return optimizer
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer,
+            mode="min",
+            factor=self.scheduler_factor,
+            patience=self.scheduler_patience
+        )
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": scheduler,
+            "monitor": "val_loss"
+        }
