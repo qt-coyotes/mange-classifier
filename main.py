@@ -35,7 +35,7 @@ def main():
     criterions = {
         "BCELoss": nn.BCELoss(),
         "MacroSoftFBetaLoss": BinaryMacroSoftFBetaLoss(2),
-        "ExpectedCostLoss": BinaryExpectedCostLoss(cfn=5),
+        "ExpectedCostLoss": BinaryExpectedCostLoss(cfn=10),
         "SurrogateFBetaLoss": BinarySurrogateFBetaLoss(2)
     }
     parser = argparse.ArgumentParser()
