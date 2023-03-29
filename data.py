@@ -12,25 +12,38 @@ from torchvision.io import read_image
 
 class COCOImageDataset(Dataset):
     def __init__(
-        self, images, labels, data_path, transform=None, target_transform=None
+        self,
+        images,
+        labels,
+        data_path,
+        args: argparse.Namespace,
+        transform=None,
+        target_transform=None,
     ):
         self.images = images
         self.labels = labels
         self.data_path = data_path
         self.transform = transform
         self.target_transform = target_transform
+        self.args = args
 
     def __len__(self):
         return len(self.images)
 
     def __getitem__(self, idx):
         image = self.images[idx]
-        cropped_image_path = self.data_path / "megadetected" / image["file_name"]
-        image_path = self.data_path / image["file_name"]
-        try:
-            img = read_image(str(cropped_image_path))
-        except Exception:
+        if self.args.no_crop:
+            image_path = self.data_path / image["file_name"]
             img = read_image(str(image_path))
+        else:
+            try:
+                cropped_image_path = (
+                    self.data_path / "megadetected" / image["file_name"]
+                )
+                img = read_image(str(cropped_image_path))
+            except Exception:
+                image_path = self.data_path / image["file_name"]
+                img = read_image(str(image_path))
         label = self.labels[idx]
         if self.transform:
             img = self.transform(img)
@@ -75,9 +88,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                 min_image_shape = (height, width)
                 min_image_area = area
 
-        equal_size_transform = torchvision.transforms.Resize(
-            min_image_shape
-        )
+        equal_size_transform = torchvision.transforms.Resize(min_image_shape)
 
         no_mange_annotations = []
         mange_annotations = []
@@ -113,7 +124,11 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
 
             self.dataset_test.append(
                 COCOImageDataset(
-                    test_X, test_y, self.data_path, equal_size_transform
+                    test_X,
+                    test_y,
+                    self.data_path,
+                    self.args,
+                    equal_size_transform,
                 )
             )
 
@@ -138,12 +153,20 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
 
             self.dataset_train.append(
                 COCOImageDataset(
-                    train_X, train_y, self.data_path, equal_size_transform
+                    train_X,
+                    train_y,
+                    self.data_path,
+                    self.args,
+                    equal_size_transform,
                 )
             )
             self.dataset_val.append(
                 COCOImageDataset(
-                    val_X, val_y, self.data_path, equal_size_transform
+                    val_X,
+                    val_y,
+                    self.data_path,
+                    self.args,
+                    equal_size_transform,
                 )
             )
 
