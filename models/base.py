@@ -30,14 +30,14 @@ class BaseModel(LightningModule):
             transforms.RandomHorizontalFlip(),
             transforms.RandomRotation(10),
             transforms.RandomPerspective(),
-            transforms.GaussianBlur(3, simga=(0, 2)),
+            transforms.GaussianBlur(3, sigma=(0.1, 2)),
             transforms.ColorJitter(
                 brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1
             ),
         ])
         self.criterion = criterion
         self.batch_size = args.batch_size
-        self.data_augmentation = args.data_augmentation
+        self.no_data_augmentation = args.no_data_augmentation
         self.learning_rate = args.learning_rate
         self.scheduler_patience = args.scheduler_patience
         self.scheduler_factor = args.scheduler_factor
@@ -63,7 +63,7 @@ class BaseModel(LightningModule):
 
     def y(self, x: Tensor):
         x = x.float()
-        if self.data_augmentation:
+        if not self.no_data_augmentation:
             x = self.augmentations(x)
         x = self.transforms(x)
         x = self.feature_extractor(x)
