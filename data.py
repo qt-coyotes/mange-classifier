@@ -118,7 +118,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
         else:
             print("WARNING: No external grouping!")
             trainvaltest_skf = StratifiedKFold(
-                n_splits=self.args.internal_k,
+                n_splits=self.args.k,
                 shuffle=self.args.shuffle,
                 random_state=self.args.random_state,
             )
