@@ -5,7 +5,7 @@ from pathlib import Path
 
 import torchvision
 from lightning.pytorch import LightningDataModule
-from sklearn.model_selection import StratifiedGroupKFold
+from sklearn.model_selection import StratifiedKFold, StratifiedGroupKFold
 from torch.utils.data import DataLoader, Dataset
 from torchvision.io import read_image
 
@@ -136,14 +136,26 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
             y_trainval = [y[i] for i in trainval_indexes]
             groups_trainval = [groups[i] for i in trainval_indexes]
 
-            trainval_sgkf = StratifiedGroupKFold(
-                n_splits=self.args.internal_k, shuffle=False, random_state=None
-            )
-            trainval_splits = list(
-                trainval_sgkf.split(
-                    X_trainval, y_trainval, groups=groups_trainval
+            if self.args.internal_group:
+                trainval_sgkf = StratifiedGroupKFold(
+                    n_splits=self.args.internal_k,
+                    shuffle=False,
+                    random_state=None,
                 )
-            )
+                trainval_splits = list(
+                    trainval_sgkf.split(
+                        X_trainval, y_trainval, groups=groups_trainval
+                    )
+                )
+            else:
+                trainval_skf = StratifiedKFold(
+                    n_splits=self.args.internal_k,
+                    shuffle=False,
+                    random_state=None,
+                )
+                trainval_splits = list(
+                    trainval_skf.split(X_trainval, y_trainval)
+                )
             train_indexes, val_indexes = trainval_splits[0]
 
             train_X = [X_trainval[i] for i in train_indexes]
