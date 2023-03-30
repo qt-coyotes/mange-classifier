@@ -105,8 +105,8 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
 
         y = [0] * len(no_mange_annotations) + [1] * len(mange_annotations)
 
+        groups = []
         if not self.args.no_external_group:
-            groups = []
             for image in X:
                 groups.append(image["location"])
             trainvaltest_sgkf = StratifiedGroupKFold(
