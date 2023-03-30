@@ -8,7 +8,7 @@ auto:
 	python3 main.py --auto_scale_batch_size true --auto_lr_find true --num_sanity_val_steps 1
 
 fast:
-	python3 main.py --fast_dev_run --model ResNet
+	python3 main.py --fast_dev_run --model ResNet --num_workers 1 --no_external_group
 
 clean:
 	rm -f logs_*.json
