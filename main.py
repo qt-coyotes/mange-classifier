@@ -138,7 +138,12 @@ def main():
     )
     group.add_argument(
         "--no_crop",
-        help="Disabl cropping",
+        help="Disable cropping",
+        action="store_true",
+    )
+    group.add_argument(
+        "--no_data_augmentation",
+        help="Disable data augmentation",
         action="store_true",
     )
     group.add_argument(
