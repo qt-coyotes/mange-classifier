@@ -15,7 +15,7 @@ from torchmetrics.classification import (
     BinaryRecall,
     BinaryConfusionMatrix,
 )
-
+import torchvision.transforms as transforms
 from metrics import BinaryExpectedCost
 
 
@@ -26,8 +26,18 @@ class BaseModel(LightningModule):
         self.feature_extractor = NotImplementedError()
         self.flatten = nn.Flatten()
         self.classifier = nn.LazyLinear(1)
+        self.augmentations = transforms.Compose([
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomRotation(10),
+            transforms.RandomPerspective(),
+            transforms.GaussianBlur(10),
+            transforms.ColorJitter(
+                brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1
+            ),
+        ])
         self.criterion = criterion
         self.batch_size = args.batch_size
+        self.data_augmentation = args.data_augmentation
         self.learning_rate = args.learning_rate
         self.scheduler_patience = args.scheduler_patience
         self.scheduler_factor = args.scheduler_factor
@@ -53,6 +63,8 @@ class BaseModel(LightningModule):
 
     def y(self, x: Tensor):
         x = x.float()
+        if self.data_augmentation:
+            x = self.augmentations(x)
         x = self.transforms(x)
         x = self.feature_extractor(x)
         if self.return_node:
