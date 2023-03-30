@@ -105,17 +105,25 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
 
         y = [0] * len(no_mange_annotations) + [1] * len(mange_annotations)
 
-        groups = []
-        for image in X:
-            groups.append(image["location"])
+        if not self.args.no_external_group:
+            groups = []
+            for image in X:
+                groups.append(image["location"])
+            trainvaltest_sgkf = StratifiedGroupKFold(
+                n_splits=self.args.k,
+                shuffle=self.args.shuffle,
+                random_state=self.args.random_state,
+            )
+            trainvaltest_splits = list(trainvaltest_sgkf.split(X, y, groups=groups))
+        else:
+            print("WARNING: No external grouping!")
+            trainvaltest_skf = StratifiedKFold(
+                n_splits=self.args.internal_k,
+                shuffle=self.args.shuffle,
+                random_state=self.args.random_state,
+            )
+            trainvaltest_splits = list(trainvaltest_skf.split(X, y))
 
-        trainvaltest_sgkf = StratifiedGroupKFold(
-            n_splits=self.args.k,
-            shuffle=self.args.shuffle,
-            random_state=self.args.random_state,
-        )
-
-        trainvaltest_splits = list(trainvaltest_sgkf.split(X, y, groups=groups))
         for i in range(self.args.k):
             trainval_indexes, test_indexes = trainvaltest_splits[i]
 
