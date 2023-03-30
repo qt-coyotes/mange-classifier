@@ -72,6 +72,11 @@ def main():
         default=5,
     )
     group.add_argument(
+        "--internal_group",
+        help="Use grouped k-fold cross validation in internal k-fold cross validation",
+        action="store_true",
+    )
+    group.add_argument(
         "--data_path",
         help="Path to images",
         type=str,
