@@ -1,5 +1,5 @@
 4090:
-	python3 main.py --batch_size 32 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --criterion ExpectedCostLoss --internal_k 10 --num_workers 12 --scheduler_patience 4 --no_external_group --internal_group
+	python3 main.py --batch_size 32 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --criterion ExpectedCostLoss --internal_k 10 --num_workers 12 --scheduler_patience 4 --no_external_group
 
 M2:
 	python3 main.py --batch_size 32 --learning_rate 0.00002 --num_sanity_val_steps 1
