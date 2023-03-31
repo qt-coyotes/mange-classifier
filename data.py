@@ -3,11 +3,12 @@ import json
 from math import inf
 from pathlib import Path
 
-import torchvision
 from lightning.pytorch import LightningDataModule
 from sklearn.model_selection import StratifiedKFold, StratifiedGroupKFold
 from torch.utils.data import DataLoader, Dataset
 from torchvision.io import read_image
+from torchvision import transforms as T
+from transforms import SquarePad
 
 
 class COCOImageDataset(Dataset):
@@ -80,17 +81,12 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
         mange_category_ids = {1}
         no_mange_category_ids = {2}
 
-        min_image_shape = None
-        min_image_area = inf
-        for image in images:
-            width = image["width"]
-            height = image["height"]
-            area = width * height
-            if area < min_image_area:
-                min_image_shape = (height, width)
-                min_image_area = area
-
-        equal_size_transform = torchvision.transforms.Resize(min_image_shape)
+        equal_size_transform = T.Compose(
+            [
+                SquarePad(),
+                T.Resize((self.args.crop_size, self.args.crop_size))
+            ]
+        )
 
         no_mange_annotations = []
         mange_annotations = []

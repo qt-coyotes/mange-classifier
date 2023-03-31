@@ -97,7 +97,6 @@ def main():
         "--path_prefix",
         help="Prefix for image path",
         type=str,
-        default="CHIL/",
     )
     group.add_argument(
         "--num_workers",
@@ -185,6 +184,12 @@ def main():
         help="Yolo pretrained model",
         type=str,
         default="yolov8n-cls.pt",
+    )
+    group.add_argument(
+        "--crop_size",
+        help="Crop size",
+        type=int,
+        default=224,
     )
     args = parser.parse_args()
     if args.accelerator is None:
