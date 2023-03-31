@@ -244,14 +244,14 @@ def cross_validate(
         if not args.no_early_stopping:
             callbacks.append(
                 EarlyStopping(
-                    "val_loss",
+                    "val_metric_ExpectedCost5",
                     min_delta=0.001,
                     patience=args.patience,
                     mode="min"
                 )
             )
             model_checkpoint = ModelCheckpoint(
-                monitor="val_loss"
+                monitor="val_metric_ExpectedCost5"
             )
             callbacks.append(model_checkpoint)
         trainer = Trainer.from_argparse_args(
