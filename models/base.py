@@ -84,11 +84,6 @@ class BaseModel(LightningModule):
             loss = self.criterion(yhat, y.float())
         self.log(f"{stage}_loss", loss, on_epoch=True)
         self.metrics[f"{stage}_metric"].update(yhat, y)
-        self.log(
-            f"{stage}_metric_ExpectedCost5",
-            self.metrics[f"{stage}_metric"].ExpectedCost5.compute(),
-            on_epoch=True
-        )
         self.metrics[f"{stage}_confusion_matrix"].update(yhat, y)
         return loss
 
@@ -104,6 +99,7 @@ class BaseModel(LightningModule):
     def epoch_end(self, outputs, stage: str):
         metrics = self.metrics[f"{stage}_metric"].compute()
         self.log(f"{stage}_metric", metrics)
+        self.log(f"{stage}_metric_ExpectedCost5", metrics["ExpectedCost5"])
         confmat = self.metrics[f"{stage}_confusion_matrix"].compute().float()
         (tn, fp), (fn, tp) = confmat
         self.log(f"{stage}_confusion_matrix_tn", tn, reduce_fx=torch.sum)
