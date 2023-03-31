@@ -94,11 +94,6 @@ def main():
         default="data/qt-coyotes-merged.json",
     )
     group.add_argument(
-        "--path_prefix",
-        help="Prefix for image path",
-        type=str,
-    )
-    group.add_argument(
         "--num_workers",
         help="Number of workers for dataloader",
         type=int,
