@@ -1,5 +1,5 @@
 4090:
-	python3 main.py --batch_size 64 --learning_rate 0.00002 --num_sanity_val_steps 1 --patience 5 --model ViT --criterion BCELoss
+	python3 main.py --data_path data/CHIL/ --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json --batch_size 32 --learning_rate 0.00002 --num_sanity_val_steps 1 --patience 5 --model ResNet --criterion BCELoss
 
 M2:
 	python3 main.py --batch_size 32 --learning_rate 0.00002 --num_sanity_val_steps 1
