@@ -1,8 +1,8 @@
 4090:
-	python3 main.py --batch_size 16 --learning_rate 0.00002 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion ExpectedLoss --criterion_cfn 5 --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json
-	python3 main.py --batch_size 16 --learning_rate 0.00002 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion ExpectedLoss --criterion_cfn 5 --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json
-	python3 main.py --batch_size 16 --learning_rate 0.00002 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet101 --criterion ExpectedLoss --criterion_cfn 5 --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json
-	python3 main.py --batch_size 16 --learning_rate 0.00002 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet152 --criterion ExpectedLoss --criterion_cfn 5 --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json
+	python3 main.py --batch_size 16 --learning_rate 0.00002 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion ExpectedCostLoss --criterion_cfn 5 --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json
+	python3 main.py --batch_size 16 --learning_rate 0.00002 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion ExpectedCostLoss --criterion_cfn 5 --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json
+	python3 main.py --batch_size 16 --learning_rate 0.00002 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet101 --criterion ExpectedCostLoss --criterion_cfn 5 --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json
+	python3 main.py --batch_size 16 --learning_rate 0.00002 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet152 --criterion ExpectedCostLoss --criterion_cfn 5 --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json
 
 M2:
 	python3 main.py --batch_size 32 --learning_rate 0.00002 --num_sanity_val_steps 1
