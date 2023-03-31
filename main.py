@@ -182,6 +182,12 @@ def main():
         default="yolov8n-cls.pt",
     )
     group.add_argument(
+        "--resnet_model",
+        help="Yolo pretrained model",
+        type=str,
+        default="ResNet18",
+    )
+    group.add_argument(
         "--crop_size",
         help="Crop size",
         type=int,
