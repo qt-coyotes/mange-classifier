@@ -32,11 +32,12 @@ def main():
         "ViT": ViTModel,
         "YOLO": YoloModel,
     }
-    criterions = {
-        "BCELoss": nn.BCELoss(),
-        "MacroSoftFBetaLoss": BinaryMacroSoftFBetaLoss(2),
-        "ExpectedCostLoss": BinaryExpectedCostLoss(cfn=5),
-        "SurrogateFBetaLoss": BinarySurrogateFBetaLoss(2)
+    criterions_set = {
+        "BCELoss",
+        "wBCELoss",
+        "MacroSoftFBetaLoss",
+        "ExpectedCostLoss",
+        "SurrogateFBetaLoss"
     }
     parser = argparse.ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
@@ -52,7 +53,7 @@ def main():
         "--criterion",
         help="Which criterion to use",
         type=str,
-        choices=list(criterions.keys()),
+        choices=criterions_set,
         default="ExpectedCostLoss",
     )
     group.add_argument("--batch_size", help="Batch size", type=int, default=32)
@@ -186,12 +187,39 @@ def main():
         type=int,
         default=224,
     )
+    group.add_argument(
+        "--criterion_pos_weight",
+        help="Weight for positive class for BCEWithLogitsLoss",
+        type=float,
+        default=10.0
+    )
+    group.add_argument(
+        "--criterion_beta",
+        help="Beta for F-beta loss",
+        type=float,
+        default=5.0
+    )
+    group.add_argument(
+        "--criterion_cfn",
+        help="Cost false negative for ExpectedCostLoss",
+        type=float,
+        default=5.0
+    )
     args = parser.parse_args()
     if args.accelerator is None:
         args.accelerator = "auto"
     print(args)
     torch.backends.cudnn.deterministic = not args.nondeterministic
     Model = models[args.model]
+    criterions = {
+        "BCELoss": nn.BCEWithLogitsLoss(),
+        "wBCELoss": nn.BCEWithLogitsLoss(
+            pos_weight=torch.tensor(args.criterion_pos_weight)
+        ),
+        "MacroSoftFBetaLoss": BinaryMacroSoftFBetaLoss(args.criterion_beta),
+        "ExpectedCostLoss": BinaryExpectedCostLoss(cfn=args.criterion_cfn),
+        "SurrogateFBetaLoss": BinarySurrogateFBetaLoss(args.criterion_beta),
+    }
     criterion = criterions[args.criterion]
     cross_validate(Model, criterion, args)
     # TODO: train final model
