@@ -32,6 +32,8 @@ class COCOImageDataset(Dataset):
 
     def __getitem__(self, idx):
         image = self.images[idx]
+        if self.args.path_prefix:
+            image["file_name"] = self.args.path_prefix + image["file_name"]
         if self.args.no_crop:
             image_path = self.data_path / image["file_name"]
             img = read_image(str(image_path))
