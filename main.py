@@ -1,10 +1,8 @@
 import argparse
-import csv
 import gc
-import json
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import torch
 from lightning.pytorch import Trainer, seed_everything
@@ -13,11 +11,8 @@ from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from torch import nn
 
 from data import StratifiedGroupKFoldDataModule
-from losses import (
-    BinaryExpectedCostLoss,
-    BinaryMacroSoftFBetaLoss,
-    BinarySurrogateFBetaLoss,
-)
+from logs import aggregate_logs, save_logs
+from losses import BinaryExpectedCostLoss, BinaryMacroSoftFBetaLoss, BinarySurrogateFBetaLoss
 from models.base import BaseModel
 from models.densenet import DenseNetModel
 from models.resnet import ResNetModel
@@ -301,79 +296,7 @@ def cross_validate(
     end_time = time.perf_counter()
     time_elapsed = timedelta(seconds=end_time - start_time)
     save_logs(test_metrics, time_elapsed, args)
-
-
-def save_logs(test_metrics, time_elapsed: timedelta, args: argparse.Namespace):
-    cv_metrics = {"metric_confusion_matrix": []}
-    for test_metric in test_metrics:
-        test_metric = test_metric[0]
-        test_metric_metric = test_metric["test_metric"]
-        for key, value in test_metric_metric.items():
-            key = key.replace("Binary", "")
-            cv_metrics[key] = cv_metrics.get(key, 0) + value.item()
-        cv_metrics["metric_confusion_matrix"].append(
-            [
-                [
-                    int(test_metric["test_confusion_matrix_tn"]),
-                    int(test_metric["test_confusion_matrix_fp"]),
-                ],
-                [
-                    int(test_metric["test_confusion_matrix_fn"]),
-                    int(test_metric["test_confusion_matrix_tp"]),
-                ],
-            ]
-        )
-        cv_metrics["loss"] = (
-            cv_metrics.get("loss", 0) + test_metric["test_loss"]
-        )
-
-    for metric in cv_metrics:
-        if isinstance(cv_metrics[metric], list):
-            continue
-        cv_metrics[metric] /= args.k
-
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    logs = {
-        "args": vars(args),
-        "cv_metrics": cv_metrics,
-        "time_elapsed": str(time_elapsed),
-    }
-    print(logs)
-    if args.fast_dev_run:
-        return
-    with open(f"logs_{timestamp}.json", "w") as f:
-        json.dump(logs, f, indent=4)
-
-    with open(f"logs_{timestamp}.tsv", "w") as f:
-        writer = csv.writer(f, delimiter="\t")
-        writer.writerow([not logs["args"]["nonpretrained"]])
-        patience = []
-        max_epochs = []
-        if logs["args"]["no_early_stopping"]:
-            max_epochs.append(logs["args"]["max_epochs"])
-        else:
-            patience.append(logs["args"]["patience"])
-        writer.writerow(patience)
-        writer.writerow(max_epochs)
-        writer.writerow([logs["args"]["batch_size"]])
-        writer.writerow([logs["args"]["learning_rate"]])
-        writer.writerow([])
-        writer.writerow([logs["cv_metrics"]["ExpectedCost50"]])
-        writer.writerow([logs["cv_metrics"]["ExpectedCost10"]])
-        writer.writerow([logs["cv_metrics"]["ExpectedCost5"]])
-        writer.writerow([logs["cv_metrics"]["F2"]])
-        writer.writerow([logs["cv_metrics"]["F1"]])
-        writer.writerow([logs["cv_metrics"]["Recall"]])
-        writer.writerow([logs["cv_metrics"]["Precision"]])
-        writer.writerow([logs["cv_metrics"]["AveragePrecision"]])
-        writer.writerow([logs["cv_metrics"]["Accuracy"]])
-        writer.writerow([logs["cv_metrics"]["AUROC"]])
-        writer.writerow(
-            [json.dumps(logs["cv_metrics"]["metric_confusion_matrix"])]
-        )
-        writer.writerow([logs["cv_metrics"]["loss"]])
-        writer.writerow([])
-        writer.writerow([logs["time_elapsed"]])
+    aggregate_logs()
 
 
 if __name__ == "__main__":

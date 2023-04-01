@@ -43,5 +43,5 @@ jobs:
       with:
         name: logs
         path: |
+          logs.tsv
           logs_*.json
-          logs_*.tsv
