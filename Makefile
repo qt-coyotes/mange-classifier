@@ -1,5 +1,9 @@
 4090:
-	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --mode ViT --criterion awBCELoss
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model DenseNet --densenet_model DenseNet121 --criterion awBCELoss
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model DenseNet --densenet_model DenseNet161 --criterion awBCELoss
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model DenseNet --densenet_model DenseNet169 --criterion awBCELoss
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model DenseNet --densenet_model DenseNet201 --criterion awBCELoss
+
 
 M2:
 	python3 main.py --batch_size 32 --learning_rate 0.00002 --num_sanity_val_steps 1
