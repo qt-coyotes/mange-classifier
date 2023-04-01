@@ -20,6 +20,7 @@ class COCOImageDataset(Dataset):
         args: argparse.Namespace,
         transform=None,
         target_transform=None,
+        pos_weight=None,
     ):
         self.images = images
         self.labels = labels
@@ -27,6 +28,7 @@ class COCOImageDataset(Dataset):
         self.transform = transform
         self.target_transform = target_transform
         self.args = args
+        self.pos_weight = pos_weight
 
     def __len__(self):
         return len(self.images)
@@ -174,6 +176,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     self.data_path,
                     self.args,
                     equal_size_transform,
+                    pos_weight=sum(y) / len(y),
                 )
             )
             self.dataset_val.append(
@@ -185,6 +188,9 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     equal_size_transform,
                 )
             )
+
+    def train_dataset(self):
+        return self.dataset_train[self.i]
 
     def train_dataloader(self):
         return DataLoader(

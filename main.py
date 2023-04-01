@@ -35,9 +35,10 @@ def main():
     criterions_set = {
         "BCELoss",
         "wBCELoss",
+        "awBCELoss",
         "MacroSoftFBetaLoss",
         "ExpectedCostLoss",
-        "SurrogateFBetaLoss"
+        "SurrogateFBetaLoss",
     }
     parser = argparse.ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
@@ -228,6 +229,7 @@ def main():
         "wBCELoss": nn.BCEWithLogitsLoss(
             pos_weight=torch.tensor(args.criterion_pos_weight)
         ),
+        "awBCELoss": "awBCELoss",
         "MacroSoftFBetaLoss": BinaryMacroSoftFBetaLoss(args.criterion_beta),
         "ExpectedCostLoss": BinaryExpectedCostLoss(cfn=args.criterion_cfn),
         "SurrogateFBetaLoss": BinarySurrogateFBetaLoss(args.criterion_beta),
@@ -264,6 +266,10 @@ def cross_validate(
             args,
             callbacks=callbacks,
         )
+        if criterion == "awBCELoss":
+            datamodule_i.setup(None)
+            p = datamodule_i.train_dataset().pos_weight
+            criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(p))
         model = Model(criterion, args)
         if args.compile and isinstance(trainer.accelerator, CUDAAccelerator):
             model = torch.compile(model)
