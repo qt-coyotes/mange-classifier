@@ -183,9 +183,15 @@ def main():
     )
     group.add_argument(
         "--resnet_model",
-        help="Yolo pretrained model",
+        help="ResNet model",
         type=str,
         default="ResNet18",
+    )
+    group.add_argument(
+        "--densenet_model",
+        help="DenseNet model",
+        type=str,
+        default="DenseNet121",
     )
     group.add_argument(
         "--crop_size",
