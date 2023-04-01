@@ -16,13 +16,13 @@ class DenseNetModel(BaseModel):
         if args.densenet_model == "DenseNet121":
             weights = models.DenseNet121_Weights.DEFAULT
             backbone = models.densenet121
-        elif args.resnet_model == "ResNet34":
+        elif args.resnet_model == "DenseNet161":
             weights = models.DenseNet161_Weights.DEFAULT
             backbone = models.densenet161
-        elif args.resnet_model == "ResNet50":
+        elif args.resnet_model == "DenseNet169":
             weights = models.DenseNet169_Weights.DEFAULT
             backbone = models.densenet169
-        elif args.resnet_model == "ResNet101":
+        elif args.resnet_model == "DenseNet201":
             weights = models.DenseNet201_Weights.DEFAULT
             backbone = models.densenet201
         else:
