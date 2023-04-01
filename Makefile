@@ -1,12 +1,28 @@
 4090:
-	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion wBCELoss --criterion_pos_weight 5
-	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion wBCELoss --criterion_pos_weight 5
-	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion wBCELoss --criterion_pos_weight 5
-	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet101 --criterion wBCELoss --criterion_pos_weight 5
-	python3 main.py --batch_size 16 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion wBCELoss --criterion_pos_weight 5
-	python3 main.py --batch_size 16 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion wBCELoss --criterion_pos_weight 5
-	python3 main.py --batch_size 16 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion wBCELoss --criterion_pos_weight 5
-	python3 main.py --batch_size 16 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet101 --criterion wBCELoss --criterion_pos_weight 5
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion wBCELoss --criterion_pos_weight 8
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion wBCELoss --criterion_pos_weight 8
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion wBCELoss --criterion_pos_weight 8
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet101 --criterion wBCELoss --criterion_pos_weight 8
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion wBCELoss --criterion_pos_weight 7
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion wBCELoss --criterion_pos_weight 7
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion wBCELoss --criterion_pos_weight 7
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet101 --criterion wBCELoss --criterion_pos_weight 7
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion wBCELoss --criterion_pos_weight 6
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion wBCELoss --criterion_pos_weight 6
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion wBCELoss --criterion_pos_weight 6
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet101 --criterion wBCELoss --criterion_pos_weight 6
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion wBCELoss --criterion_pos_weight 4
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion wBCELoss --criterion_pos_weight 4
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion wBCELoss --criterion_pos_weight 4
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet101 --criterion wBCELoss --criterion_pos_weight 4
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion wBCELoss --criterion_pos_weight 3
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion wBCELoss --criterion_pos_weight 3
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion wBCELoss --criterion_pos_weight 3
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet101 --criterion wBCELoss --criterion_pos_weight 3
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion wBCELoss --criterion_pos_weight 2
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion wBCELoss --criterion_pos_weight 2
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion wBCELoss --criterion_pos_weight 2
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet101 --criterion wBCELoss --criterion_pos_weight 2
 
 M2:
 	python3 main.py --batch_size 32 --learning_rate 0.00002 --num_sanity_val_steps 1
