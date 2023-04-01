@@ -169,6 +169,10 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
             val_X = [X_trainval[i] for i in val_indexes]
             val_y = [y_trainval[i] for i in val_indexes]
 
+            n1 = sum(train_y)
+            n0 = len(train_y) - n1
+            p = n0 / n1
+
             self.dataset_train.append(
                 COCOImageDataset(
                     train_X,
@@ -176,7 +180,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     self.data_path,
                     self.args,
                     equal_size_transform,
-                    pos_weight=sum(y) / len(y),
+                    pos_weight=p,
                 )
             )
             self.dataset_val.append(
