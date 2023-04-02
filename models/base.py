@@ -25,7 +25,15 @@ class BaseModel(LightningModule):
         self.transforms = nn.Identity()
         self.feature_extractor = NotImplementedError()
         self.flatten = nn.Flatten()
-        self.classifier = nn.LazyLinear(1)
+        self.classifier = nn.Sequential(
+            nn.LazyLinear(args.hidden_0_size),
+            nn.ReLU(),
+            nn.Linear(args.hidden_0_size, args.hidden_1_size),
+            nn.ReLU(),
+            nn.Linear(args.hidden_1_size, args.hidden_2_size),
+            nn.ReLU(),
+            nn.Linear(args.hidden_2_size, 1)
+        )
         self.augmentations = transforms.Compose([
             transforms.RandomHorizontalFlip(),
             transforms.RandomRotation(10),
@@ -61,15 +69,17 @@ class BaseModel(LightningModule):
             )
         self.metrics = nn.ModuleDict(metrics)
 
-    def y(self, x: Tensor):
-        x = x.float()
+    def y(self, x: Tuple[Tensor, Tensor]):
+        i, t = x
+        i = i.float()
         if not self.no_data_augmentation:
-            x = self.augmentations(x)
-        x = self.transforms(x)
-        x = self.feature_extractor(x)
+            i = self.augmentations(i)
+        i = self.transforms(i)
+        i = self.feature_extractor(i)
         if self.return_node:
-            x = x[self.return_node]
-        x = self.flatten(x)
+            i = i[self.return_node]
+        i = self.flatten(i)
+        x = torch.cat((i, t), dim=1)
         x = self.classifier(x)
         y = x.flatten()
         return y

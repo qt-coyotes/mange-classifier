@@ -1,13 +1,14 @@
 import argparse
 import json
-from math import inf
 from pathlib import Path
 
+import torch
 from lightning.pytorch import LightningDataModule
-from sklearn.model_selection import StratifiedKFold, StratifiedGroupKFold
+from sklearn.model_selection import StratifiedGroupKFold, StratifiedKFold
 from torch.utils.data import DataLoader, Dataset
-from torchvision.io import read_image
 from torchvision import transforms as T
+from torchvision.io import read_image
+
 from transforms import SquarePad
 
 
@@ -47,12 +48,23 @@ class COCOImageDataset(Dataset):
             except Exception:
                 image_path = self.data_path / image["file_name"]
                 img = read_image(str(image_path))
+        tabular = torch.tensor([
+            image["is_color"],
+            image["year"],
+            image["month"],
+            image["day"],
+            image["hour"],
+            image["minute"],
+            image["second"],
+            image["latitude"],
+            image["longitude"],
+        ], dtype=torch.float32)
         label = self.labels[idx]
         if self.transform:
             img = self.transform(img)
         if self.target_transform:
             label = self.target_transform(label)
-        return img, label
+        return (img, tabular), label
 
 
 class StratifiedGroupKFoldDataModule(LightningDataModule):
