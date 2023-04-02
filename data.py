@@ -66,7 +66,7 @@ class COCOImageDataset(Dataset):
             (image["year"] - self.year_mean) / self.year_std,
             (image["month"] - self.month_mean) / self.month_std,
             # image["day"],
-            # image["hour"],
+            image["hour"],
             # image["minute"],
             # image["latitude"],
             # image["longitude"],
