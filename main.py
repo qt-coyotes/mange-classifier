@@ -213,6 +213,24 @@ def main():
         type=float,
         default=5.0
     )
+    group.add_argument(
+        "--dropout_p",
+        help="Dropout probability",
+        type=float,
+        default=0.2,
+    )
+    group.add_argument(
+        "--hidden_0_size",
+        help="Size of the first hidden layer",
+        type=int,
+        default=512 + ,
+    )
+    group.add_argument(
+        "--hidden_1_size",
+        help="Size of the second hidden layer",
+        type=int,
+        default=512,
+    )
     args = parser.parse_args()
     if args.accelerator is None:
         args.accelerator = "auto"
