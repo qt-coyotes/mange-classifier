@@ -55,7 +55,6 @@ class COCOImageDataset(Dataset):
             image["day"],
             image["hour"],
             image["minute"],
-            image["second"],
             image["latitude"],
             image["longitude"],
         ], dtype=torch.float32)

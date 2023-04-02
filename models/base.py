@@ -28,11 +28,11 @@ class BaseModel(LightningModule):
         self.classifier = nn.Sequential(
             nn.LazyLinear(args.hidden_0_size),
             nn.ReLU(),
+            nn.Dropout(args.dropout_p),
             nn.Linear(args.hidden_0_size, args.hidden_1_size),
             nn.ReLU(),
-            nn.Linear(args.hidden_1_size, args.hidden_2_size),
-            nn.ReLU(),
-            nn.Linear(args.hidden_2_size, 1)
+            nn.Dropout(args.dropout_p),
+            nn.Linear(args.hidden_1_size, 1)
         )
         self.augmentations = transforms.Compose([
             transforms.RandomHorizontalFlip(),
