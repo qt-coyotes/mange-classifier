@@ -1,5 +1,10 @@
 4090:
-	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion awBCELoss
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 10 --model ResNet --resnet_model ResNet18 --criterion awBCELoss
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 10 --model ResNet --resnet_model ResNet34 --criterion awBCELoss
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 10 --model ResNet --resnet_model ResNet18 --criterion awBCELoss --no_data_augmentation
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 10 --model ResNet --resnet_model ResNet34 --criterion awBCELoss --no_data_augmentation
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion awBCELoss --no_data_augmentation
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion awBCELoss --no_data_augmentation
 
 
 M2:
