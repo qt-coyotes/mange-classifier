@@ -223,13 +223,13 @@ def main():
         "--hidden_0_size",
         help="Size of the first hidden layer",
         type=int,
-        default=512 + ,
+        default=512 + 8,
     )
     group.add_argument(
         "--hidden_1_size",
         help="Size of the second hidden layer",
         type=int,
-        default=512,
+        default=256,
     )
     args = parser.parse_args()
     if args.accelerator is None:
