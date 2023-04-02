@@ -227,6 +227,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
             num_workers=self.args.num_workers,
             persistent_workers=self.args.persistent_workers,
             shuffle=True,
+            drop_last=True,
         )
 
     def val_dataloader(self):

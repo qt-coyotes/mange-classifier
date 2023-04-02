@@ -101,7 +101,6 @@ class BaseModel(LightningModule):
         return self.step(batch, batch_idx, "val")
 
     def test_step(self, batch: Tuple[Tensor], batch_idx):
-        self.eval()
         return self.step(batch, batch_idx, "test")
 
     def epoch_end(self, outputs, stage: str):
