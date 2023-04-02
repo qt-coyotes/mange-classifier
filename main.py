@@ -220,16 +220,10 @@ def main():
         default=0.2,
     )
     group.add_argument(
-        "--hidden_0_size",
-        help="Size of the first hidden layer",
+        "--tabular_hidden_size",
+        help="Size of the tabular hidden layers",
         type=int,
-        default=512 + 8,
-    )
-    group.add_argument(
-        "--hidden_1_size",
-        help="Size of the second hidden layer",
-        type=int,
-        default=256,
+        default=32,
     )
     args = parser.parse_args()
     if args.accelerator is None:
