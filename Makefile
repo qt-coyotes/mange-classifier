@@ -1,10 +1,7 @@
 4090:
-	python3 main.py --batch_size 8 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion awBCELoss
-	python3 main.py --batch_size 8 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion awBCELoss
-	python3 main.py --batch_size 8 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion awBCELoss
-	python3 main.py --batch_size 4 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion awBCELoss
-	python3 main.py --batch_size 4 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion awBCELoss
-	python3 main.py --batch_size 4 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion awBCELoss
+	python3 main.py --batch_size 8 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion awBCELoss --internal_k 10
+	python3 main.py --batch_size 8 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion awBCELoss --internal_k 10
+	python3 main.py --batch_size 8 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion awBCELoss --internal_k 10
 
 
 M2:
