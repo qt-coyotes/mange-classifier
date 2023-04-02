@@ -49,7 +49,7 @@ class COCOImageDataset(Dataset):
                 image_path = self.data_path / image["file_name"]
                 img = read_image(str(image_path))
         tabular = torch.tensor([
-            # image["is_color"],
+            image["is_color"],
             # image["year"],
             # image["month"],
             # image["day"],
