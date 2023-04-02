@@ -26,13 +26,7 @@ class BaseModel(LightningModule):
         self.feature_extractor = NotImplementedError()
         self.flatten = nn.Flatten()
         self.classifier = nn.Sequential(
-            nn.LazyLinear(args.hidden_0_size),
-            nn.ReLU(),
-            nn.Dropout(args.dropout_p),
-            nn.Linear(args.hidden_0_size, args.hidden_1_size),
-            nn.ReLU(),
-            nn.Dropout(args.dropout_p),
-            nn.Linear(args.hidden_1_size, 1)
+            nn.LazyLinear(1)
         )
         self.augmentations = transforms.Compose([
             transforms.RandomHorizontalFlip(),
