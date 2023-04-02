@@ -32,4 +32,4 @@ class DenseNetModel(BaseModel):
         )
         children = list(backbone.children())
         layers = children[:-1]
-        self.feature_extractor = nn.Sequential(*layers)
+        self.image_backbone = nn.Sequential(*layers)
