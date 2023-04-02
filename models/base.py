@@ -23,9 +23,11 @@ class BaseModel(LightningModule):
     def __init__(self, criterion: nn.Module, args: argparse.Namespace):
         super().__init__()
         self.transforms = nn.Identity()
-        self.feature_extractor = NotImplementedError()
+        self.image_backbone = NotImplementedError()
         self.flatten = nn.Flatten()
+        self.tabular_backbone = nn.Identity()
         self.classifier = nn.Sequential(
+            nn.LazyBatchNorm1d(),
             nn.LazyLinear(1)
         )
         self.augmentations = transforms.Compose([
@@ -69,10 +71,11 @@ class BaseModel(LightningModule):
         if not self.no_data_augmentation:
             i = self.augmentations(i)
         i = self.transforms(i)
-        i = self.feature_extractor(i)
+        i = self.image_backbone(i)
         if self.return_node:
             i = i[self.return_node]
         i = self.flatten(i)
+        t = self.tabular_backbone(t)
         x = torch.cat((i, t), dim=1)
         x = self.classifier(x)
         y = x.flatten()
