@@ -68,8 +68,8 @@ class COCOImageDataset(Dataset):
             # image["day"],
             (image["hour"] - self.hour_mean) / self.hour_std,
             # image["minute"],
-            # image["latitude"],
-            # image["longitude"],
+            image["latitude"] / 90.,
+            image["longitude"] / 180.,
         ], dtype=torch.float32)
         label = self.labels[idx]
         if self.transform:
