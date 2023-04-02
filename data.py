@@ -50,13 +50,13 @@ class COCOImageDataset(Dataset):
                 img = read_image(str(image_path))
         tabular = torch.tensor([
             image["is_color"],
-            image["year"],
-            image["month"],
-            image["day"],
-            image["hour"],
-            image["minute"],
-            image["latitude"],
-            image["longitude"],
+            # image["year"],
+            # image["month"],
+            # image["day"],
+            # image["hour"],
+            # image["minute"],
+            # image["latitude"],
+            # image["longitude"],
         ], dtype=torch.float32)
         label = self.labels[idx]
         if self.transform:
