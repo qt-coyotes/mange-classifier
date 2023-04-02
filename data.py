@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 import torch
+import numpy as np
 from lightning.pytorch import LightningDataModule
 from sklearn.model_selection import StratifiedGroupKFold, StratifiedKFold
 from torch.utils.data import DataLoader, Dataset
@@ -30,6 +31,18 @@ class COCOImageDataset(Dataset):
         self.target_transform = target_transform
         self.args = args
         self.pos_weight = pos_weight
+        years = np.array([image["year"] for image in images])
+        self.year_mean = years.mean()
+        self.year_std = years.std()
+        months = np.array([image["month"] for image in images])
+        self.month_mean = months.mean()
+        self.month_std = months.std()
+        days = np.array([image["day"] for image in images])
+        self.day_mean = days.mean()
+        self.day_std = days.std()
+        hours = np.array([image["hour"] for image in images])
+        self.hour_mean = hours.mean()
+        self.hour_std = hours.std()
 
     def __len__(self):
         return len(self.images)
@@ -50,8 +63,8 @@ class COCOImageDataset(Dataset):
                 img = read_image(str(image_path))
         tabular = torch.tensor([
             image["is_color"],
-            image["year"] + image["month"] / 12,
-            # image["month"],
+            (image["year"] - self.year_mean) / self.year_std,
+            (image["month"] - self.month_mean) / self.month_std,
             # image["day"],
             # image["hour"],
             # image["minute"],
