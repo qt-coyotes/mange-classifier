@@ -44,7 +44,7 @@ class BaseModel(LightningModule):
             # transforms.RandomPerspective(),
             transforms.GaussianBlur(3, sigma=(0.1, 2)),
             transforms.ColorJitter(
-                brightness=0.1, contrast=0.1, saturation=0.2, hue=0.1
+                brightness=0.1, contrast=0.1, saturation=0.1, hue=0.2
             ),
         ])
         self.criterion = criterion
