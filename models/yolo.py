@@ -1,8 +1,9 @@
 import argparse
 
-from ultralytics import YOLO
-from models.base import BaseModel
 from torch import nn
+from ultralytics import YOLO
+
+from models.base import BaseModel
 
 
 class YoloModel(BaseModel):
@@ -14,4 +15,6 @@ class YoloModel(BaseModel):
         super().__init__(criterion, args)
         model = YOLO(args.yolo_model).model
         list(list(model.children())[0].children())[-1].linear = nn.Identity()
-        self.feature_extractor = model.model
+        for k, v in model.named_parameters():
+            v.requires_grad = True
+        self.image_backbone = model.model

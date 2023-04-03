@@ -220,16 +220,10 @@ def main():
         default=0.2,
     )
     group.add_argument(
-        "--hidden_0_size",
-        help="Size of the first hidden layer",
+        "--tabular_hidden_size",
+        help="Size of the tabular hidden layers",
         type=int,
-        default=512 + 8,
-    )
-    group.add_argument(
-        "--hidden_1_size",
-        help="Size of the second hidden layer",
-        type=int,
-        default=256,
+        default=32,
     )
     group.add_argument(
         "--no_tabular_features",
@@ -277,7 +271,7 @@ def cross_validate(
                 )
             )
             model_checkpoint = ModelCheckpoint(
-                monitor="val_loss"
+                monitor="val_loss",
             )
             callbacks.append(model_checkpoint)
         trainer = Trainer.from_argparse_args(

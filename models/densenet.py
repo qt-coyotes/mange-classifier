@@ -16,13 +16,13 @@ class DenseNetModel(BaseModel):
         if args.densenet_model == "DenseNet121":
             weights = models.DenseNet121_Weights.DEFAULT
             backbone = models.densenet121
-        elif args.resnet_model == "DenseNet161":
+        elif args.densenet_model == "DenseNet161":
             weights = models.DenseNet161_Weights.DEFAULT
             backbone = models.densenet161
-        elif args.resnet_model == "DenseNet169":
+        elif args.densenet_model == "DenseNet169":
             weights = models.DenseNet169_Weights.DEFAULT
             backbone = models.densenet169
-        elif args.resnet_model == "DenseNet201":
+        elif args.densenet_model == "DenseNet201":
             weights = models.DenseNet201_Weights.DEFAULT
             backbone = models.densenet201
         else:
@@ -32,4 +32,4 @@ class DenseNetModel(BaseModel):
         )
         children = list(backbone.children())
         layers = children[:-1]
-        self.feature_extractor = nn.Sequential(*layers)
+        self.image_backbone = nn.Sequential(*layers)

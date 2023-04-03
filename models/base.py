@@ -23,16 +23,20 @@ class BaseModel(LightningModule):
     def __init__(self, criterion: nn.Module, args: argparse.Namespace):
         super().__init__()
         self.transforms = nn.Identity()
-        self.feature_extractor = NotImplementedError()
+        self.image_backbone = NotImplementedError()
         self.flatten = nn.Flatten()
+        # self.tabular_backbone = nn.Sequential(
+        #     nn.LazyBatchNorm1d(),
+        #     nn.LazyLinear(args.tabular_hidden_size),
+        #     nn.ReLU(),
+        #     nn.LazyBatchNorm1d(),
+        #     nn.Linear(args.tabular_hidden_size, args.tabular_hidden_size),
+        #     nn.ReLU(),
+        # )
+        self.tabular_backbone = nn.Identity()
         self.classifier = nn.Sequential(
-            nn.LazyLinear(args.hidden_0_size),
-            nn.ReLU(),
-            nn.Dropout(args.dropout_p),
-            nn.Linear(args.hidden_0_size, args.hidden_1_size),
-            nn.ReLU(),
-            nn.Dropout(args.dropout_p),
-            nn.Linear(args.hidden_1_size, 1)
+            nn.LazyBatchNorm1d(),
+            nn.LazyLinear(1)
         )
         self.augmentations = transforms.Compose([
             transforms.RandomHorizontalFlip(),
@@ -75,10 +79,11 @@ class BaseModel(LightningModule):
         if not self.no_data_augmentation:
             i = self.augmentations(i)
         i = self.transforms(i)
-        i = self.feature_extractor(i)
+        i = self.image_backbone(i)
         if self.return_node:
             i = i[self.return_node]
         i = self.flatten(i)
+        t = self.tabular_backbone(t)
         x = torch.cat((i, t), dim=1)
         x = self.classifier(x)
         y = x.flatten()
@@ -109,6 +114,7 @@ class BaseModel(LightningModule):
     def epoch_end(self, outputs, stage: str):
         metrics = self.metrics[f"{stage}_metric"].compute()
         self.log(f"{stage}_metric", metrics)
+        self.log(f"{stage}_metric_ExpectedCost5", metrics["ExpectedCost5"])
         confmat = self.metrics[f"{stage}_confusion_matrix"].compute().float()
         (tn, fp), (fn, tp) = confmat
         self.log(f"{stage}_confusion_matrix_tn", tn, reduce_fx=torch.sum)
