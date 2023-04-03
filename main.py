@@ -225,6 +225,11 @@ def main():
         type=int,
         default=32,
     )
+    group.add_argument(
+        "--no_tabular_features",
+        help="Do not use tabular features",
+        action="store_true",
+    )
     args = parser.parse_args()
     if args.accelerator is None:
         args.accelerator = "auto"
