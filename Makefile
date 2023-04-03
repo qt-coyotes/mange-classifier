@@ -1,5 +1,9 @@
 4090:
-	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ViT --criterion awBCELoss
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model YOLO --yolo_model yolov8n-cls.pt --criterion awBCELoss
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model YOLO --yolo_model yolov8s-cls.pt --criterion awBCELoss
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model YOLO --yolo_model yolov8m-cls.pt --criterion awBCELoss
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model YOLO --yolo_model yolov8l-cls.pt --criterion awBCELoss
+	python3 main.py --batch_size 16 --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model YOLO --yolo_model yolov8x-cls.pt --criterion awBCELoss
 
 M2:
 	python3 main.py --batch_size 32 --learning_rate 0.00002 --num_sanity_val_steps 1
