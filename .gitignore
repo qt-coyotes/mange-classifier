@@ -134,3 +134,5 @@ service-account-key.json
 
 
 *.pt
+
+lightning_logs
