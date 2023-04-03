@@ -43,6 +43,7 @@ class COCOImageDataset(Dataset):
         hours = np.array([image["hour"] for image in images])
         self.hour_mean = hours.mean()
         self.hour_std = hours.std()
+        self.locations = set(image["location"] for image in images)
 
     def __len__(self):
         return len(self.images)
