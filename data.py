@@ -48,16 +48,19 @@ class COCOImageDataset(Dataset):
             except Exception:
                 image_path = self.data_path / image["file_name"]
                 img = read_image(str(image_path))
-        tabular = torch.tensor([
-            image["is_color"],
-            image["year"],
-            image["month"],
-            image["day"],
-            image["hour"],
-            image["minute"],
-            image["latitude"],
-            image["longitude"],
-        ], dtype=torch.float32)
+        if self.args.no_tabular_features:
+            tabular = torch.tensor([], dtype=torch.float32)
+        else:
+            tabular = torch.tensor([
+                image["is_color"],
+                image["year"],
+                image["month"],
+                image["day"],
+                image["hour"],
+                image["minute"],
+                image["latitude"],
+                image["longitude"],
+            ], dtype=torch.float32)
         label = self.labels[idx]
         if self.transform:
             img = self.transform(img)
