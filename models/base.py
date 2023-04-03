@@ -92,7 +92,7 @@ class BaseModel(LightningModule):
             loss = self.criterion(logits, y.float())
         else:
             loss = self.criterion(yhat, y.float())
-        self.log(f"{stage}_loss", loss, on_epoch=True)
+        self.log(f"{stage}_loss", loss)
         self.metrics[f"{stage}_metric"].update(yhat, y)
         self.metrics[f"{stage}_confusion_matrix"].update(yhat, y)
         return loss
