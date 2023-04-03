@@ -17,6 +17,7 @@ from torchmetrics.classification import (
 )
 import torchvision.transforms as transforms
 from metrics import BinaryExpectedCost
+from losses import HybridLoss
 
 
 class BaseModel(LightningModule):
@@ -42,7 +43,7 @@ class BaseModel(LightningModule):
             transforms.RandomHorizontalFlip(),
             transforms.RandomRotation(10),
             # transforms.RandomPerspective(),
-            transforms.GaussianBlur(3, sigma=(0.1, 3)),
+            transforms.GaussianBlur(3, sigma=(0.1, 2)),
             transforms.ColorJitter(
                 brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1
             ),
@@ -95,6 +96,8 @@ class BaseModel(LightningModule):
         yhat = torch.sigmoid(logits)
         if isinstance(self.criterion, nn.BCEWithLogitsLoss):
             loss = self.criterion(logits, y.float())
+        elif isinstance(self.criterion, HybridLoss):
+            loss = self.criterion(logits, y.float(), batch_idx)
         else:
             loss = self.criterion(yhat, y.float())
         self.log(f"{stage}_loss", loss)
@@ -114,7 +117,7 @@ class BaseModel(LightningModule):
     def epoch_end(self, outputs, stage: str):
         metrics = self.metrics[f"{stage}_metric"].compute()
         self.log(f"{stage}_metric", metrics)
-        self.log(f"{stage}_metric_ExpectedCost5", metrics["ExpectedCost5"])
+        self.log(f"{stage}_metric_ExpectedCost5", metrics["ExpectedCost5"], prog_bar=True)
         confmat = self.metrics[f"{stage}_confusion_matrix"].compute().float()
         (tn, fp), (fn, tp) = confmat
         self.log(f"{stage}_confusion_matrix_tn", tn, reduce_fx=torch.sum)

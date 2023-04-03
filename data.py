@@ -31,6 +31,8 @@ class COCOImageDataset(Dataset):
         self.target_transform = target_transform
         self.args = args
         self.pos_weight = pos_weight
+        if self.args.no_tabular_features:
+            return
         years = np.array([image["year"] for image in images])
         self.year_mean = years.mean()
         self.year_std = years.std()

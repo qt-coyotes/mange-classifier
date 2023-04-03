@@ -12,7 +12,7 @@ from torch import nn
 
 from data import StratifiedGroupKFoldDataModule
 from logs import aggregate_logs, save_logs
-from losses import BinaryExpectedCostLoss, BinaryMacroSoftFBetaLoss, BinarySurrogateFBetaLoss
+from losses import BinaryExpectedCostLoss, BinaryMacroSoftFBetaLoss, BinarySurrogateFBetaLoss, HybridLoss
 from models.base import BaseModel
 from models.densenet import DenseNetModel
 from models.resnet import ResNetModel
@@ -34,6 +34,7 @@ def main():
         "MacroSoftFBetaLoss",
         "ExpectedCostLoss",
         "SurrogateFBetaLoss",
+        "HybridLoss"
     }
     parser = argparse.ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
@@ -245,6 +246,7 @@ def main():
         "MacroSoftFBetaLoss": BinaryMacroSoftFBetaLoss(args.criterion_beta),
         "ExpectedCostLoss": BinaryExpectedCostLoss(cfn=args.criterion_cfn),
         "SurrogateFBetaLoss": BinarySurrogateFBetaLoss(args.criterion_beta),
+        "HybridLoss": "HybridLoss"
     }
     criterion = criterions[args.criterion]
     cross_validate(Model, criterion, args)
@@ -277,10 +279,15 @@ def cross_validate(
             args,
             callbacks=callbacks,
         )
-        if criterion == "awBCELoss":
+        if criterion == "awBCELoss" or criterion == "HybridLoss":
             datamodule_i.setup(None)
             p = datamodule_i.train_dataset().pos_weight
             criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(p))
+        if criterion == "HybridLoss":
+            criterion = HybridLoss(
+                criterion,
+                BinaryExpectedCostLoss(cfn=args.criterion_cfn)
+            )
         model = Model(criterion, args)
         if args.compile and isinstance(trainer.accelerator, CUDAAccelerator):
             model = torch.compile(model)
