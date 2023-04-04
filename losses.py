@@ -79,23 +79,21 @@ class HybridLoss(nn.Module):
     def __init__(
         self,
         loss_a: nn.Module,
-        loss_b: nn.Module,
-        zeta: int
+        loss_b: nn.Module
     ):
         """
         Args:
-            ctp: Cost of true positive
-            cfp: Cost of false positive
-            cfn: Cost of false negative
-            ctn: Cost of true negative
+            loss_a: Loss function to use for the first epoch
+            loss_b: Loss function to use for the remaining epochs
         """
         super().__init__()
         self.loss_a = loss_a
         self.loss_b = loss_b
-        self.zeta = zeta
+        self.max_batch_idx = -1
 
     def forward(self, yhat: Tensor, y: Tensor, batch_idx: int):
-        if batch_idx < self.zeta:
+        if batch_idx > self.max_batch_idx:
+            self.max_batch_idx = batch_idx
             return self.loss_a(yhat, y)
         else:
             return self.loss_b(yhat, y)

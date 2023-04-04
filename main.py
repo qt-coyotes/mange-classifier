@@ -231,6 +231,12 @@ def main():
         help="Do not use tabular features",
         action="store_true",
     )
+    group.add_argument(
+        "--monitor",
+        help="Metric to monitor",
+        type=str,
+        default="val_metric_ExpectedCost5",
+    )
     args = parser.parse_args()
     if args.accelerator is None:
         args.accelerator = "auto"
@@ -266,13 +272,13 @@ def cross_validate(
         if not args.no_early_stopping:
             callbacks.append(
                 EarlyStopping(
-                    "val_metric_ExpectedCost5",
+                    args.monitor,
                     patience=args.patience,
                     mode="min"
                 )
             )
             model_checkpoint = ModelCheckpoint(
-                monitor="val_metric_ExpectedCost5"
+                monitor=args.monitor,
             )
             callbacks.append(model_checkpoint)
         trainer = Trainer.from_argparse_args(
