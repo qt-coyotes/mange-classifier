@@ -33,18 +33,6 @@ class COCOImageDataset(Dataset):
         self.pos_weight = pos_weight
         if self.args.no_tabular_features:
             return
-        years = np.array([image["year"] for image in images])
-        self.year_mean = years.mean()
-        self.year_std = years.std()
-        months = np.array([image["month"] for image in images])
-        self.month_mean = months.mean()
-        self.month_std = months.std()
-        days = np.array([image["day"] for image in images])
-        self.day_mean = days.mean()
-        self.day_std = days.std()
-        hours = np.array([image["hour"] for image in images])
-        self.hour_mean = hours.mean()
-        self.hour_std = hours.std()
         self.locations = set(image["location"] for image in images)
 
     def __len__(self):
@@ -69,10 +57,9 @@ class COCOImageDataset(Dataset):
         else:
             tabular = torch.tensor([
                 image["is_color"],
-                (image["year"] - self.year_mean) / self.year_std,
-                (image["month"] - self.month_mean) / self.month_std,
-                # image["day"],
-                (image["hour"] - self.hour_mean) / self.hour_std,
+                image["year"],
+                image["month"],
+                image["hour"],
                 # image["minute"],
                 image["latitude"] / 90.,
                 image["longitude"] / 180.,
