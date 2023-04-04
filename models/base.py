@@ -60,7 +60,7 @@ class BaseModel(LightningModule):
             metrics[f"{stage}_confusion_matrix"] = BinaryConfusionMatrix()
             metrics[f"{stage}_metric"] = MetricCollection(
                 {
-                    "ExpectedCost5": BinaryExpectedCost(),
+                    "ExpectedCost5": BinaryExpectedCost(cfn=5.),
                     "ExpectedCost10": BinaryExpectedCost(cfn=10.),
                     "ExpectedCost50": BinaryExpectedCost(cfn=50.),
                     "F2": BinaryFBetaScore(beta=2.0),
@@ -72,6 +72,9 @@ class BaseModel(LightningModule):
                     "AUROC": BinaryAUROC(),
                 }
             )
+        self.train_EC5 = BinaryExpectedCost(cfn=5.)
+        self.val_EC5 = BinaryExpectedCost(cfn=5.)
+        self.test_EC5 = BinaryExpectedCost(cfn=5.)
         self.metrics = nn.ModuleDict(metrics)
 
     def y(self, x: Tuple[Tensor, Tensor]):
@@ -101,6 +104,15 @@ class BaseModel(LightningModule):
         else:
             loss = self.criterion(yhat, y.float())
         self.log(f"{stage}_loss", loss)
+        if stage == "train":
+            self.train_EC5(yhat, y)
+            self.log(f"{stage}_EC5", self.train_EC5, prog_bar=True)
+        elif stage == "val":
+            self.val_EC5(yhat, y)
+            self.log(f"{stage}_EC5", self.val_EC5, prog_bar=True)
+        elif stage == "test":
+            self.test_EC5(yhat, y)
+            self.log(f"{stage}_EC5", self.test_EC5, prog_bar=True)
         self.metrics[f"{stage}_metric"].update(yhat, y)
         self.metrics[f"{stage}_confusion_matrix"].update(yhat, y)
         return loss
@@ -117,7 +129,6 @@ class BaseModel(LightningModule):
     def epoch_end(self, outputs, stage: str):
         metrics = self.metrics[f"{stage}_metric"].compute()
         self.log(f"{stage}_metric", metrics)
-        self.log(f"{stage}_metric_ExpectedCost5", metrics["ExpectedCost5"], prog_bar=True)
         confmat = self.metrics[f"{stage}_confusion_matrix"].compute().float()
         (tn, fp), (fn, tp) = confmat
         self.log(f"{stage}_confusion_matrix_tn", tn, reduce_fx=torch.sum)
