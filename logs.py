@@ -49,6 +49,7 @@ def save_logs(test_metrics, time_elapsed: timedelta, args: argparse.Namespace):
 
 def aggregate_logs():
     paths = glob.glob("logs_*.json")
+    paths.sort()
     rows = [
         [],  # Model
         [],  # Dataset
