@@ -1,7 +1,5 @@
 4090:
-	python3 main.py --batch_size 16 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ViT --resnet_model ResNet18 --criterion awBCELoss --internal_group
-	python3 main.py --batch_size 16 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ViT --resnet_model ResNet18 --criterion HybridLoss --internal_group
-	python3 main.py --batch_size 16 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ViT --resnet_model ResNet18 --criterion ExpectedCostLoss --internal_group
+	python3 main.py --batch_size 16 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ViT --criterion awBCELoss --internal_group
 
 M2:
 	python3 main.py --batch_size 32 --learning_rate 0.00002 --num_sanity_val_steps 1
