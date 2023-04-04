@@ -235,7 +235,7 @@ def main():
         "--monitor",
         help="Metric to monitor",
         type=str,
-        default="val_metric_ExpectedCost5",
+        default="val_metric_EC5",
     )
     args = parser.parse_args()
     if args.accelerator is None:
