@@ -34,7 +34,11 @@ class BaseModel(LightningModule):
         #     nn.Linear(args.tabular_hidden_size, args.tabular_hidden_size),
         #     nn.ReLU(),
         # )
-        self.tabular_backbone = nn.Identity()
+        self.tabular_backbone = nn.Sequential(
+            nn.LazyBatchNorm1d(),
+            nn.LazyLinear(args.tabular_hidden_size),
+            nn.ReLU(),
+        )
         self.classifier = nn.Sequential(
             nn.LazyBatchNorm1d(),
             nn.LazyLinear(1)
