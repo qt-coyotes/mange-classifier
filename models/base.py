@@ -42,11 +42,6 @@ class BaseModel(LightningModule):
         self.augmentations = transforms.Compose([
             transforms.RandomHorizontalFlip(),
             transforms.RandomRotation(10),
-            # transforms.RandomPerspective(),
-            transforms.GaussianBlur(3, sigma=(0.1, 2)),
-            transforms.ColorJitter(
-                brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1
-            ),
         ])
         self.criterion = criterion
         self.batch_size = args.batch_size
