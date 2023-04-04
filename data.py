@@ -69,7 +69,7 @@ class COCOImageDataset(Dataset):
         else:
             tabular = torch.tensor([
                 image["is_color"],
-                (image["year"] - self.year_mean) / self.year_std,
+                # (image["year"] - self.year_mean) / self.year_std,
                 (image["month"] - self.month_mean) / self.month_std,
                 # image["day"],
                 (image["hour"] - self.hour_mean) / self.hour_std,
