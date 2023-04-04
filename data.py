@@ -58,18 +58,27 @@ class COCOImageDataset(Dataset):
             tabular = torch.tensor(
                 [
                     image["is_color"],
-                    image["year"],
-                    image["month"],
+                    (image["year"] - self.tabular_transform["mean"]["year"])
+                    / self.tabular_transform["std"]["year"],
+                    (image["month"] - self.tabular_transform["mean"]["month"])
+                    / self.tabular_transform["std"]["month"],
                     # image["day"],
-                    image["hour"],
+                    (image["hour"] - self.tabular_transform["mean"]["hour"])
+                    / self.tabular_transform["std"]["hour"],
                     # image["minute"],
-                    image["latitude"],
-                    image["longitude"],
+                    (
+                        image["latitude"]
+                        - self.tabular_transform["mean"]["latitude"]
+                    )
+                    / self.tabular_transform["std"]["latitude"],
+                    (
+                        image["longitude"]
+                        - self.tabular_transform["mean"]["longitude"]
+                    )
+                    / self.tabular_transform["std"]["longitude"],
                 ],
                 dtype=torch.float32,
             )
-            if self.tabular_transform:
-                tabular = self.tabular_transform(tabular)
         label = self.labels[idx]
         if self.transform:
             img = self.transform(img)
@@ -161,50 +170,31 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
             tabular_transform = None
             if not self.args.no_tabular_features:
                 years = np.array([image["year"] for image in X_trainval])
-                year_mean = years.mean()
-                year_std = years.std()
                 months = np.array([image["month"] for image in X_trainval])
-                month_mean = months.mean()
-                month_std = months.std()
-                days = np.array([image["day"] for image in X_trainval])
-                day_mean = days.mean()
-                day_std = days.std()
                 hours = np.array([image["hour"] for image in X_trainval])
-                hour_mean = hours.mean()
-                hour_std = hours.std()
                 latitudes = np.array(
                     [image["latitude"] for image in X_trainval]
                 )
-                latitude_mean = latitudes.mean()
-                latitude_std = latitudes.std()
                 longitudes = np.array(
                     [image["longitude"] for image in X_trainval]
                 )
-                longitude_mean = longitudes.mean()
-                longitude_std = longitudes.std()
 
-                tabular_transform = T.Normalize(
-                    mean=torch.tensor(
-                        [
-                            year_mean,
-                            month_mean,
-                            day_mean,
-                            hour_mean,
-                            latitude_mean,
-                            longitude_mean,
-                        ]
-                    ),
-                    std=torch.tensor(
-                        [
-                            year_std,
-                            month_std,
-                            day_std,
-                            hour_std,
-                            latitude_std,
-                            longitude_std,
-                        ]
-                    ),
-                )
+                tabular_transform = {
+                    "mean": {
+                        "year": years.mean(),
+                        "month": months.mean(),
+                        "hour": hours.mean(),
+                        "latitude": latitudes.mean(),
+                        "longitude": longitudes.mean(),
+                    },
+                    "std": {
+                        "year": years.std(),
+                        "month": months.std(),
+                        "hour": hours.std(),
+                        "latitude": latitudes.std(),
+                        "longitude": longitudes.std(),
+                    },
+                }
 
             if self.args.internal_group:
                 groups_trainval = [groups[i] for i in trainval_indexes]
@@ -245,7 +235,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     self.data_path,
                     self.args,
                     equal_size_transform,
-                    tabular_transform=tabular_transform
+                    tabular_transform=tabular_transform,
                 )
             )
             self.dataset_train.append(
