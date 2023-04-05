@@ -12,7 +12,12 @@ from torch import nn
 
 from data import StratifiedGroupKFoldDataModule
 from logs import aggregate_logs, generate_logs, log_to_gsheet, log_to_json
-from losses import BinaryExpectedCostLoss, BinaryMacroSoftFBetaLoss, BinarySurrogateFBetaLoss, HybridLoss
+from losses import (
+    BinaryExpectedCostLoss,
+    BinaryMacroSoftFBetaLoss,
+    BinarySurrogateFBetaLoss,
+    HybridLoss,
+)
 from models.base import BaseModel
 from models.densenet import DenseNetModel
 from models.random import RandomModel
@@ -36,7 +41,7 @@ def main():
         "MacroSoftFBetaLoss",
         "ExpectedCostLoss",
         "SurrogateFBetaLoss",
-        "HybridLoss"
+        "HybridLoss",
     }
     parser = argparse.ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
@@ -208,19 +213,16 @@ def main():
         "--criterion_pos_weight",
         help="Weight for positive class for BCEWithLogitsLoss",
         type=float,
-        default=10.0
+        default=10.0,
     )
     group.add_argument(
-        "--criterion_beta",
-        help="Beta for F-beta loss",
-        type=float,
-        default=5.0
+        "--criterion_beta", help="Beta for F-beta loss", type=float, default=5.0
     )
     group.add_argument(
         "--criterion_cfn",
         help="Cost false negative for ExpectedCostLoss",
         type=float,
-        default=5.0
+        default=5.0,
     )
     group.add_argument(
         "--dropout_p",
@@ -245,11 +247,7 @@ def main():
         type=str,
         default="val_EC5",
     )
-    group.add_argument(
-        "--message",
-        help="Message to log",
-        type=str
-    )
+    group.add_argument("--message", help="Message to log", type=str)
     args = parser.parse_args()
     if args.accelerator is None:
         args.accelerator = "auto"
@@ -265,7 +263,7 @@ def main():
         "MacroSoftFBetaLoss": BinaryMacroSoftFBetaLoss(args.criterion_beta),
         "ExpectedCostLoss": BinaryExpectedCostLoss(cfn=args.criterion_cfn),
         "SurrogateFBetaLoss": BinarySurrogateFBetaLoss(args.criterion_beta),
-        "HybridLoss": "HybridLoss"
+        "HybridLoss": "HybridLoss",
     }
     criterion = criterions[args.criterion]
     cross_validate(Model, criterion, args)
@@ -284,11 +282,7 @@ def cross_validate(
         callbacks = []
         if not args.no_early_stopping:
             callbacks.append(
-                EarlyStopping(
-                    args.monitor,
-                    patience=args.patience,
-                    mode="min"
-                )
+                EarlyStopping(args.monitor, patience=args.patience, mode="min")
             )
             model_checkpoint = ModelCheckpoint(
                 monitor=args.monitor,
@@ -304,18 +298,22 @@ def cross_validate(
             criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(p))
         if criterion == "HybridLoss":
             criterion = HybridLoss(
-                criterion,
-                BinaryExpectedCostLoss(cfn=args.criterion_cfn)
+                criterion, BinaryExpectedCostLoss(cfn=args.criterion_cfn)
             )
         model = Model(criterion, args)
         if args.compile and isinstance(trainer.accelerator, CUDAAccelerator):
             model = torch.compile(model)
 
         if args.auto_scale_batch_size or args.auto_lr_find:
+            datamodule_i.setup(None)
+            X, _ = next(iter(datamodule_i.train_dataloader()))
+            _ = model(X)
             trainer.tune(model, datamodule=datamodule_i)
             if args.auto_lr_find:
-                print(f"Automatically found learning rate: {model.lr}")
-                args.learning_rate = model.lr
+                print(
+                    f"Automatically found learning rate: {model.learning_rate}"
+                )
+                args.learning_rate = model.learning_rate
             if args.auto_scale_batch_size:
                 print("Automatically found batch size")
                 print("Replace --auto_scale_batch_size with")
@@ -328,7 +326,7 @@ def cross_validate(
         elif not args.no_early_stopping:
             test_metric = trainer.test(
                 ckpt_path=model_checkpoint.best_model_path,
-                dataloaders=datamodule
+                dataloaders=datamodule,
             )
         else:
             test_metric = trainer.test(ckpt_path="best", dataloaders=datamodule)

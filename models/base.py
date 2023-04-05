@@ -72,7 +72,7 @@ class BaseModel(LightningModule):
         self.test_EC5 = BinaryExpectedCost(cfn=5.)
         self.metrics = nn.ModuleDict(metrics)
 
-    def y(self, x: Tuple[Tensor, Tensor]):
+    def forward(self, x: Tuple[Tensor, Tensor]):
         i, t = x
         i = i.float()
         if not self.no_data_augmentation:
@@ -90,7 +90,7 @@ class BaseModel(LightningModule):
 
     def step(self, batch: Tuple[Tensor], batch_idx: int, stage: str):
         x, y = batch
-        logits = self.y(x)
+        logits = self.forward(x)
         yhat = torch.sigmoid(logits)
         if isinstance(self.criterion, nn.BCEWithLogitsLoss):
             loss = self.criterion(logits, y.float())
