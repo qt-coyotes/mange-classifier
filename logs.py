@@ -93,7 +93,7 @@ def get_row(logs):
     timestamp = logs.get("timestamp")
     if not timestamp:
         timestamp = datetime.now().isoformat()
-    timestamp = datetime.fromisoformat(timestamp)
+
     row.append(timestamp)
     row.append(
         f"{os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}/actions/runs/{os.environ.get('GITHUB_RUN_ID')}"
