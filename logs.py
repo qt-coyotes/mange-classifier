@@ -12,7 +12,6 @@ from googleapiclient.errors import HttpError
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 SPREADSHEET_ID = "1nFRtoKX3q4MXsyvjImYz-_jdtw4LmSAaZPXffv1C2js"
-RANGE_NAME = "v12c!A1:A1"
 
 
 def generate_logs(
@@ -59,9 +58,7 @@ def generate_logs(
 
 
 def log_to_json(logs):
-    with open(
-        f"logs_{logs['timestamp'].replace(':', '-')}.json", "w"
-    ) as f:
+    with open(f"logs_{logs['timestamp'].replace(':', '-')}.json", "w") as f:
         json.dump(logs, f, indent=4)
 
 
@@ -159,6 +156,14 @@ def log_to_gsheet(logs):
         "service-account-key.json",
         scopes=SCOPES,
     )
+
+    if (
+        logs["args"]["metadata_path"]
+        == "data/CHIL/CHIL_uwin_mange_Marit_07242020.json"
+    ):
+        RANGE_NAME = "CHIL!A1:A1"
+    else:
+        RANGE_NAME = "v12c!A1:A1"
 
     try:
         service = build("sheets", "v4", credentials=creds)
