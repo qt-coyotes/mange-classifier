@@ -19,8 +19,6 @@ jobs:
     - name: Run clean
       run: make clean
 
-    - uses: iterative/setup-dvc@v1
-
     # https://github.com/iterative/dvc/pull/7213/
     - name: Pull data
       run: |
