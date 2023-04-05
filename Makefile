@@ -1,6 +1,7 @@
 4090:
-	python3 main.py --batch_size 16 --learning_rate 0.0001 --num_sanity_val_steps 1 --max_epochs 1 --model ResNet --resnet_model ResNet18 --criterion BCELoss --message "Testing 123" --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json --no_tabular_features
-	python3 main.py --batch_size 16 --learning_rate 0.0001 --num_sanity_val_steps 1 --max_epochs 1 --model ResNet --resnet_model ResNet18 --criterion BCELoss --message "Testing 456" --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json --no_tabular_features
+	python3 main.py --batch_size 64 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion BCELoss --monitor val_loss --nonpretrained --no_crop --no_data_augmentation --no_tabular_features --message "Baseline run with BCELoss, No Transfer Learning, No Megadetector Cropping, No Data Augmentation, and No Additional Tabular Features."
+	python3 main.py --batch_size 32 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion BCELoss --monitor val_loss --nonpretrained --no_crop --no_data_augmentation --no_tabular_features --message "Baseline run with BCELoss, No Transfer Learning, No Megadetector Cropping, No Data Augmentation, and No Additional Tabular Features."
+	python3 main.py --batch_size 16 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion BCELoss --monitor val_loss --nonpretrained --no_crop --no_data_augmentation --no_tabular_features --message "Baseline run with BCELoss, No Transfer Learning, No Megadetector Cropping, No Data Augmentation, and No Additional Tabular Features."
 
 M2:
 	python3 main.py --batch_size 32 --learning_rate 0.00002 --num_sanity_val_steps 1
