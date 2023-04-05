@@ -88,8 +88,13 @@ def get_row(logs):
     message = logs["args"].get("message")
     if not message:
         message = ref.commit.message
+    message = message.strip()
     row.append(message)
-    row.append(logs.get("timestamp"))
+    timestamp = logs.get("timestamp")
+    if not timestamp:
+        timestamp = datetime.now()
+    timestamp = timestamp.isoformat()
+    row.append(timestamp)
     row.append(
         f"{os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}/actions/runs/{os.environ.get('GITHUB_RUN_ID')}"
     )
