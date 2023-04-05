@@ -311,11 +311,14 @@ def cross_validate(
 
         if args.auto_scale_batch_size or args.auto_lr_find:
             trainer.tune(model, datamodule=datamodule_i)
-            print("Automatically found batch size and learning rate")
-            print("Replace --auto_scale_batch_size and --auto_lr_find with:")
-            print(f"--batch_size {model.batch_size}")
-            print(f"--learning_rate {model.learning_rate}")
-            break
+            if args.auto_lr_find:
+                print(f"Automatically found learning rate: {model.lr}")
+                args.learning_rate = model.lr
+            if args.auto_scale_batch_size:
+                print("Automatically found batch size")
+                print("Replace --auto_scale_batch_size with")
+                print(f"--batch_size {model.batch_size}")
+                break
         trainer.fit(model=model, train_dataloaders=datamodule_i)
         if args.fast_dev_run:
             test_metric = trainer.test(model, dataloaders=datamodule)
