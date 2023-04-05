@@ -20,7 +20,7 @@ class COCOImageDataset(Dataset):
         labels,
         data_path,
         args: argparse.Namespace,
-        transform=None,
+        image_transform=None,
         tabular_transform=None,
         target_transform=None,
         pos_weight=None,
@@ -28,7 +28,7 @@ class COCOImageDataset(Dataset):
         self.images = images
         self.labels = labels
         self.data_path = data_path
-        self.transform = transform
+        self.image_transform = image_transform
         self.tabular_transform = tabular_transform
         self.target_transform = target_transform
         self.args = args
@@ -64,8 +64,8 @@ class COCOImageDataset(Dataset):
                 dtype=torch.float32,
             )
         label = self.labels[idx]
-        if self.transform:
-            img = self.transform(img)
+        if self.image_transform:
+            img = self.image_transform(img)
         if self.target_transform:
             label = self.target_transform(label)
         return (img, tabular), label
@@ -97,14 +97,25 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
         mange_category_ids = {1}
         no_mange_category_ids = {2}
 
-        equal_size_transform = T.Compose(
-            [
-                SquarePad(),
-                T.Resize(
-                    (self.args.crop_size, self.args.crop_size), antialias=True
-                ),
-            ]
-        )
+        if self.args.no_crop:
+            equal_size_transform = T.Compose(
+                [
+                    T.Resize(
+                        (self.args.crop_size, self.args.crop_size),
+                        antialias=True,
+                    )
+                ]
+            )
+        else:
+            equal_size_transform = T.Compose(
+                [
+                    SquarePad(),
+                    T.Resize(
+                        (self.args.crop_size, self.args.crop_size),
+                        antialias=True,
+                    ),
+                ]
+            )
 
         no_mange_annotations = []
         mange_annotations = []
@@ -218,7 +229,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     test_y,
                     self.data_path,
                     self.args,
-                    equal_size_transform,
+                    image_transform=equal_size_transform,
                     tabular_transform=tabular_transform,
                 )
             )
@@ -228,9 +239,9 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     train_y,
                     self.data_path,
                     self.args,
-                    equal_size_transform,
-                    pos_weight=p,
+                    image_transform=equal_size_transform,
                     tabular_transform=tabular_transform,
+                    pos_weight=p,
                 )
             )
             self.dataset_val.append(
@@ -239,7 +250,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     val_y,
                     self.data_path,
                     self.args,
-                    equal_size_transform,
+                    image_transform=equal_size_transform,
                     tabular_transform=tabular_transform,
                 )
             )
