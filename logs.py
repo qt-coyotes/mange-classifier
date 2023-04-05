@@ -60,7 +60,7 @@ def generate_logs(
 
 def log_to_json(logs):
     with open(
-        f"logs_{logs['timestamp']}.json", "w"
+        f"logs_{logs['timestamp'].replace(':', '-')}.json", "w"
     ) as f:
         json.dump(logs, f, indent=4)
 
