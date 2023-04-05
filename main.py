@@ -11,7 +11,7 @@ from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from torch import nn
 
 from data import StratifiedGroupKFoldDataModule
-from logs import aggregate_logs, save_logs
+from logs import aggregate_logs, generate_logs, log_to_gsheet, log_to_json
 from losses import BinaryExpectedCostLoss, BinaryMacroSoftFBetaLoss, BinarySurrogateFBetaLoss, HybridLoss
 from models.base import BaseModel
 from models.densenet import DenseNetModel
@@ -191,6 +191,12 @@ def main():
         default="DenseNet121",
     )
     group.add_argument(
+        "--vit_model",
+        help="DenseNet model",
+        type=str,
+        default="ViT-B_16",
+    )
+    group.add_argument(
         "--crop_size",
         help="Crop size",
         type=int,
@@ -236,6 +242,11 @@ def main():
         help="Metric to monitor",
         type=str,
         default="val_EC5",
+    )
+    group.add_argument(
+        "--message",
+        help="Message to log",
+        type=str
     )
     args = parser.parse_args()
     if args.accelerator is None:
@@ -324,8 +335,10 @@ def cross_validate(
 
     end_time = time.perf_counter()
     time_elapsed = timedelta(seconds=end_time - start_time)
-    save_logs(test_metrics, time_elapsed, args)
+    logs = generate_logs(test_metrics, time_elapsed, args)
+    log_to_json(logs)
     aggregate_logs()
+    log_to_gsheet(logs)
 
 
 if __name__ == "__main__":

@@ -1,11 +1,23 @@
+import argparse
 import csv
 import glob
 import json
+import os
 from datetime import datetime, timedelta
-import argparse
+
+import git
+from google.oauth2.service_account import Credentials
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+SPREADSHEET_ID = "1nFRtoKX3q4MXsyvjImYz-_jdtw4LmSAaZPXffv1C2js"
+RANGE_NAME = "v12c!A1:A1"
 
 
-def save_logs(test_metrics, time_elapsed: timedelta, args: argparse.Namespace):
+def generate_logs(
+    test_metrics, time_elapsed: timedelta, args: argparse.Namespace
+):
     cv_metrics = {"metric_confusion_matrix": []}
     for test_metric in test_metrics:
         test_metric = test_metric[0]
@@ -34,92 +46,122 @@ def save_logs(test_metrics, time_elapsed: timedelta, args: argparse.Namespace):
             continue
         cv_metrics[metric] /= args.k
 
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     logs = {
         "args": vars(args),
         "cv_metrics": cv_metrics,
         "time_elapsed": str(time_elapsed),
+        "timestamp": datetime.now(),
     }
     print(logs)
     if args.fast_dev_run:
         return
-    with open(f"logs_{timestamp}.json", "w") as f:
+    return logs
+
+
+def log_to_json(logs):
+    with open(
+        f"logs_{logs['timestamp'].strftime('%Yæ-%m-%d-%H-%M-%S')}.json", "w"
+    ) as f:
         json.dump(logs, f, indent=4)
 
 
 def aggregate_logs():
     paths = glob.glob("logs_*.json")
     paths.sort()
-    rows = [
-        [],  # Model
-        [],  # Dataset
-        [],  # Evaluation Strategy
-        [],  # Loss Function
-        [],  # Internal K
-        [],  # Parameters (M)
-        [],  # Data Augmentation
-        [],  # Pretrained
-        [],  # Early Stopping Patience
-        [],  # Epochs
-        [],  # Batch Size
-        [],  # Learning Rate
-        [],
-        [],  # Expected Cost (50 : 1)
-        [],  # Expected Cost (10 : 1)
-        [],  # Expected Cost (5 : 1)
-        [],  # F2 Score
-        [],  # F1 Score 🤮
-        [],  # Recall
-        [],  # Precision
-        [],  # Average Precision
-        [],  # Accuracy 🤮
-        [],  # AUROC 🤮
-        [],  # Confusion Matrix
-        [],  # Loss
-        [],
-        [],  # Training Time (h:mm:ss)
-    ]
+    rows = []
     for path in paths:
         with open(path) as f:
             logs = json.load(f)
-        model = logs["args"]["model"]
-        if model == "ResNet":
-            model = logs["args"]["resnet_model"]
-        rows[0].append(model)
-        rows[1].append("qt coyotes merged dataset v11")
-        rows[2].append("StratifiedGroupKFold")
-        criterion = logs["args"]["criterion"]
-        if criterion == "ExpectedCostLoss":
-            criterion += str(logs["args"]["criterion_cfn"])
-        elif criterion == "wBCELoss":
-            criterion += str(logs["args"]["criterion_pos_weight"])
-        rows[3].append(criterion)
-        rows[4].append(logs["args"]["internal_k"])
-        rows[5].append("?")
-        rows[6].append(not logs["args"]["no_data_augmentation"])
-        rows[7].append(not logs["args"]["nonpretrained"])
-        rows[8].append(logs["args"]["patience"])
-        rows[9].append(logs["args"]["max_epochs"])
-        rows[10].append(logs["args"]["batch_size"])
-        rows[11].append(logs["args"]["learning_rate"])
-        rows[12].append("")
-        rows[13].append(logs["cv_metrics"]["ExpectedCost50"])
-        rows[14].append(logs["cv_metrics"]["ExpectedCost10"])
-        rows[15].append(logs["cv_metrics"]["ExpectedCost5"])
-        rows[16].append(logs["cv_metrics"]["F2"])
-        rows[17].append(logs["cv_metrics"]["F1"])
-        rows[18].append(logs["cv_metrics"]["Recall"])
-        rows[19].append(logs["cv_metrics"]["Precision"])
-        rows[20].append(logs["cv_metrics"]["AveragePrecision"])
-        rows[21].append(logs["cv_metrics"]["Accuracy"])
-        rows[22].append(logs["cv_metrics"]["AUROC"])
-        rows[23].append(
-            json.dumps(logs["cv_metrics"]["metric_confusion_matrix"])
-        )
-        rows[24].append(logs["cv_metrics"]["loss"])
-        rows[25].append("")
-        rows[26].append(logs["time_elapsed"])
+        row = get_row(logs)
+        rows.append(row)
 
     with open("logs.tsv", "w") as f:
         writer = csv.writer(f, delimiter="\t")
         writer.writerows(rows)
+
+
+def get_row(logs):
+    row = []
+
+    repo = git.Repo()
+    ref = repo.head.ref
+    message = logs["args"].get("message")
+    if not message:
+        message = ref.commit.message
+    row.append(message)
+    row.append(logs.get("timestamp"))
+    row.append(
+        f"{os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}/actions/runs/{os.environ.get('GITHUB_RUN_ID')}"
+    )
+    row.append(None)
+
+    row.append(logs["cv_metrics"]["ExpectedCost5"])
+    row.append(logs["cv_metrics"]["Precision"])
+    row.append(logs["cv_metrics"]["Recall"])
+    row.append(json.dumps(logs["cv_metrics"]["metric_confusion_matrix"]))
+    row.append(logs["time_elapsed"])
+    row.append(None)
+
+    model = logs["args"]["model"]
+    if model == "ResNet":
+        model = logs["args"]["resnet_model"]
+    elif model == "DenseNet":
+        model = logs["args"]["densenet_model"]
+    elif model == "ViT":
+        model = logs["args"]["vit_model"]
+    elif model == "YOLO":
+        model = logs["args"]["yolo_model"]
+    row.append(model)
+
+    criterion = logs["args"]["criterion"]
+    if criterion == "ExpectedCostLoss":
+        criterion += str(logs["args"]["criterion_cfn"])
+    elif criterion == "wBCELoss":
+        criterion += str(logs["args"]["criterion_pos_weight"])
+    row.append(criterion)
+    row.append(logs["args"]["internal_k"])
+    row.append(None)
+    row.append(not logs["args"]["no_data_augmentation"])
+    row.append(not logs["args"]["nonpretrained"])
+    row.append(logs["args"]["patience"])
+    row.append(logs["args"]["max_epochs"])
+    row.append(logs["args"]["batch_size"])
+    row.append(logs["args"]["learning_rate"])
+    row.append(ref.commit.hexsha)
+    row.append(None)
+
+    row.append(logs["cv_metrics"]["ExpectedCost50"])
+    row.append(logs["cv_metrics"]["ExpectedCost10"])
+    row.append(logs["cv_metrics"]["AveragePrecision"])
+    row.append(logs["cv_metrics"]["F1"])
+    row.append(logs["cv_metrics"]["AUROC"])
+    row.append(logs["cv_metrics"]["Accuracy"])
+    row.append(logs["cv_metrics"]["loss"])
+
+    return row
+
+
+def log_to_gsheet(row):
+    if os.environ.get("GITHUB_ACTIONS"):
+        with open("service-account-key.json", "w") as f:
+            f.write(os.environ.get("GDRIVE_CREDENTIALS_DATA"))
+    creds = Credentials.from_service_account_file(
+        "service-account-key.json",
+        scopes=SCOPES,
+    )
+
+    try:
+        service = build("sheets", "v4", credentials=creds)
+        sheet = service.spreadsheets()
+        sheet.values().append(
+            spreadsheetId=SPREADSHEET_ID,
+            range=RANGE_NAME,
+            body={
+                "majorDimension": "ROWS",
+                "values": [row],
+            },
+            valueInputOption="USER_ENTERED",
+        ).execute()
+
+    except HttpError as err:
+        print(err)
