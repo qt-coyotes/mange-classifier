@@ -143,6 +143,9 @@ def get_row(logs):
     row.append(logs["cv_metrics"]["AUROC"])
     row.append(logs["cv_metrics"]["Accuracy"])
     row.append(logs["cv_metrics"]["loss"])
+    row.append(None)
+
+    row.append(logs["args"]["metadata_path"])
 
     return row
 
