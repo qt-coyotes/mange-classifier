@@ -145,7 +145,8 @@ def get_row(logs):
     return row
 
 
-def log_to_gsheet(row):
+def log_to_gsheet(logs):
+    row = get_row(logs)
     if os.environ.get("GITHUB_ACTIONS"):
         with open("service-account-key.json", "w") as f:
             f.write(os.environ.get("GDRIVE_CREDENTIALS_DATA"))
