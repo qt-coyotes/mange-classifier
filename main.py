@@ -15,6 +15,7 @@ from logs import aggregate_logs, generate_logs, log_to_gsheet, log_to_json
 from losses import BinaryExpectedCostLoss, BinaryMacroSoftFBetaLoss, BinarySurrogateFBetaLoss, HybridLoss
 from models.base import BaseModel
 from models.densenet import DenseNetModel
+from models.random import RandomModel
 from models.resnet import ResNetModel
 from models.vit import ViTModel
 from models.yolo import YoloModel
@@ -26,6 +27,7 @@ def main():
         "ResNet": ResNetModel,
         "ViT": ViTModel,
         "YOLO": YoloModel,
+        "Random": RandomModel,
     }
     criterions_set = {
         "BCELoss",
@@ -319,8 +321,9 @@ def cross_validate(
                 print("Replace --auto_scale_batch_size with")
                 print(f"--batch_size {model.batch_size}")
                 break
-        trainer.fit(model=model, train_dataloaders=datamodule_i)
-        if args.fast_dev_run:
+        if args.model != "Random":
+            trainer.fit(model=model, train_dataloaders=datamodule_i)
+        if args.fast_dev_run or args.model == "Random":
             test_metric = trainer.test(model, dataloaders=datamodule)
         elif not args.no_early_stopping:
             test_metric = trainer.test(
