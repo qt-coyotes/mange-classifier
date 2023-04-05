@@ -19,6 +19,12 @@ jobs:
     - name: Run clean
       run: make clean
 
+
+    - name: Install python dependencies
+      run: |
+        python3 -m pip install -U pip
+        python3 -m pip install -r requirements.txt
+
     # https://github.com/iterative/dvc/pull/7213/
     - name: Pull data
       run: |
@@ -27,11 +33,6 @@ jobs:
       env:
         GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Install python dependencies
-      run: |
-        python3 -m pip install -U pip
-        python3 -m pip install -r requirements.txt
 
     - name: Run experiment
       run: make 4090
