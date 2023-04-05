@@ -93,6 +93,7 @@ def get_row(logs):
     timestamp = logs.get("timestamp")
     if not timestamp:
         timestamp = datetime.now().isoformat()
+    timestamp = datetime.fromisoformat(timestamp)
     row.append(timestamp)
     row.append(
         f"{os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}/actions/runs/{os.environ.get('GITHUB_RUN_ID')}"
@@ -136,8 +137,9 @@ def get_row(logs):
 
     row.append(logs["cv_metrics"]["ExpectedCost50"])
     row.append(logs["cv_metrics"]["ExpectedCost10"])
-    row.append(logs["cv_metrics"]["AveragePrecision"])
+    row.append(logs["cv_metrics"]["F2"])
     row.append(logs["cv_metrics"]["F1"])
+    row.append(logs["cv_metrics"]["AveragePrecision"])
     row.append(logs["cv_metrics"]["AUROC"])
     row.append(logs["cv_metrics"]["Accuracy"])
     row.append(logs["cv_metrics"]["loss"])
