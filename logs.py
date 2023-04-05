@@ -50,7 +50,7 @@ def generate_logs(
         "args": vars(args),
         "cv_metrics": cv_metrics,
         "time_elapsed": str(time_elapsed),
-        "timestamp": datetime.now(),
+        "timestamp": datetime.now().isoformat(),
     }
     print(logs)
     if args.fast_dev_run:
@@ -60,7 +60,7 @@ def generate_logs(
 
 def log_to_json(logs):
     with open(
-        f"logs_{logs['timestamp'].strftime('%Yæ-%m-%d-%H-%M-%S')}.json", "w"
+        f"logs_{logs['timestamp']}.json", "w"
     ) as f:
         json.dump(logs, f, indent=4)
 
