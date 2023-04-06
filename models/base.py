@@ -17,6 +17,7 @@ from torchmetrics.classification import (
 )
 import torchvision.transforms as transforms
 from metrics import BinaryExpectedCost
+from losses import HybridLoss
 
 
 class BaseModel(LightningModule):
@@ -41,11 +42,6 @@ class BaseModel(LightningModule):
         self.augmentations = transforms.Compose([
             transforms.RandomHorizontalFlip(),
             transforms.RandomRotation(10),
-            # transforms.RandomPerspective(),
-            transforms.GaussianBlur(3, sigma=(0.1, 2)),
-            transforms.ColorJitter(
-                brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1
-            ),
         ])
         self.criterion = criterion
         self.batch_size = args.batch_size
@@ -59,7 +55,7 @@ class BaseModel(LightningModule):
             metrics[f"{stage}_confusion_matrix"] = BinaryConfusionMatrix()
             metrics[f"{stage}_metric"] = MetricCollection(
                 {
-                    "ExpectedCost5": BinaryExpectedCost(),
+                    "ExpectedCost5": BinaryExpectedCost(cfn=5.),
                     "ExpectedCost10": BinaryExpectedCost(cfn=10.),
                     "ExpectedCost50": BinaryExpectedCost(cfn=50.),
                     "F2": BinaryFBetaScore(beta=2.0),
@@ -71,9 +67,12 @@ class BaseModel(LightningModule):
                     "AUROC": BinaryAUROC(),
                 }
             )
+        self.train_EC5 = BinaryExpectedCost(cfn=5.)
+        self.val_EC5 = BinaryExpectedCost(cfn=5.)
+        self.test_EC5 = BinaryExpectedCost(cfn=5.)
         self.metrics = nn.ModuleDict(metrics)
 
-    def y(self, x: Tuple[Tensor, Tensor]):
+    def forward(self, x: Tuple[Tensor, Tensor]):
         i, t = x
         i = i.float()
         if not self.no_data_augmentation:
@@ -91,13 +90,24 @@ class BaseModel(LightningModule):
 
     def step(self, batch: Tuple[Tensor], batch_idx: int, stage: str):
         x, y = batch
-        logits = self.y(x)
+        logits = self.forward(x)
         yhat = torch.sigmoid(logits)
         if isinstance(self.criterion, nn.BCEWithLogitsLoss):
             loss = self.criterion(logits, y.float())
+        elif isinstance(self.criterion, HybridLoss):
+            loss = self.criterion(logits, y.float(), batch_idx)
         else:
             loss = self.criterion(yhat, y.float())
         self.log(f"{stage}_loss", loss)
+        if stage == "train":
+            self.train_EC5(yhat, y)
+            self.log(f"{stage}_EC5", self.train_EC5, prog_bar=True)
+        elif stage == "val":
+            self.val_EC5(yhat, y)
+            self.log(f"{stage}_EC5", self.val_EC5, prog_bar=True)
+        elif stage == "test":
+            self.test_EC5(yhat, y)
+            self.log(f"{stage}_EC5", self.test_EC5, prog_bar=True)
         self.metrics[f"{stage}_metric"].update(yhat, y)
         self.metrics[f"{stage}_confusion_matrix"].update(yhat, y)
         return loss
@@ -114,7 +124,6 @@ class BaseModel(LightningModule):
     def epoch_end(self, outputs, stage: str):
         metrics = self.metrics[f"{stage}_metric"].compute()
         self.log(f"{stage}_metric", metrics)
-        self.log(f"{stage}_metric_ExpectedCost5", metrics["ExpectedCost5"])
         confmat = self.metrics[f"{stage}_confusion_matrix"].compute().float()
         (tn, fp), (fn, tp) = confmat
         self.log(f"{stage}_confusion_matrix_tn", tn, reduce_fx=torch.sum)

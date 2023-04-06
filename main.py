@@ -11,10 +11,16 @@ from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from torch import nn
 
 from data import StratifiedGroupKFoldDataModule
-from logs import aggregate_logs, save_logs
-from losses import BinaryExpectedCostLoss, BinaryMacroSoftFBetaLoss, BinarySurrogateFBetaLoss
+from logs import aggregate_logs, generate_logs, log_to_gsheet, log_to_json
+from losses import (
+    BinaryExpectedCostLoss,
+    BinaryMacroSoftFBetaLoss,
+    BinarySurrogateFBetaLoss,
+    HybridLoss,
+)
 from models.base import BaseModel
 from models.densenet import DenseNetModel
+from models.random import RandomModel
 from models.resnet import ResNetModel
 from models.vit import ViTModel
 from models.yolo import YoloModel
@@ -26,6 +32,7 @@ def main():
         "ResNet": ResNetModel,
         "ViT": ViTModel,
         "YOLO": YoloModel,
+        "Random": RandomModel,
     }
     criterions_set = {
         "BCELoss",
@@ -34,6 +41,7 @@ def main():
         "MacroSoftFBetaLoss",
         "ExpectedCostLoss",
         "SurrogateFBetaLoss",
+        "HybridLoss",
     }
     parser = argparse.ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
@@ -190,6 +198,12 @@ def main():
         default="DenseNet121",
     )
     group.add_argument(
+        "--vit_model",
+        help="DenseNet model",
+        type=str,
+        default="ViT-B_16",
+    )
+    group.add_argument(
         "--crop_size",
         help="Crop size",
         type=int,
@@ -199,19 +213,16 @@ def main():
         "--criterion_pos_weight",
         help="Weight for positive class for BCEWithLogitsLoss",
         type=float,
-        default=10.0
+        default=10.0,
     )
     group.add_argument(
-        "--criterion_beta",
-        help="Beta for F-beta loss",
-        type=float,
-        default=5.0
+        "--criterion_beta", help="Beta for F-beta loss", type=float, default=5.0
     )
     group.add_argument(
         "--criterion_cfn",
         help="Cost false negative for ExpectedCostLoss",
         type=float,
-        default=5.0
+        default=5.0,
     )
     group.add_argument(
         "--dropout_p",
@@ -230,6 +241,13 @@ def main():
         help="Do not use tabular features",
         action="store_true",
     )
+    group.add_argument(
+        "--monitor",
+        help="Metric to monitor",
+        type=str,
+        default="val_EC5",
+    )
+    group.add_argument("--message", help="Message to log", type=str)
     args = parser.parse_args()
     if args.accelerator is None:
         args.accelerator = "auto"
@@ -245,6 +263,7 @@ def main():
         "MacroSoftFBetaLoss": BinaryMacroSoftFBetaLoss(args.criterion_beta),
         "ExpectedCostLoss": BinaryExpectedCostLoss(cfn=args.criterion_cfn),
         "SurrogateFBetaLoss": BinarySurrogateFBetaLoss(args.criterion_beta),
+        "HybridLoss": "HybridLoss",
     }
     criterion = criterions[args.criterion]
     cross_validate(Model, criterion, args)
@@ -263,42 +282,51 @@ def cross_validate(
         callbacks = []
         if not args.no_early_stopping:
             callbacks.append(
-                EarlyStopping(
-                    "val_metric_ExpectedCost5",
-                    patience=args.patience,
-                    mode="min"
-                )
+                EarlyStopping(args.monitor, patience=args.patience, mode="min")
             )
             model_checkpoint = ModelCheckpoint(
-                monitor="val_metric_ExpectedCost5"
+                monitor=args.monitor,
             )
             callbacks.append(model_checkpoint)
         trainer = Trainer.from_argparse_args(
             args,
             callbacks=callbacks,
         )
-        if criterion == "awBCELoss":
+        if criterion == "awBCELoss" or criterion == "HybridLoss":
             datamodule_i.setup(None)
             p = datamodule_i.train_dataset().pos_weight
             criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(p))
+        if criterion == "HybridLoss":
+            criterion = HybridLoss(
+                criterion, BinaryExpectedCostLoss(cfn=args.criterion_cfn)
+            )
         model = Model(criterion, args)
         if args.compile and isinstance(trainer.accelerator, CUDAAccelerator):
             model = torch.compile(model)
 
         if args.auto_scale_batch_size or args.auto_lr_find:
+            datamodule_i.setup(None)
+            X, _ = next(iter(datamodule_i.train_dataloader()))
+            _ = model(X)
             trainer.tune(model, datamodule=datamodule_i)
-            print("Automatically found batch size and learning rate")
-            print("Replace --auto_scale_batch_size and --auto_lr_find with:")
-            print(f"--batch_size {model.batch_size}")
-            print(f"--learning_rate {model.learning_rate}")
-            break
-        trainer.fit(model=model, train_dataloaders=datamodule_i)
-        if args.fast_dev_run:
+            if args.auto_lr_find:
+                print(
+                    f"Automatically found learning rate: {model.learning_rate}"
+                )
+                args.learning_rate = model.learning_rate
+            if args.auto_scale_batch_size:
+                print("Automatically found batch size")
+                print("Replace --auto_scale_batch_size with")
+                print(f"--batch_size {model.batch_size}")
+                break
+        if args.model != "Random":
+            trainer.fit(model=model, train_dataloaders=datamodule_i)
+        if args.fast_dev_run or args.model == "Random":
             test_metric = trainer.test(model, dataloaders=datamodule)
         elif not args.no_early_stopping:
             test_metric = trainer.test(
                 ckpt_path=model_checkpoint.best_model_path,
-                dataloaders=datamodule
+                dataloaders=datamodule,
             )
         else:
             test_metric = trainer.test(ckpt_path="best", dataloaders=datamodule)
@@ -311,8 +339,10 @@ def cross_validate(
 
     end_time = time.perf_counter()
     time_elapsed = timedelta(seconds=end_time - start_time)
-    save_logs(test_metrics, time_elapsed, args)
+    logs = generate_logs(test_metrics, time_elapsed, args)
+    log_to_json(logs)
     aggregate_logs()
+    log_to_gsheet(logs)
 
 
 if __name__ == "__main__":

@@ -20,29 +20,19 @@ class COCOImageDataset(Dataset):
         labels,
         data_path,
         args: argparse.Namespace,
-        transform=None,
+        image_transform=None,
+        tabular_transform=None,
         target_transform=None,
         pos_weight=None,
     ):
         self.images = images
         self.labels = labels
         self.data_path = data_path
-        self.transform = transform
+        self.image_transform = image_transform
+        self.tabular_transform = tabular_transform
         self.target_transform = target_transform
         self.args = args
         self.pos_weight = pos_weight
-        years = np.array([image["year"] for image in images])
-        self.year_mean = years.mean()
-        self.year_std = years.std()
-        months = np.array([image["month"] for image in images])
-        self.month_mean = months.mean()
-        self.month_std = months.std()
-        days = np.array([image["day"] for image in images])
-        self.day_mean = days.mean()
-        self.day_std = days.std()
-        hours = np.array([image["hour"] for image in images])
-        self.hour_mean = hours.mean()
-        self.hour_std = hours.std()
         self.locations = set(image["location"] for image in images)
 
     def __len__(self):
@@ -65,19 +55,17 @@ class COCOImageDataset(Dataset):
         if self.args.no_tabular_features:
             tabular = torch.tensor([], dtype=torch.float32)
         else:
-            tabular = torch.tensor([
-                image["is_color"],
-                (image["year"] - self.year_mean) / self.year_std,
-                (image["month"] - self.month_mean) / self.month_std,
-                # image["day"],
-                (image["hour"] - self.hour_mean) / self.hour_std,
-                # image["minute"],
-                image["latitude"] / 90.,
-                image["longitude"] / 180.,
-            ], dtype=torch.float32)
+            tabular = torch.tensor(
+                [
+                    image["is_color"],
+                    (image["hour"] - self.tabular_transform["mean"]["hour"])
+                    / self.tabular_transform["std"]["hour"],
+                ],
+                dtype=torch.float32,
+            )
         label = self.labels[idx]
-        if self.transform:
-            img = self.transform(img)
+        if self.image_transform:
+            img = self.image_transform(img)
         if self.target_transform:
             label = self.target_transform(label)
         return (img, tabular), label
@@ -109,12 +97,25 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
         mange_category_ids = {1}
         no_mange_category_ids = {2}
 
-        equal_size_transform = T.Compose(
-            [
-                SquarePad(),
-                T.Resize((self.args.crop_size, self.args.crop_size), antialias=True),
-            ]
-        )
+        if self.args.no_crop:
+            equal_size_transform = T.Compose(
+                [
+                    T.Resize(
+                        (self.args.crop_size, self.args.crop_size),
+                        antialias=True,
+                    )
+                ]
+            )
+        else:
+            equal_size_transform = T.Compose(
+                [
+                    SquarePad(),
+                    T.Resize(
+                        (self.args.crop_size, self.args.crop_size),
+                        antialias=True,
+                    ),
+                ]
+            )
 
         no_mange_annotations = []
         mange_annotations = []
@@ -140,7 +141,9 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                 shuffle=self.args.shuffle,
                 random_state=self.args.random_state,
             )
-            trainvaltest_splits = list(trainvaltest_sgkf.split(X, y, groups=groups))
+            trainvaltest_splits = list(
+                trainvaltest_sgkf.split(X, y, groups=groups)
+            )
         else:
             print("WARNING: No external grouping!")
             trainvaltest_skf = StratifiedKFold(
@@ -156,18 +159,37 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
             test_X = [X[i] for i in test_indexes]
             test_y = [y[i] for i in test_indexes]
 
-            self.dataset_test.append(
-                COCOImageDataset(
-                    test_X,
-                    test_y,
-                    self.data_path,
-                    self.args,
-                    equal_size_transform,
-                )
-            )
-
             X_trainval = [X[i] for i in trainval_indexes]
             y_trainval = [y[i] for i in trainval_indexes]
+
+            tabular_transform = None
+            if not self.args.no_tabular_features:
+                years = np.array([image["year"] for image in X_trainval])
+                months = np.array([image["month"] for image in X_trainval])
+                hours = np.array([image["hour"] for image in X_trainval])
+                latitudes = np.array(
+                    [image["latitude"] for image in X_trainval]
+                )
+                longitudes = np.array(
+                    [image["longitude"] for image in X_trainval]
+                )
+
+                tabular_transform = {
+                    "mean": {
+                        "year": years.mean(),
+                        "month": months.mean(),
+                        "hour": hours.mean(),
+                        "latitude": latitudes.mean(),
+                        "longitude": longitudes.mean(),
+                    },
+                    "std": {
+                        "year": years.std(),
+                        "month": months.std(),
+                        "hour": hours.std(),
+                        "latitude": latitudes.std(),
+                        "longitude": longitudes.std(),
+                    },
+                }
 
             if self.args.internal_group:
                 groups_trainval = [groups[i] for i in trainval_indexes]
@@ -201,13 +223,24 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
             n0 = len(train_y) - n1
             p = n0 / n1
 
+            self.dataset_test.append(
+                COCOImageDataset(
+                    test_X,
+                    test_y,
+                    self.data_path,
+                    self.args,
+                    image_transform=equal_size_transform,
+                    tabular_transform=tabular_transform,
+                )
+            )
             self.dataset_train.append(
                 COCOImageDataset(
                     train_X,
                     train_y,
                     self.data_path,
                     self.args,
-                    equal_size_transform,
+                    image_transform=equal_size_transform,
+                    tabular_transform=tabular_transform,
                     pos_weight=p,
                 )
             )
@@ -217,7 +250,8 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     val_y,
                     self.data_path,
                     self.args,
-                    equal_size_transform,
+                    image_transform=equal_size_transform,
+                    tabular_transform=tabular_transform,
                 )
             )
 
