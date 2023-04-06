@@ -1,7 +1,5 @@
 4090:
-	-python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion awBCELoss --monitor val_loss --no_crop  --no_tabular_features --no_data_augmentation --message "ResNet50 with Transfer Learning and awBCELoss."
-	-python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet101 --criterion awBCELoss --monitor val_loss --no_crop  --no_tabular_features --no_data_augmentation --message "ResNet101 with Transfer Learning and awBCELoss."
-	-python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet152 --criterion awBCELoss --monitor val_loss --no_crop  --no_tabular_features --no_data_augmentation --message "ResNet152 with Transfer Learning and awBCELoss."
+	python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ViT --criterion awBCELoss --monitor val_loss --no_crop  --no_tabular_features --no_data_augmentation --message "ViT with Transfer Learning and awBCELoss."
 
 CHIL:
 	python3 main.py --batch_size 16 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion BCELoss --monitor val_loss --no_crop --no_tabular_features --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json --message "pretrained + data augmentation"
