@@ -1,5 +1,5 @@
 4090:
-	-python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion awBCELoss --monitor val_loss --no_crop --no_data_augmentation --message "ResNet50 awBCELoss, Auto LR, with Transfer Learning and Tabular Features, Fixed Learning Rate."
+	-python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet101 --criterion awBCELoss --monitor val_loss --no_crop --no_data_augmentation --message "ResNet101 awBCELoss, Auto LR, with Transfer Learning and Tabular Features, Fixed Learning Rate."
 
 
 CHIL:
