@@ -18,3 +18,4 @@ clean:
 	rm -f logs_*.json
 	rm -f logs*.tsv
 	rm -rf lightning_logs
+	rm -rf stripped_logs
