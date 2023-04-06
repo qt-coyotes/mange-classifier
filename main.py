@@ -253,6 +253,11 @@ def main():
         type=str,
         default="val_EC5",
     )
+    group.add_argument(
+        "--save_checkpoint",
+        help="Backup the checkpoint",
+        type=bool,
+    )
     group.add_argument("--message", help="Message to log", type=str)
     args = parser.parse_args()
     if args.accelerator is None:

@@ -192,6 +192,10 @@ def log_to_gsheet(logs):
 
 
 def extract_lightning_logs(args):
+    if not args.save_checkpoint:
+        print("Not saving this checkpoint, as specified in args")
+        return
+
     if not os.path.exists(STRIP_DIR):
         os.mkdir(STRIP_DIR)
 
