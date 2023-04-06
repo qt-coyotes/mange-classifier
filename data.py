@@ -98,14 +98,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
         no_mange_category_ids = {2}
 
         if self.args.no_crop:
-            equal_size_transform = T.Compose(
-                [
-                    T.Resize(
-                        (self.args.crop_size, self.args.crop_size),
-                        antialias=True,
-                    )
-                ]
-            )
+            equal_size_transform = None
         else:
             equal_size_transform = T.Compose(
                 [

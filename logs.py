@@ -139,7 +139,7 @@ def get_row(logs):
     row.append(logs["cv_metrics"]["AveragePrecision"])
     row.append(logs["cv_metrics"]["AUROC"])
     row.append(logs["cv_metrics"]["Accuracy"])
-    row.append(logs["cv_metrics"]["loss"])
+    row.append(str(logs["cv_metrics"]["loss"]))
     row.append(None)
 
     row.append(logs["args"]["metadata_path"])
@@ -163,7 +163,7 @@ def log_to_gsheet(logs):
     ):
         RANGE_NAME = "CHIL!A1:A1"
     else:
-        RANGE_NAME = "v12c!A1:A1"
+        RANGE_NAME = "v12d!A1:A1"
 
     try:
         service = build("sheets", "v4", credentials=creds)
