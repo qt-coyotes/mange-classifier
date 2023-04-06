@@ -1,9 +1,5 @@
 4090:
-	-python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model YOLO --resnet_model yolov8n-cls.pt --criterion awBCELoss --monitor val_loss --no_crop --no_data_augmentation --message "yolov8n-cls pretrained with awBCELoss."
-	-python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model YOLO --resnet_model yolov8s-cls.pt --criterion awBCELoss --monitor val_loss --no_crop --no_data_augmentation --message "yolov8s-cls pretrained with awBCELoss."
-	-python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model YOLO --resnet_model yolov8m-cls.pt --criterion awBCELoss --monitor val_loss --no_crop --no_data_augmentation --message "yolov8m pretrained with awBCELoss."
-	-python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model YOLO --resnet_model yolov8l-cls.pt --criterion awBCELoss --monitor val_loss --no_crop --no_data_augmentation --message "yolov8l pretrained with awBCELoss."
-	-python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model YOLO --resnet_model yolov8x-cls.pt --criterion awBCELoss --monitor val_loss --no_crop --no_data_augmentation --message "yolov8x pretrained with awBCELoss."
+	-python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet50 --criterion awBCELoss --monitor val_loss --no_crop --no_data_augmentation --message "ResNet50 awBCELoss, Auto LR, with Transfer Learning and Tabular Features, Fixed Learning Rate."
 
 
 CHIL:
