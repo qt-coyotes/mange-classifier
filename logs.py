@@ -148,6 +148,11 @@ def get_row(logs):
 
     row.append(logs["args"]["metadata_path"])
 
+    with open(logs["args"]["metadata_path"]) as f:
+        coco = json.load(f)
+
+    row.append(coco["info"]["version"])
+
     return row
 
 
@@ -167,7 +172,7 @@ def log_to_gsheet(logs):
     ):
         RANGE_NAME = "CHIL!A1:A1"
     else:
-        RANGE_NAME = "v12d!A1:A1"
+        RANGE_NAME = "v17d!A1:A1"
 
     try:
         service = build("sheets", "v4", credentials=creds)
