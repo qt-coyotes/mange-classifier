@@ -291,6 +291,7 @@ def cross_validate(
         trainer = Trainer.from_argparse_args(
             args,
             callbacks=callbacks,
+            log_every_n_steps=1000,
         )
         if criterion == "awBCELoss" or criterion == "HybridLoss":
             datamodule_i.setup(None)
@@ -343,6 +344,8 @@ def cross_validate(
     log_to_json(logs)
     aggregate_logs()
     log_to_gsheet(logs)
+
+    extract_lightning_logs(args)  # Pulls out the one checkpoint we want
 
 
 if __name__ == "__main__":

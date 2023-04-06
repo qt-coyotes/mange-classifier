@@ -47,3 +47,4 @@ jobs:
         path: |
           logs.tsv
           logs_*.json
+          stripped_logs
