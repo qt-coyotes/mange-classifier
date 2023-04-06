@@ -172,7 +172,7 @@ def log_to_gsheet(logs):
     ):
         RANGE_NAME = "CHIL!A1:A1"
     else:
-        RANGE_NAME = "v17d!A1:A1"
+        RANGE_NAME = "v17!A1:A1"
 
     try:
         service = build("sheets", "v4", credentials=creds)
