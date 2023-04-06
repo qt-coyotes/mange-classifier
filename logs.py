@@ -190,6 +190,7 @@ def log_to_gsheet(logs):
     except HttpError as err:
         print(err)
 
+
 def extract_lightning_logs(args):
     if not os.path.exists(STRIP_DIR):
         os.mkdir(STRIP_DIR)
@@ -197,16 +198,18 @@ def extract_lightning_logs(args):
     with open(f"{STRIP_DIR}/checkpoints.tsv", "w") as f:
         f.write("time\tmodel\tcheckpoint\tmessage\n")
 
-    logs = list(filter(lambda x: x.startswith("version_"), os.listdir('lightning_logs')))
+    logs = list(
+        filter(lambda x: x.startswith("version_"), os.listdir("lightning_logs"))
+    )
 
     if len(logs) == 0:
         return
 
     retain = random.choice(logs)  # Hope it's a directory I guess?
     log_dir_name = uuid.uuid1()
-    t = str(datetime.today()).split('.')[0].replace(' ', '_').replace(':', '-')
+    t = str(datetime.today()).split(".")[0].replace(" ", "_").replace(":", "-")
 
-    shutil.move(f'lightning_logs/{retain}', f'{STRIP_DIR}/{log_dir_name}')
+    shutil.move(f"lightning_logs/{retain}", f"{STRIP_DIR}/{log_dir_name}")
 
     with open(f"{STRIP_DIR}/checkpoints.tsv", "a") as f:
         f.write(f"{t}\t{str(args.model)}\t{log_dir_name}\t{args.message}\n")

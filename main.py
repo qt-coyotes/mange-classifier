@@ -11,7 +11,13 @@ from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from torch import nn
 
 from data import StratifiedGroupKFoldDataModule
-from logs import aggregate_logs, generate_logs, log_to_gsheet, log_to_json
+from logs import (
+    aggregate_logs,
+    generate_logs,
+    log_to_gsheet,
+    log_to_json,
+    extract_lightning_logs,
+)
 from losses import (
     BinaryExpectedCostLoss,
     BinaryMacroSoftFBetaLoss,
