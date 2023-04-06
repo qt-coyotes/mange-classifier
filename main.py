@@ -18,12 +18,16 @@ from losses import (
     BinarySurrogateFBetaLoss,
     HybridLoss,
 )
+from models.all_negative import AllNegativeModel
+from models.all_positive import AllPositiveModel
 from models.base import BaseModel
 from models.densenet import DenseNetModel
 from models.random import RandomModel
 from models.resnet import ResNetModel
 from models.vit import ViTModel
 from models.yolo import YoloModel
+
+NO_TRAIN_MODELS = {"Random", "AllPositive", "AllNegative"}
 
 
 def main():
@@ -33,6 +37,8 @@ def main():
         "ViT": ViTModel,
         "YOLO": YoloModel,
         "Random": RandomModel,
+        "AllPositive": AllPositiveModel,
+        "AllNegative": AllNegativeModel,
     }
     criterions_set = {
         "BCELoss",
@@ -319,9 +325,9 @@ def cross_validate(
                 print("Replace --auto_scale_batch_size with")
                 print(f"--batch_size {model.batch_size}")
                 break
-        if args.model != "Random":
+        if args.model not in NO_TRAIN_MODELS:
             trainer.fit(model=model, train_dataloaders=datamodule_i)
-        if args.fast_dev_run or args.model == "Random":
+        if args.fast_dev_run or args.model in NO_TRAIN_MODELS:
             test_metric = trainer.test(model, dataloaders=datamodule)
         elif not args.no_early_stopping:
             test_metric = trainer.test(
