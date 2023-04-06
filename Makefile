@@ -1,5 +1,6 @@
 4090:
-	python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion awBCELoss --monitor val_loss --no_tabular_features --no_data_augmentation --message "ResNet34 with Transfer Learning, awBCELoss, and cropping."
+	python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model DenseNet --resnet_model DenseNet121 --criterion BCELoss --monitor val_loss --no_crop --no_tabular_features --no_data_augmentation --message "DenseNet121 with Transfer Learning, BCELoss."
+	python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model DenseNet --resnet_model DenseNet121 --criterion awBCELoss --monitor val_loss --no_crop --no_tabular_features --no_data_augmentation --message "DenseNet121 with Transfer Learning, awBCELoss."
 
 CHIL:
 	python3 main.py --batch_size 16 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion BCELoss --monitor val_loss --no_crop --no_tabular_features --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json --message "pretrained + data augmentation"
