@@ -192,7 +192,7 @@ def log_to_gsheet(logs):
 
 
 def extract_lightning_logs(args):
-    if not args.save_checkpoint:
+    if args.no_save_checkpoint:
         print("Not saving this checkpoint, as specified in args")
         return
 

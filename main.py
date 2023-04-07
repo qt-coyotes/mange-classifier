@@ -254,7 +254,7 @@ def main():
         default="val_EC5",
     )
     group.add_argument(
-        "--save_checkpoint",
+        "--no_save_checkpoint",
         action="store_true",
         help="Backup the checkpoint",
     )
