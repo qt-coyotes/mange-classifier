@@ -169,23 +169,15 @@ def get_gsheet_creds():
     return creds
 
 
-def log_to_gsheet(logs, row):
+def log_to_gsheet(row, gsheet_sheet):
     creds = get_gsheet_creds()
-
-    if (
-        logs["args"]["metadata_path"]
-        == "data/CHIL/CHIL_uwin_mange_Marit_07242020.json"
-    ):
-        RANGE_NAME = "CHIL!A1:A1"
-    else:
-        RANGE_NAME = "v17!A1:A1"
 
     try:
         service = build("sheets", "v4", credentials=creds)
         sheet = service.spreadsheets()
         sheet.values().append(
             spreadsheetId=SPREADSHEET_ID,
-            range=RANGE_NAME,
+            range=gsheet_range,
             body={
                 "majorDimension": "ROWS",
                 "values": [row],

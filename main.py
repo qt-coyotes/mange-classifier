@@ -367,7 +367,7 @@ def internal_cross_validation(datamodule: LightningDataModule):
             argv.remove("--learning_rate")
         argv = list(filter(len, argv))
         print(f"Hyperparameter configuration: {c}/{len(argvs)}")
-        log_to_gsheet([f"{c}", f"{len(argvs)}" f"{c}/{len(argvs)}", f"{argv}"])
+        log_to_gsheet([f"{c}", f"{len(argvs)}" f"{c}/{len(argvs)}", f"{argv}"], "SuperLearner!A1:A1")
         args = parse_args(argv)
         model = model_from_args(args, datamodule)
         model, trainer, model_checkpoint = model_from_args(args, datamodule)
@@ -380,7 +380,7 @@ def internal_cross_validation(datamodule: LightningDataModule):
             best_args = args
     print(f"Best EC5: {best_EC5}")
     print(f"Best args: {best_args}")
-    log_to_gsheet([f"{best_EC5}", f"{best_args}"])
+    log_to_gsheet([f"{best_EC5}", f"{best_args}"], "SuperLearner!A1:A1")
     return parse_args(best_args)
 
 
@@ -419,7 +419,14 @@ def external_cross_validation(args: argparse.Namespace):
     log_to_json(logs)
     aggregate_logs()
     row = get_row(logs)
-    log_to_gsheet(row)
+    if (
+        logs["args"]["metadata_path"]
+        == "data/CHIL/CHIL_uwin_mange_Marit_07242020.json"
+    ):
+        gsheet_range = "CHIL!A1:A1"
+    else:
+        gsheet_range = "v17!A1:A1"
+    log_to_gsheet(row, gsheet_range)
 
     extract_lightning_logs(args)  # Pulls out the one checkpoint we want
 
