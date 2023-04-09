@@ -12,11 +12,27 @@ class ViTModel(BaseModel):
         self,
         criterion: nn.Module,
         args: argparse.Namespace,
+        architecture: str = "B/16",
     ):
         super().__init__(criterion, args)
-        weights = models.ViT_B_16_Weights.DEFAULT
+        if architecture == "B/16":
+            weights = models.ViT_B_16_Weights.DEFAULT
+            backbone = models.vit_b_16(weights=weights)
+        elif architecture == "B/32":
+            weights = models.ViT_B_32_Weights.DEFAULT
+            backbone = models.vit_b_32(weights=weights)
+        elif architecture == "L/16":
+            weights = models.ViT_L_16_Weights.DEFAULT
+            backbone = models.vit_l_16(weights=weights)
+        elif architecture == "L/32":
+            weights = models.ViT_L_32_Weights.DEFAULT
+            backbone = models.vit_l_32(weights=weights)
+        elif architecture == "H/14":
+            weights = models.ViT_H_14_Weights.DEFAULT
+            backbone = models.vit_h_14(weights=weights)
+        else:
+            raise ValueError(f"Unknown ViT architecture: {architecture}")
         self.transforms = weights.transforms()
-        backbone = models.vit_b_16(weights=weights)
         self.return_node = "getitem_5"
         self.image_backbone = create_feature_extractor(
             backbone, return_nodes=[self.return_node]

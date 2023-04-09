@@ -22,8 +22,6 @@ class COCOImageDataset(Dataset):
         args: argparse.Namespace,
         image_transform=None,
         tabular_transform=None,
-        image_transform=None,
-        tabular_transform=None,
         target_transform=None,
         pos_weight=None,
     ):
@@ -257,8 +255,6 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     train_y,
                     self.data_path,
                     self.args,
-                    image_transform=equal_size_transform,
-                    tabular_transform=tabular_transform,
                     image_transform=equal_size_transform,
                     tabular_transform=tabular_transform,
                     pos_weight=p,

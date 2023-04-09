@@ -18,7 +18,6 @@ from torchmetrics.classification import (
 import torchvision.transforms as transforms
 from metrics import BinaryExpectedCost
 from losses import HybridLoss
-from losses import HybridLoss
 
 
 class BaseModel(LightningModule):
