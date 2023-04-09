@@ -343,6 +343,8 @@ def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule)
     if args.auto_scale_batch_size:
         print(f"Automatically found batch size: P={model.batch_size}")
         args.batch_size = model.batch_size
+    if not args.max_epochs:
+        args.max_epochs = 100
     return model, trainer, model_checkpoint
 
 
