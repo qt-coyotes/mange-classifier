@@ -51,11 +51,11 @@ SUPER_LEARNER_MODELS = {
     # "ViT-B/16": (ViTModel, "B/16"),
     # "ViT-B/32": (ViTModel, "B/32"),
     # "ViT-L/16": (ViTModel, "L/16"),
-    "ViT-L/32": (ViTModel, "L/32"),
+    # "ViT-L/32": (ViTModel, "L/32"),
     # "DenseNet121": (DenseNetModel, 121),
     # "DenseNet161": (DenseNetModel, 161),
     # "DenseNet169": (DenseNetModel, 169),
-    "DenseNet201": (DenseNetModel, 201),
+    # "DenseNet201": (DenseNetModel, 201),
     # "yolov8n-cls.pt": (YoloModel, "yolov8n-cls.pt"),
     # "yolov8s-cls.pt": (YoloModel, "yolov8s-cls.pt"),
     # "yolov8m-cls.pt": (YoloModel, "yolov8m-cls.pt"),
@@ -66,16 +66,15 @@ SUPER_LEARNER_MODELS = {
 MODELS = {**NO_TRAIN_MODELS, **SUPER_LEARNER_MODELS}
 
 LEARNING_RATES = {
-    # 0.001,
-    # 0.0001,
-    # 0.00001,
+    0.001,
+    0.0001,
+    0.00001,
     "--auto_lr_find",
 }
 
 BATCH_SIZES = {
-    # 16,
-    # 32,
-    64
+    16,
+    32,
 }
 
 CRITERIONS = {
