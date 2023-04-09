@@ -313,7 +313,6 @@ def cross_validate(
             log_every_n_steps=1000,
         )
         if criterion == "awBCELoss" or criterion == "HybridLoss":
-        if criterion == "awBCELoss" or criterion == "HybridLoss":
             datamodule_i.setup(None)
             p = datamodule_i.train_dataset().pos_weight
             criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(p))
