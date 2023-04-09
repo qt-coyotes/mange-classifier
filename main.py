@@ -353,7 +353,7 @@ def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule)
 def internal_cross_validation(datamodule: LightningDataModule):
     best_EC5 = torch.inf
     best_args = None
-    argvs = itertools.product(
+    argvs = list(itertools.product(
         ("--model",), SUPER_LEARNER_MODELS,
         ("--criterion",), CRITERIONS,
         ("--learning_rate",), map(str, LEARNING_RATES),
@@ -361,14 +361,16 @@ def internal_cross_validation(datamodule: LightningDataModule):
         ("--no_crop", ""),
         ("--no_data_augmentation", ""),
         ("--no_tabular_features", ""),
-    )
-    print(len(list(argvs)))
+    ))
+    print(f"Number of internal cross validation configurations: {len(argvs)}")
     for argv in argvs:
         argv = list(filter(len, argv))
+        print(f"Internal cross validation configuration: {argv}")
         args = parse_args(argv)
         model = model_from_args(args, datamodule)
         ec5 = 0
         for j in range(datamodule.args.internal_k):
+            print(f"Internal cross validation fold: {j}")
             datamodule.j = j
             model, trainer, model_checkpoint = model_from_args(
                 args, datamodule
@@ -378,10 +380,12 @@ def internal_cross_validation(datamodule: LightningDataModule):
             trainer.fit(model, datamodule=datamodule)
             ec5 += trainer.callback_metrics["val_EC5"]
         EC5 = ec5 / datamodule.args.internal_k
+        print(f"EC5: {EC5}")
         if EC5 < best_EC5:
             best_EC5 = EC5
             best_args = args
-
+    print(f"Best EC5: {best_EC5}")
+    print(f"Best args: {best_args}")
     return parse_args(best_args)
 
 
