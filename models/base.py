@@ -75,7 +75,7 @@ class BaseModel(LightningModule):
     def forward(self, x: Tuple[Tensor, Tensor]):
         i, t = x
         i = i.float()
-        if not self.no_data_augmentation:
+        if not self.no_data_augmentation and self.training:
             i = self.augmentations(i)
         i = self.transforms(i)
         i = self.image_backbone(i)
