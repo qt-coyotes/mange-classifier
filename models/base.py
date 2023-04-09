@@ -40,8 +40,8 @@ class BaseModel(LightningModule):
             nn.LazyLinear(1)
         )
         self.augmentations = transforms.Compose([
-            transforms.RandomHorizontalFlip(),
-            # transforms.RandomRotation(15),
+            # transforms.RandomHorizontalFlip(),
+            transforms.RandomRotation(10),
             # transforms.GaussianBlur(3),
         ])
         self.criterion = criterion
