@@ -1,5 +1,4 @@
 4090:
-	python3 main.py --num_sanity_val_steps 1 --patience 5 --model ResNet18 --batch_size 16 --learning_rate 0.0001 --criterion awBCELoss --monitor val_loss --no_crop --no_tabular_features --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json --message "pretrained"
 	python3 main.py --num_sanity_val_steps 1 --patience 5 --model SuperLearner --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json --message "superlearner v1"
 
 CHIL:
