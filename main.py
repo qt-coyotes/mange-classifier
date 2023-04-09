@@ -15,6 +15,7 @@ from data import StratifiedGroupKFoldDataModule
 from logs import (
     aggregate_logs,
     generate_logs,
+    get_row,
     log_to_gsheet,
     log_to_json,
     extract_lightning_logs,
@@ -360,17 +361,17 @@ def internal_cross_validation(datamodule: LightningDataModule):
         ("--no_tabular_features", ""),
     ))
     print(f"Number of internal cross validation configurations: {len(argvs)}")
-    for argv in argvs:
+    for c, argv in enumerate(argvs):
         argv = list(argv)
         if "--auto_lr_find" in argv:
             argv.remove("--learning_rate")
         argv = list(filter(len, argv))
-        print(f"Internal cross validation configuration: {argv}")
+        print(f"Internal cross validation configuration: {c}/{len(argvs)}")
         args = parse_args(argv)
         model = model_from_args(args, datamodule)
         ec5 = 0
         for j in range(datamodule.args.internal_k):
-            print(f"Internal cross validation fold: {j}")
+            print(f"Internal cross validation fold: {j}/{datamodule.args.internal_k}")
             datamodule.j = j
             model, trainer, model_checkpoint = model_from_args(
                 args, datamodule
@@ -423,7 +424,8 @@ def external_cross_validation(args: argparse.Namespace):
     logs = generate_logs(test_metrics, time_elapsed, args)
     log_to_json(logs)
     aggregate_logs()
-    log_to_gsheet(logs)
+    row = get_row(logs)
+    log_to_gsheet(row)
 
     extract_lightning_logs(args)  # Pulls out the one checkpoint we want
 

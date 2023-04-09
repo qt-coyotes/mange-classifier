@@ -169,8 +169,7 @@ def get_gsheet_creds():
     return creds
 
 
-def log_to_gsheet(logs):
-    row = get_row(logs)
+def log_to_gsheet(logs, row):
     creds = get_gsheet_creds()
 
     if (
