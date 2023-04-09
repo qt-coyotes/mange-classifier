@@ -35,15 +35,14 @@ class BaseModel(LightningModule):
         #     nn.ReLU(),
         # )
         self.tabular_backbone = nn.Identity()
-        self.classifier = nn.Sequential(
-            nn.LazyBatchNorm1d(),
-            nn.LazyLinear(1)
+        self.classifier = nn.Sequential(nn.LazyBatchNorm1d(), nn.LazyLinear(1))
+        self.augmentations = transforms.Compose(
+            [
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomRotation(10),
+                transforms.GaussianBlur(3),
+            ]
         )
-        self.augmentations = transforms.Compose([
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation(10),
-            transforms.GaussianBlur(3),
-        ])
         self.criterion = criterion
         self.batch_size = args.batch_size
         self.no_data_augmentation = args.no_data_augmentation
@@ -56,9 +55,9 @@ class BaseModel(LightningModule):
             metrics[f"{stage}_confusion_matrix"] = BinaryConfusionMatrix()
             metrics[f"{stage}_metric"] = MetricCollection(
                 {
-                    "ExpectedCost5": BinaryExpectedCost(cfn=5.),
-                    "ExpectedCost10": BinaryExpectedCost(cfn=10.),
-                    "ExpectedCost50": BinaryExpectedCost(cfn=50.),
+                    "ExpectedCost5": BinaryExpectedCost(cfn=5.0),
+                    "ExpectedCost10": BinaryExpectedCost(cfn=10.0),
+                    "ExpectedCost50": BinaryExpectedCost(cfn=50.0),
                     "F2": BinaryFBetaScore(beta=2.0),
                     "F1": BinaryF1Score(),
                     "Recall": BinaryRecall(),
@@ -68,9 +67,9 @@ class BaseModel(LightningModule):
                     "AUROC": BinaryAUROC(),
                 }
             )
-        self.train_EC5 = BinaryExpectedCost(cfn=5.)
-        self.val_EC5 = BinaryExpectedCost(cfn=5.)
-        self.test_EC5 = BinaryExpectedCost(cfn=5.)
+        self.train_EC5 = BinaryExpectedCost(cfn=5.0)
+        self.val_EC5 = BinaryExpectedCost(cfn=5.0)
+        self.test_EC5 = BinaryExpectedCost(cfn=5.0)
         self.metrics = nn.ModuleDict(metrics)
 
     def forward(self, x: Tuple[Tensor, Tensor]):
@@ -99,16 +98,34 @@ class BaseModel(LightningModule):
             loss = self.criterion(logits, y.float(), batch_idx)
         else:
             loss = self.criterion(yhat, y.float())
-        self.log(f"{stage}_loss", loss)
+        self.log(f"{stage}_loss", loss, on_step=False, on_epoch=True)
         if stage == "train":
             self.train_EC5(yhat, y)
-            self.log(f"{stage}_EC5", self.train_EC5, prog_bar=True)
+            self.log(
+                f"{stage}_EC5",
+                self.train_EC5,
+                on_step=False,
+                on_epoch=True,
+                prog_bar=True,
+            )
         elif stage == "val":
             self.val_EC5(yhat, y)
-            self.log(f"{stage}_EC5", self.val_EC5, prog_bar=True)
+            self.log(
+                f"{stage}_EC5",
+                self.val_EC5,
+                on_step=False,
+                on_epoch=True,
+                prog_bar=True,
+            )
         elif stage == "test":
             self.test_EC5(yhat, y)
-            self.log(f"{stage}_EC5", self.test_EC5, prog_bar=True)
+            self.log(
+                f"{stage}_EC5",
+                self.test_EC5,
+                on_step=False,
+                on_epoch=True,
+                prog_bar=True,
+            )
         self.metrics[f"{stage}_metric"].update(yhat, y)
         self.metrics[f"{stage}_confusion_matrix"].update(yhat, y)
         return loss
@@ -147,10 +164,10 @@ class BaseModel(LightningModule):
             optimizer,
             mode="min",
             factor=self.scheduler_factor,
-            patience=self.scheduler_patience
+            patience=self.scheduler_patience,
         )
         return {
             "optimizer": optimizer,
             "lr_scheduler": scheduler,
-            "monitor": "val_loss"
+            "monitor": "val_loss",
         }
