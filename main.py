@@ -332,12 +332,14 @@ def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule)
         model = Model(criterion, args)
     if args.compile and isinstance(trainer.accelerator, CUDAAccelerator):
         model = torch.compile(model)
+    if args.learning_rate == -1:
+        args.auto_lr_find = True
     if args.auto_scale_batch_size or args.auto_lr_find:
         datamodule_i.setup(None)
         X, _ = next(iter(datamodule_i.train_dataloader()))
         _ = model(X)
         trainer.tune(model, datamodule=datamodule_i)
-    if args.auto_lr_find or args.learning_rate == -1:
+    if args.auto_lr_find:
         print(
             f"Automatically found learning rate: {model.learning_rate}"
         )
@@ -351,7 +353,7 @@ def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule)
 def internal_cross_validation(datamodule: LightningDataModule):
     best_EC5 = torch.inf
     best_args = None
-    all_args = itertools.product(
+    argvs = itertools.product(
         ("--model",), SUPER_LEARNER_MODELS,
         ("--criterion",), CRITERIONS,
         ("--learning_rate",), map(str, LEARNING_RATES),
@@ -360,9 +362,10 @@ def internal_cross_validation(datamodule: LightningDataModule):
         ("--no_data_augmentation", ""),
         ("--no_tabular_features", ""),
     )
-    for args in all_args:
-        print(args)
-        args = parse_args(args)
+    for argv in argvs:
+        argv = list(filter(len, argvs))
+        print(argv)
+        args = parse_args(argv)
         model = model_from_args(args, datamodule)
         ec5 = 0
         for j in range(datamodule.args.internal_k):

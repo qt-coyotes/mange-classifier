@@ -1,13 +1,13 @@
 import argparse
-import argparse
 import csv
 import glob
 import json
 import os
-import shutil
 import random
+import shutil
 import uuid
 from datetime import datetime, timedelta
+from functools import lru_cache
 
 import git
 from google.oauth2.service_account import Credentials
@@ -157,8 +157,8 @@ def get_row(logs):
     return row
 
 
-def log_to_gsheet(logs):
-    row = get_row(logs)
+@lru_cache(maxsize=1)
+def get_gsheet_creds():
     if os.environ.get("GITHUB_ACTIONS"):
         with open("service-account-key.json", "w") as f:
             f.write(os.environ.get("GDRIVE_CREDENTIALS_DATA"))
@@ -166,6 +166,12 @@ def log_to_gsheet(logs):
         "service-account-key.json",
         scopes=SCOPES,
     )
+    return creds
+
+
+def log_to_gsheet(logs):
+    row = get_row(logs)
+    creds = get_gsheet_creds()
 
     if (
         logs["args"]["metadata_path"]
