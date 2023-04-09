@@ -50,8 +50,8 @@ SUPER_LEARNER_MODELS = {
     # "ResNet152": (ResNetModel, 152),
     # "ViT-B/16": (ViTModel, "B/16"),
     # "ViT-B/32": (ViTModel, "B/32"),
-    "ViT-L/16": (ViTModel, "L/16"),
-    # "ViT-L/32": (ViTModel, "L/32"),
+    # "ViT-L/16": (ViTModel, "L/16"),
+    "ViT-L/32": (ViTModel, "L/32"),
     # "DenseNet121": (DenseNetModel, 121),
     # "DenseNet161": (DenseNetModel, 161),
     # "DenseNet169": (DenseNetModel, 169),
@@ -333,6 +333,7 @@ def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule)
         model = torch.compile(model)
     if args.learning_rate == -1:
         args.auto_lr_find = True
+        args.learning_rate = None
     if args.auto_scale_batch_size or args.auto_lr_find:
         datamodule_i.setup(None)
         X, _ = next(iter(datamodule_i.train_dataloader()))
