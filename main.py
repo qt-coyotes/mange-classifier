@@ -363,8 +363,7 @@ def internal_cross_validation(datamodule: LightningDataModule):
         ("--no_tabular_features", ""),
     )
     for argv in argvs:
-        argv = list(filter(len, argvs))
-        print(argv)
+        argv = list(filter(len, argv))
         args = parse_args(argv)
         model = model_from_args(args, datamodule)
         ec5 = 0
