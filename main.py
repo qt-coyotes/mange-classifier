@@ -69,7 +69,7 @@ LEARNING_RATES = {
     # 0.001,
     # 0.0001,
     # 0.00001,
-    -1
+    "--auto_lr_find",
 }
 
 BATCH_SIZES = {
@@ -325,8 +325,6 @@ def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule)
         criterion = HybridLoss(
             criterion, BinaryExpectedCostLoss(cfn=args.criterion_cfn)
         )
-    if args.learning_rate < 0:
-        args.auto_lr_find = True
     if architecture is not None:
         model = Model(criterion, args, architecture=architecture)
     else:
@@ -362,6 +360,9 @@ def internal_cross_validation(datamodule: LightningDataModule):
     ))
     print(f"Number of internal cross validation configurations: {len(argvs)}")
     for argv in argvs:
+        argv = list(argv)
+        if "--auto_lr_find" in argv:
+            argv.remove("--learning_rate")
         argv = list(filter(len, argv))
         print(f"Internal cross validation configuration: {argv}")
         args = parse_args(argv)
