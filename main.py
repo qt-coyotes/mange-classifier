@@ -24,12 +24,16 @@ from losses import (
     BinarySurrogateFBetaLoss,
     HybridLoss,
 )
+from models.all_negative import AllNegativeModel
+from models.all_positive import AllPositiveModel
 from models.base import BaseModel
 from models.densenet import DenseNetModel
 from models.random import RandomModel
 from models.resnet import ResNetModel
 from models.vit import ViTModel
 from models.yolo import YoloModel
+
+NO_TRAIN_MODELS = {"Random", "AllPositive", "AllNegative"}
 
 
 def main():
@@ -39,6 +43,9 @@ def main():
         "ViT": ViTModel,
         "YOLO": YoloModel,
         "Random": RandomModel,
+        "AllPositive": AllPositiveModel,
+        "AllNegative": AllNegativeModel,
+        "Random": RandomModel,
     }
     criterions_set = {
         "BCELoss",
@@ -47,6 +54,7 @@ def main():
         "MacroSoftFBetaLoss",
         "ExpectedCostLoss",
         "SurrogateFBetaLoss",
+        "HybridLoss",
         "HybridLoss",
     }
     parser = argparse.ArgumentParser()
@@ -305,9 +313,14 @@ def cross_validate(
             log_every_n_steps=1000,
         )
         if criterion == "awBCELoss" or criterion == "HybridLoss":
+        if criterion == "awBCELoss" or criterion == "HybridLoss":
             datamodule_i.setup(None)
             p = datamodule_i.train_dataset().pos_weight
             criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(p))
+        if criterion == "HybridLoss":
+            criterion = HybridLoss(
+                criterion, BinaryExpectedCostLoss(cfn=args.criterion_cfn)
+            )
         if criterion == "HybridLoss":
             criterion = HybridLoss(
                 criterion, BinaryExpectedCostLoss(cfn=args.criterion_cfn)
@@ -317,6 +330,9 @@ def cross_validate(
             model = torch.compile(model)
 
         if args.auto_scale_batch_size or args.auto_lr_find:
+            datamodule_i.setup(None)
+            X, _ = next(iter(datamodule_i.train_dataloader()))
+            _ = model(X)
             datamodule_i.setup(None)
             X, _ = next(iter(datamodule_i.train_dataloader()))
             _ = model(X)
@@ -331,13 +347,14 @@ def cross_validate(
                 print("Replace --auto_scale_batch_size with")
                 print(f"--batch_size {model.batch_size}")
                 break
-        if args.model != "Random":
+        if args.model not in NO_TRAIN_MODELS:
             trainer.fit(model=model, train_dataloaders=datamodule_i)
-        if args.fast_dev_run or args.model == "Random":
+        if args.fast_dev_run or args.model in NO_TRAIN_MODELS:
             test_metric = trainer.test(model, dataloaders=datamodule)
         elif not args.no_early_stopping:
             test_metric = trainer.test(
                 ckpt_path=model_checkpoint.best_model_path,
+                dataloaders=datamodule,
                 dataloaders=datamodule,
             )
         else:
@@ -351,6 +368,8 @@ def cross_validate(
 
     end_time = time.perf_counter()
     time_elapsed = timedelta(seconds=end_time - start_time)
+    logs = generate_logs(test_metrics, time_elapsed, args)
+    log_to_json(logs)
     logs = generate_logs(test_metrics, time_elapsed, args)
     log_to_json(logs)
     aggregate_logs()

@@ -18,6 +18,7 @@ from torchmetrics.classification import (
 import torchvision.transforms as transforms
 from metrics import BinaryExpectedCost
 from losses import HybridLoss
+from losses import HybridLoss
 
 
 class BaseModel(LightningModule):
@@ -41,7 +42,7 @@ class BaseModel(LightningModule):
         )
         self.augmentations = transforms.Compose([
             transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation(5),
+            transforms.RandomRotation(10),
             transforms.GaussianBlur(3),
         ])
         self.criterion = criterion

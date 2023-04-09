@@ -22,6 +22,8 @@ class COCOImageDataset(Dataset):
         args: argparse.Namespace,
         image_transform=None,
         tabular_transform=None,
+        image_transform=None,
+        tabular_transform=None,
         target_transform=None,
         pos_weight=None,
     ):
@@ -185,6 +187,35 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     },
                 }
 
+            tabular_transform = None
+            if not self.args.no_tabular_features:
+                years = np.array([image["year"] for image in X_trainval])
+                months = np.array([image["month"] for image in X_trainval])
+                hours = np.array([image["hour"] for image in X_trainval])
+                latitudes = np.array(
+                    [image["latitude"] for image in X_trainval]
+                )
+                longitudes = np.array(
+                    [image["longitude"] for image in X_trainval]
+                )
+
+                tabular_transform = {
+                    "mean": {
+                        "year": years.mean(),
+                        "month": months.mean(),
+                        "hour": hours.mean(),
+                        "latitude": latitudes.mean(),
+                        "longitude": longitudes.mean(),
+                    },
+                    "std": {
+                        "year": years.std(),
+                        "month": months.std(),
+                        "hour": hours.std(),
+                        "latitude": latitudes.std(),
+                        "longitude": longitudes.std(),
+                    },
+                }
+
             if self.args.internal_group:
                 groups_trainval = [groups[i] for i in trainval_indexes]
                 trainval_sgkf = StratifiedGroupKFold(
@@ -226,6 +257,8 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     train_y,
                     self.data_path,
                     self.args,
+                    image_transform=equal_size_transform,
+                    tabular_transform=tabular_transform,
                     image_transform=equal_size_transform,
                     tabular_transform=tabular_transform,
                     pos_weight=p,
