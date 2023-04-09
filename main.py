@@ -80,7 +80,7 @@ BATCH_SIZES = {
 
 CRITERIONS = {
     "BCELoss",
-    "wBCELoss",
+    # "wBCELoss",
     "awBCELoss",
     "ExpectedCostLoss",
     # "MacroSoftFBetaLoss",
@@ -325,21 +325,19 @@ def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule)
         criterion = HybridLoss(
             criterion, BinaryExpectedCostLoss(cfn=args.criterion_cfn)
         )
+    if args.learning_rate < 0:
+        args.auto_lr_find = True
     if architecture is not None:
         model = Model(criterion, args, architecture=architecture)
     else:
         model = Model(criterion, args)
     if args.compile and isinstance(trainer.accelerator, CUDAAccelerator):
         model = torch.compile(model)
-    if args.learning_rate == -1:
-        args.auto_lr_find = True
-        args.learning_rate = None
     if args.auto_scale_batch_size or args.auto_lr_find:
         datamodule_i.setup(None)
         X, _ = next(iter(datamodule_i.train_dataloader()))
         _ = model(X)
         trainer.tune(model, datamodule=datamodule_i)
-    if args.auto_lr_find:
         print(
             f"Automatically found learning rate: {model.learning_rate}"
         )
