@@ -75,6 +75,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
     def __init__(self, args: argparse.Namespace):
         super().__init__()
         self.i = -1
+        self.j = 0
         self.data_path = Path(args.data_path)
         self.metadata_path = Path(args.metadata_path)
         self.args = args
@@ -205,16 +206,40 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                 trainval_splits = list(
                     trainval_skf.split(X_trainval, y_trainval)
                 )
-            train_indexes, val_indexes = trainval_splits[0]
 
-            train_X = [X_trainval[i] for i in train_indexes]
-            train_y = [y_trainval[i] for i in train_indexes]
-            val_X = [X_trainval[i] for i in val_indexes]
-            val_y = [y_trainval[i] for i in val_indexes]
+            train_datasets = []
+            val_datasets = []
+            for j in range(self.args.internal_k):
+                train_indexes, val_indexes = trainval_splits[j]
 
-            n1 = sum(train_y)
-            n0 = len(train_y) - n1
-            p = n0 / n1
+                train_X = [X_trainval[i] for i in train_indexes]
+                train_y = [y_trainval[i] for i in train_indexes]
+                val_X = [X_trainval[i] for i in val_indexes]
+                val_y = [y_trainval[i] for i in val_indexes]
+
+                n1 = sum(train_y)
+                n0 = len(train_y) - n1
+                p = n0 / n1
+
+                train_dataset = COCOImageDataset(
+                    train_X,
+                    train_y,
+                    self.data_path,
+                    self.args,
+                    image_transform=equal_size_transform,
+                    tabular_transform=tabular_transform,
+                    pos_weight=p,
+                )
+                train_datasets.append(train_dataset)
+                val_dataset = COCOImageDataset(
+                    val_X,
+                    val_y,
+                    self.data_path,
+                    self.args,
+                    image_transform=equal_size_transform,
+                    tabular_transform=tabular_transform,
+                )
+                val_datasets.append(val_dataset)
 
             self.dataset_test.append(
                 COCOImageDataset(
@@ -226,34 +251,15 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     tabular_transform=tabular_transform,
                 )
             )
-            self.dataset_train.append(
-                COCOImageDataset(
-                    train_X,
-                    train_y,
-                    self.data_path,
-                    self.args,
-                    image_transform=equal_size_transform,
-                    tabular_transform=tabular_transform,
-                    pos_weight=p,
-                )
-            )
-            self.dataset_val.append(
-                COCOImageDataset(
-                    val_X,
-                    val_y,
-                    self.data_path,
-                    self.args,
-                    image_transform=equal_size_transform,
-                    tabular_transform=tabular_transform,
-                )
-            )
+            self.dataset_train.append(train_datasets)
+            self.dataset_val.append(val_datasets)
 
     def train_dataset(self):
-        return self.dataset_train[self.i]
+        return self.dataset_train[self.i][self.j]
 
     def train_dataloader(self):
         return DataLoader(
-            self.dataset_train[self.i],
+            self.dataset_train[self.i][self.j],
             batch_size=self.args.batch_size,
             num_workers=self.args.num_workers,
             persistent_workers=self.args.persistent_workers,
@@ -263,7 +269,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
 
     def val_dataloader(self):
         return DataLoader(
-            self.dataset_val[self.i],
+            self.dataset_val[self.i][self.j],
             batch_size=self.args.batch_size,
             num_workers=self.args.num_workers,
             persistent_workers=self.args.persistent_workers,
