@@ -44,8 +44,8 @@ NO_TRAIN_MODELS = {
 }
 
 SUPER_LEARNER_MODELS = {
-    # "ResNet18": (ResNetModel, 18),
-    # "ResNet34": (ResNetModel, 34),
+    "ResNet18": (ResNetModel, 18),
+    "ResNet34": (ResNetModel, 34),
     # "ResNet50": (ResNetModel, 50),
     # "ResNet101": (ResNetModel, 101),
     # "ResNet152": (ResNetModel, 152),
@@ -61,7 +61,7 @@ SUPER_LEARNER_MODELS = {
     # "yolov8s-cls.pt": (YoloModel, "yolov8s-cls.pt"),
     # "yolov8m-cls.pt": (YoloModel, "yolov8m-cls.pt"),
     # "yolov8l-cls.pt": (YoloModel, "yolov8l-cls.pt"),
-    "yolov8x-cls.pt": (YoloModel, "yolov8x-cls.pt"),
+    # "yolov8x-cls.pt": (YoloModel, "yolov8x-cls.pt"),
 }
 
 MODELS = {**NO_TRAIN_MODELS, **SUPER_LEARNER_MODELS}
@@ -360,33 +360,27 @@ def internal_cross_validation(datamodule: LightningDataModule):
         ("--no_data_augmentation", ""),
         ("--no_tabular_features", ""),
     ))
-    print(f"Number of internal cross validation configurations: {len(argvs)}")
+    print(f"Number of hyperparameter configurations: {len(argvs)}")
     for c, argv in enumerate(argvs):
         argv = list(argv)
         if "--auto_lr_find" in argv:
             argv.remove("--learning_rate")
         argv = list(filter(len, argv))
-        print(f"Internal cross validation configuration: {c}/{len(argvs)}")
+        print(f"Hyperparameter configuration: {c}/{len(argvs)}")
+        log_to_gsheet([f"{c}", f"{len(argvs)}" f"{c}/{len(argvs)}", f"{argv}"])
         args = parse_args(argv)
         model = model_from_args(args, datamodule)
-        ec5 = 0
-        for j in range(datamodule.args.internal_k):
-            print(f"Internal cross validation fold: {j}/{datamodule.args.internal_k}")
-            datamodule.j = j
-            model, trainer, model_checkpoint = model_from_args(
-                args, datamodule
-            )
-            # val_EC5 is not quite right
-            # also has leakage of pos_weight
-            trainer.fit(model, datamodule=datamodule)
-            ec5 += trainer.callback_metrics["val_EC5"]
-        EC5 = ec5 / datamodule.args.internal_k
+        model, trainer, model_checkpoint = model_from_args(args, datamodule)
+        # leakage of pos_weight
+        trainer.fit(model, datamodule=datamodule)
+        EC5 = trainer.callback_metrics["val_EC5"]
         print(f"EC5: {EC5}")
         if EC5 < best_EC5:
             best_EC5 = EC5
             best_args = args
     print(f"Best EC5: {best_EC5}")
     print(f"Best args: {best_args}")
+    log_to_gsheet([f"{best_EC5}", f"{best_args}"])
     return parse_args(best_args)
 
 
