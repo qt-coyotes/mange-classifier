@@ -41,7 +41,7 @@ class BaseModel(LightningModule):
         )
         self.augmentations = transforms.Compose([
             transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation(10),
+            transforms.RandomRotation(15),
             transforms.GaussianBlur(3),
         ])
         self.criterion = criterion
