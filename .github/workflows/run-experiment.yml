@@ -49,3 +49,4 @@ jobs:
           logs.tsv
           logs_*.json
           stripped_logs
+          lightning_logs
