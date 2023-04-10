@@ -38,7 +38,7 @@ jobs:
       run: make
       env:
         GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
-      timeout-minutes: 1440
+      timeout-minutes: 10080
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3

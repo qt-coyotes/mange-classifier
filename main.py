@@ -45,20 +45,20 @@ NO_TRAIN_MODELS = {
 
 SUPER_LEARNER_MODELS = {
     "ResNet18": (ResNetModel, 18),
-    # "ResNet34": (ResNetModel, 34),
+    "ResNet34": (ResNetModel, 34),
     # "ResNet50": (ResNetModel, 50),
     # "ResNet101": (ResNetModel, 101),
     # "ResNet152": (ResNetModel, 152),
-    # "ViT-B/16": (ViTModel, "B/16"),
+    "ViT-B/16": (ViTModel, "B/16"),
     # "ViT-B/32": (ViTModel, "B/32"),
     # "ViT-L/16": (ViTModel, "L/16"),
     # "ViT-L/32": (ViTModel, "L/32"),
-    # "DenseNet121": (DenseNetModel, 121),
+    "DenseNet121": (DenseNetModel, 121),
     # "DenseNet161": (DenseNetModel, 161),
     # "DenseNet169": (DenseNetModel, 169),
     # "DenseNet201": (DenseNetModel, 201),
     # "yolov8n-cls.pt": (YoloModel, "yolov8n-cls.pt"),
-    # "yolov8s-cls.pt": (YoloModel, "yolov8s-cls.pt"),
+    "yolov8s-cls.pt": (YoloModel, "yolov8s-cls.pt"),
     # "yolov8m-cls.pt": (YoloModel, "yolov8m-cls.pt"),
     # "yolov8l-cls.pt": (YoloModel, "yolov8l-cls.pt"),
     # "yolov8x-cls.pt": (YoloModel, "yolov8x-cls.pt"),
@@ -69,12 +69,12 @@ MODELS = {**NO_TRAIN_MODELS, **SUPER_LEARNER_MODELS}
 LEARNING_RATES = {
     # 0.001,
     0.0001,
-    # 0.00001,
+    0.00001,
     "--auto_lr_find",
 }
 
 BATCH_SIZES = {
-    16,
+    # 16,
     32,
 }
 
