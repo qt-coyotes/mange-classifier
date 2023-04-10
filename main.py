@@ -351,6 +351,7 @@ def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule)
 def internal_cross_validation(datamodule: LightningDataModule):
     best_EC5 = torch.inf
     best_args = None
+    best_checkpoint = None
     argvs = list(itertools.product(
         ("--model",), SUPER_LEARNER_MODELS,
         ("--criterion",), CRITERIONS,
@@ -378,7 +379,7 @@ def internal_cross_validation(datamodule: LightningDataModule):
         if EC5 < best_EC5:
             best_EC5 = EC5
             best_args = args
-            best_checkpoint = model_checkpoint.best_model_path
+            best_checkpoint = model_checkpoint
     print(f"Best EC5: {best_EC5}")
     print(f"Best args: {best_args}")
     log_to_gsheet([f"{best_EC5}", f"{best_args}"], "SuperLearner!A1:A1")
