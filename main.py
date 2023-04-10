@@ -70,19 +70,19 @@ LEARNING_RATES = {
     # 0.001,
     0.0001,
     # 0.00001,
-    # "--auto_lr_find",
+    "--auto_lr_find",
 }
 
 BATCH_SIZES = {
-    # 16,
+    16,
     32,
 }
 
 CRITERIONS = {
-    "BCELoss",
-    # "wBCELoss",
     "awBCELoss",
-    # "ExpectedCostLoss",
+    "BCELoss",
+    "ExpectedCostLoss",
+    # "wBCELoss",
     # "MacroSoftFBetaLoss",
     # "SurrogateFBetaLoss",
     # "HybridLoss",
@@ -374,7 +374,7 @@ def internal_cross_validation(datamodule: LightningDataModule):
         trainer.fit(model, datamodule=datamodule)
         EC5 = trainer.callback_metrics["val_EC5"]
         print(f"EC5: {EC5}")
-        log_to_gsheet([f"{EC5}", f"{c / len(argvs)}", f"{c}", f"{len(argvs)}", f"{argv}"], "SuperLearner!A1:A1")
+        log_to_gsheet([f"{EC5}", f"{c / len(argvs)}", f"{c}", f"{len(argvs)}", f"{' '.join(argv)}"], "SuperLearner!A1:A1")
         if EC5 < best_EC5:
             best_EC5 = EC5
             best_args = args
@@ -388,10 +388,10 @@ def external_cross_validation(args: argparse.Namespace):
     start_time = time.perf_counter()
     test_metrics = []
     datamodule = StratifiedGroupKFoldDataModule(args)
-    using_super_learner = args.model == "SuperLearner"
+    args_copy = args
     for datamodule_i in datamodule:
         seed_everything(args.random_state, workers=True)
-        if using_super_learner:
+        if args_copy.model == "SuperLearner":
             args = internal_cross_validation(datamodule_i)
         model, trainer, model_checkpoint = model_from_args(args, datamodule_i)
         if args.model not in NO_TRAIN_MODELS:
@@ -414,9 +414,7 @@ def external_cross_validation(args: argparse.Namespace):
 
     end_time = time.perf_counter()
     time_elapsed = timedelta(seconds=end_time - start_time)
-    logs = generate_logs(test_metrics, time_elapsed, args)
-    log_to_json(logs)
-    logs = generate_logs(test_metrics, time_elapsed, args)
+    logs = generate_logs(test_metrics, time_elapsed, args_copy)
     log_to_json(logs)
     aggregate_logs()
     row = get_row(logs)
@@ -429,7 +427,7 @@ def external_cross_validation(args: argparse.Namespace):
         gsheet_range = "v17!A1:A1"
     log_to_gsheet(row, gsheet_range)
 
-    extract_lightning_logs(args)  # Pulls out the one checkpoint we want
+    extract_lightning_logs(args_copy)  # Pulls out the one checkpoint we want
 
 
 def train_final_model(args: argparse.Namespace):
