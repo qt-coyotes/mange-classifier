@@ -70,11 +70,11 @@ LEARNING_RATES = {
     # 0.001,
     0.0001,
     # 0.00001,
-    "--auto_lr_find",
+    # "--auto_lr_find",
 }
 
 BATCH_SIZES = {
-    16,
+    # 16,
     32,
 }
 
@@ -82,7 +82,7 @@ CRITERIONS = {
     "BCELoss",
     # "wBCELoss",
     "awBCELoss",
-    "ExpectedCostLoss",
+    # "ExpectedCostLoss",
     # "MacroSoftFBetaLoss",
     # "SurrogateFBetaLoss",
     # "HybridLoss",
@@ -381,7 +381,7 @@ def internal_cross_validation(datamodule: LightningDataModule):
     print(f"Best EC5: {best_EC5}")
     print(f"Best args: {best_args}")
     log_to_gsheet([f"{best_EC5}", f"{best_args}"], "SuperLearner!A1:A1")
-    return parse_args(best_args)
+    return best_args
 
 
 def external_cross_validation(args: argparse.Namespace):
