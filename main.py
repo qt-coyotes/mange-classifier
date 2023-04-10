@@ -388,9 +388,10 @@ def external_cross_validation(args: argparse.Namespace):
     start_time = time.perf_counter()
     test_metrics = []
     datamodule = StratifiedGroupKFoldDataModule(args)
+    using_super_learner = args.model == "SuperLearner"
     for datamodule_i in datamodule:
         seed_everything(args.random_state, workers=True)
-        if args.model == "SuperLearner":
+        if using_super_learner:
             args = internal_cross_validation(datamodule_i)
         model, trainer, model_checkpoint = model_from_args(args, datamodule_i)
         if args.model not in NO_TRAIN_MODELS:
