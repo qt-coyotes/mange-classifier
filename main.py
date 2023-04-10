@@ -45,7 +45,7 @@ NO_TRAIN_MODELS = {
 
 SUPER_LEARNER_MODELS = {
     "ResNet18": (ResNetModel, 18),
-    "ResNet34": (ResNetModel, 34),
+    # "ResNet34": (ResNetModel, 34),
     # "ResNet50": (ResNetModel, 50),
     # "ResNet101": (ResNetModel, 101),
     # "ResNet152": (ResNetModel, 152),
@@ -67,9 +67,9 @@ SUPER_LEARNER_MODELS = {
 MODELS = {**NO_TRAIN_MODELS, **SUPER_LEARNER_MODELS}
 
 LEARNING_RATES = {
-    0.001,
+    # 0.001,
     0.0001,
-    0.00001,
+    # 0.00001,
     "--auto_lr_find",
 }
 
@@ -367,14 +367,14 @@ def internal_cross_validation(datamodule: LightningDataModule):
             argv.remove("--learning_rate")
         argv = list(filter(len, argv))
         print(f"Hyperparameter configuration: {c}/{len(argvs)}")
-        log_to_gsheet([f"{c}", f"{len(argvs)}" f"{c}/{len(argvs)}", f"{argv}"], "SuperLearner!A1:A1")
         args = parse_args(argv)
         model = model_from_args(args, datamodule)
         model, trainer, model_checkpoint = model_from_args(args, datamodule)
-        # leakage of pos_weight
+        # internal leakage of pos_weight and early stopping
         trainer.fit(model, datamodule=datamodule)
         EC5 = trainer.callback_metrics["val_EC5"]
         print(f"EC5: {EC5}")
+        log_to_gsheet([f"{EC5}", f"{c / len(argvs)}", f"{c}", f"{len(argvs)}", f"{argv}"], "SuperLearner!A1:A1")
         if EC5 < best_EC5:
             best_EC5 = EC5
             best_args = args
