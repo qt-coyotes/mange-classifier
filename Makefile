@@ -1,5 +1,5 @@
 4090:
-	python3 main.py --num_sanity_val_steps 1 --patience 3 --internal_group --model SuperLearner --message "superlearner v1"
+	python3 main.py --num_sanity_val_steps 1 --patience 5 --internal_group --model SuperLearner --message "superlearner v1" --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json
 
 CHIL:
 	python3 main.py --batch_size 16 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion BCELoss --monitor val_loss --no_crop --no_tabular_features --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json --message "pretrained + data augmentation"

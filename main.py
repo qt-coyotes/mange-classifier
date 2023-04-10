@@ -45,23 +45,23 @@ NO_TRAIN_MODELS = {
 
 SUPER_LEARNER_MODELS = {
     "ResNet18": (ResNetModel, 18),
-    "ResNet34": (ResNetModel, 34),
-    # "ResNet50": (ResNetModel, 50),
-    # "ResNet101": (ResNetModel, 101),
-    # "ResNet152": (ResNetModel, 152),
-    "ViT-B/16": (ViTModel, "B/16"),
-    # "ViT-B/32": (ViTModel, "B/32"),
-    # "ViT-L/16": (ViTModel, "L/16"),
-    # "ViT-L/32": (ViTModel, "L/32"),
-    "DenseNet121": (DenseNetModel, 121),
-    # "DenseNet161": (DenseNetModel, 161),
-    # "DenseNet169": (DenseNetModel, 169),
-    # "DenseNet201": (DenseNetModel, 201),
-    # "yolov8n-cls.pt": (YoloModel, "yolov8n-cls.pt"),
-    "yolov8s-cls.pt": (YoloModel, "yolov8s-cls.pt"),
-    # "yolov8m-cls.pt": (YoloModel, "yolov8m-cls.pt"),
-    # "yolov8l-cls.pt": (YoloModel, "yolov8l-cls.pt"),
-    # "yolov8x-cls.pt": (YoloModel, "yolov8x-cls.pt"),
+    # "ResNet34": (ResNetModel, 34),
+    # # "ResNet50": (ResNetModel, 50),
+    # # "ResNet101": (ResNetModel, 101),
+    # # "ResNet152": (ResNetModel, 152),
+    # "ViT-B/16": (ViTModel, "B/16"),
+    # # "ViT-B/32": (ViTModel, "B/32"),
+    # # "ViT-L/16": (ViTModel, "L/16"),
+    # # "ViT-L/32": (ViTModel, "L/32"),
+    # "DenseNet121": (DenseNetModel, 121),
+    # # "DenseNet161": (DenseNetModel, 161),
+    # # "DenseNet169": (DenseNetModel, 169),
+    # # "DenseNet201": (DenseNetModel, 201),
+    # # "yolov8n-cls.pt": (YoloModel, "yolov8n-cls.pt"),
+    # "yolov8s-cls.pt": (YoloModel, "yolov8s-cls.pt"),
+    # # "yolov8m-cls.pt": (YoloModel, "yolov8m-cls.pt"),
+    # # "yolov8l-cls.pt": (YoloModel, "yolov8l-cls.pt"),
+    # # "yolov8x-cls.pt": (YoloModel, "yolov8x-cls.pt"),
 }
 
 MODELS = {**NO_TRAIN_MODELS, **SUPER_LEARNER_MODELS}
@@ -69,8 +69,8 @@ MODELS = {**NO_TRAIN_MODELS, **SUPER_LEARNER_MODELS}
 LEARNING_RATES = {
     # 0.001,
     0.0001,
-    0.00001,
-    "--auto_lr_find",
+    # 0.00001,
+    # "--auto_lr_find",
 }
 
 BATCH_SIZES = {
@@ -80,8 +80,8 @@ BATCH_SIZES = {
 
 CRITERIONS = {
     "awBCELoss",
-    "BCELoss",
-    "ExpectedCostLoss",
+    # "BCELoss",
+    # "ExpectedCostLoss",
     # "wBCELoss",
     # "MacroSoftFBetaLoss",
     # "SurrogateFBetaLoss",
@@ -372,16 +372,17 @@ def internal_cross_validation(datamodule: LightningDataModule):
         model, trainer, model_checkpoint = model_from_args(args, datamodule)
         # internal leakage of pos_weight and early stopping
         trainer.fit(model, datamodule=datamodule)
-        EC5 = trainer.callback_metrics["val_EC5"]
+        EC5 = model_checkpoint.best_model_score
         print(f"EC5: {EC5}")
         log_to_gsheet([f"{EC5}", f"{c / len(argvs)}", f"{c}", f"{len(argvs)}", f"{' '.join(argv)}"], "SuperLearner!A1:A1")
         if EC5 < best_EC5:
             best_EC5 = EC5
             best_args = args
+            best_checkpoint = model_checkpoint.best_model_path
     print(f"Best EC5: {best_EC5}")
     print(f"Best args: {best_args}")
     log_to_gsheet([f"{best_EC5}", f"{best_args}"], "SuperLearner!A1:A1")
-    return best_args
+    return best_args, best_checkpoint
 
 
 def external_cross_validation(args: argparse.Namespace):
@@ -392,13 +393,14 @@ def external_cross_validation(args: argparse.Namespace):
     for datamodule_i in datamodule:
         seed_everything(args.random_state, workers=True)
         if args_copy.model == "SuperLearner":
-            args = internal_cross_validation(datamodule_i)
-        model, trainer, model_checkpoint = model_from_args(args, datamodule_i)
-        if args.model not in NO_TRAIN_MODELS:
-            trainer.fit(model=model, train_dataloaders=datamodule_i)
-        if args.fast_dev_run or args.model in NO_TRAIN_MODELS:
-            test_metric = trainer.test(model, dataloaders=datamodule)
-        elif not args.no_early_stopping:
+            args, model_checkpoint = internal_cross_validation(datamodule_i)
+        else:
+            model, trainer, model_checkpoint = model_from_args(args, datamodule_i)
+            if args.model not in NO_TRAIN_MODELS:
+                trainer.fit(model=model, train_dataloaders=datamodule_i)
+            if args.fast_dev_run or args.model in NO_TRAIN_MODELS:
+                test_metric = trainer.test(model, dataloaders=datamodule)
+        if not args.no_early_stopping:
             test_metric = trainer.test(
                 ckpt_path=model_checkpoint.best_model_path,
                 dataloaders=datamodule,
