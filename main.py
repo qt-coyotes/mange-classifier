@@ -395,6 +395,7 @@ def external_cross_validation(args: argparse.Namespace):
         seed_everything(args.random_state, workers=True)
         if args_copy.model == "SuperLearner":
             args, model_checkpoint = internal_cross_validation(datamodule_i)
+            model = model_from_args(args, datamodule_i)
             trainer = Trainer.from_argparse_args(
                 args,
                 log_every_n_steps=1000,
@@ -407,6 +408,7 @@ def external_cross_validation(args: argparse.Namespace):
                 test_metric = trainer.test(model, dataloaders=datamodule)
         if not args.no_early_stopping:
             test_metric = trainer.test(
+                model=model,
                 ckpt_path=model_checkpoint.best_model_path,
                 dataloaders=datamodule,
             )
