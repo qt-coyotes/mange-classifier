@@ -47,7 +47,6 @@ class COCOImageDataset(Dataset):
         hours = np.array([image["hour"] for image in images])
         self.hour_mean = hours.mean()
         self.hour_std = hours.std()
-        self.locations = set(image["lo
 
     def __len__(self):
         return len(self.images)
@@ -77,8 +76,8 @@ class COCOImageDataset(Dataset):
                     image["is_color"],
                     (image["year"] - self.year_mean) / self.year_std,
                     (image["month"] - self.month_mean) / self.month_std,
-                    image["latitude"] / 90.,
-                    image["longitude"] / 180.,
+                    image["latitude"] / 90.0,
+                    image["longitude"] / 180.0,
                 ],
                 dtype=torch.float32,
             )
@@ -154,9 +153,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                 shuffle=self.args.shuffle,
                 random_state=self.args.random_state,
             )
-            trainvaltest_splits = list(
-                trainvaltest_sgkf.split(X, y, groups=groups)
-            )
+            trainvaltest_splits = list(trainvaltest_sgkf.split(X, y, groups=groups))
         else:
             print("WARNING: No external grouping!")
             trainvaltest_skf = StratifiedKFold(
@@ -180,12 +177,8 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                 years = np.array([image["year"] for image in X_trainval])
                 months = np.array([image["month"] for image in X_trainval])
                 hours = np.array([image["hour"] for image in X_trainval])
-                latitudes = np.array(
-                    [image["latitude"] for image in X_trainval]
-                )
-                longitudes = np.array(
-                    [image["longitude"] for image in X_trainval]
-                )
+                latitudes = np.array([image["latitude"] for image in X_trainval])
+                longitudes = np.array([image["longitude"] for image in X_trainval])
 
                 tabular_transform = {
                     "mean": {
@@ -209,12 +202,8 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                 years = np.array([image["year"] for image in X_trainval])
                 months = np.array([image["month"] for image in X_trainval])
                 hours = np.array([image["hour"] for image in X_trainval])
-                latitudes = np.array(
-                    [image["latitude"] for image in X_trainval]
-                )
-                longitudes = np.array(
-                    [image["longitude"] for image in X_trainval]
-                )
+                latitudes = np.array([image["latitude"] for image in X_trainval])
+                longitudes = np.array([image["longitude"] for image in X_trainval])
 
                 tabular_transform = {
                     "mean": {
@@ -241,9 +230,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     random_state=None,
                 )
                 trainval_splits = list(
-                    trainval_sgkf.split(
-                        X_trainval, y_trainval, groups=groups_trainval
-                    )
+                    trainval_sgkf.split(X_trainval, y_trainval, groups=groups_trainval)
                 )
             else:
                 trainval_skf = StratifiedKFold(
@@ -251,9 +238,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     shuffle=False,
                     random_state=None,
                 )
-                trainval_splits = list(
-                    trainval_skf.split(X_trainval, y_trainval)
-                )
+                trainval_splits = list(trainval_skf.split(X_trainval, y_trainval))
 
             train_datasets = []
             val_datasets = []
