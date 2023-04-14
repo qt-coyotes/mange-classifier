@@ -35,6 +35,20 @@ class COCOImageDataset(Dataset):
         self.pos_weight = pos_weight
         self.locations = set(image["location"] for image in images)
 
+        years = np.array([image["year"] for image in images])
+        self.year_mean = years.mean()
+        self.year_std = years.std()
+        months = np.array([image["month"] for image in images])
+        self.month_mean = months.mean()
+        self.month_std = months.std()
+        days = np.array([image["day"] for image in images])
+        self.day_mean = days.mean()
+        self.day_std = days.std()
+        hours = np.array([image["hour"] for image in images])
+        self.hour_mean = hours.mean()
+        self.hour_std = hours.std()
+        self.locations = set(image["lo
+
     def __len__(self):
         return len(self.images)
 
@@ -60,6 +74,11 @@ class COCOImageDataset(Dataset):
                     image["is_color"],
                     (image["hour"] - self.tabular_transform["mean"]["hour"])
                     / self.tabular_transform["std"]["hour"],
+                    image["is_color"],
+                    (image["year"] - self.year_mean) / self.year_std,
+                    (image["month"] - self.month_mean) / self.month_std,
+                    image["latitude"] / 90.,
+                    image["longitude"] / 180.,
                 ],
                 dtype=torch.float32,
             )

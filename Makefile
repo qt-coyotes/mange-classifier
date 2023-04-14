@@ -1,8 +1,5 @@
 4090:
-	-python3 main.py --batch_size 32 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion BCELoss --monitor val_loss --no_crop --no_data_augmentation --message "ResNet18 with Transfer Learning and Tabular Features, Fixed Learning Rate."
-	-python3 main.py --batch_size 32 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion BCELoss --monitor val_loss --no_tabular_features --message "ResNet18 with Transfer Learning, Cropped Images, and Data Augmentation, Fixed Learning Rate."
-	-python3 main.py --batch_size 32 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion BCELoss --monitor val_loss --nonpretrained --message "ResNet18 with Cropped Images, Data Augmentation, and Tabular Features, Fixed Learning Rate."
-	-python3 main.py --batch_size 32 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion BCELoss --monitor val_loss --message "ResNet18 with Transfer Learning, Cropped Images, Data Augmentation, and Tabular Features, Fixed Learning Rate."
+	-python3 main.py --batch_size 32 --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion BCELoss --monitor val_loss --message "dens + crop + data augmentation 1"
 
 CHIL:
 	python3 main.py --batch_size 16 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion BCELoss --monitor val_loss --no_crop --no_tabular_features --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json --message "pretrained + data augmentation"
