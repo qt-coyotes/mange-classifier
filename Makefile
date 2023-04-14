@@ -1,5 +1,5 @@
 4090:
-	python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --monitor val_loss --no_crop --no_data_augmentation --no_tabular_features --message "CAPTUM awBCELoss, Transfer Learning, No Megadetector Cropping, No Data Augmentation, and No Additional Tabular Features."
+	-python3 main.py --batch_size 32 --auto_lr_find --learning_rate 0.0001 --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion awBCELoss --monitor val_loss --message "dens + crop + data augmentation 1"
 
 CHIL:
 	python3 main.py --batch_size 16 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet18 --criterion BCELoss --monitor val_loss --no_crop --no_tabular_features --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json --message "pretrained + data augmentation"
