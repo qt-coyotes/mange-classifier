@@ -35,7 +35,9 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Run experiment
-      run: make
+      run: |
+        make clean
+        make 4090
       env:
         GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
       timeout-minutes: 10080
@@ -48,5 +50,4 @@ jobs:
         path: |
           logs.tsv
           logs_*.json
-          stripped_logs
           lightning_logs
