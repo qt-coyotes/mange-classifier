@@ -432,9 +432,6 @@ def external_cross_validation(args: argparse.Namespace):
         gsheet_range = "v17!A1:A1"
     log_to_gsheet(row, gsheet_range)
 
-    extract_lightning_logs(args_copy)  # Pulls out the one checkpoint we want
-
-
 def train_final_model(args: argparse.Namespace):
     pass
 
