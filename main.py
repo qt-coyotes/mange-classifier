@@ -399,9 +399,9 @@ def external_cross_validation(args: argparse.Namespace):
             model, trainer, model_checkpoint = model_from_args(args, datamodule_i)
             if args.model not in NO_TRAIN_MODELS:
                 trainer.fit(model=model, train_dataloaders=datamodule_i)
-            if args.fast_dev_run or args.model in NO_TRAIN_MODELS:
-                test_metric = trainer.test(model, dataloaders=datamodule)
-        if not args.no_early_stopping:
+        if args.fast_dev_run or args.model in NO_TRAIN_MODELS:
+            test_metric = trainer.test(model, dataloaders=datamodule)
+        elif not args.no_early_stopping:
             test_metric = trainer.test(
                 model=model,
                 ckpt_path=model_checkpoint.best_model_path,
