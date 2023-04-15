@@ -5,7 +5,7 @@ import json
 
 SAGE = re.compile('Sage Raymond')
 
-with open('qt-coyotes-merged.json', 'r') as f:
+with open('data/qt-coyotes-merged.json', 'r') as f:
     js = json.load(f)
 
 js2 = {
@@ -19,7 +19,7 @@ print(len(js['images']))
 print(len(js['annotations']))
 
 for image in js['images']:
-    if not SAGE.match(image['rights_holder']):
+    if SAGE.match(image['rights_holder']):
         this_id = image['id']
 
         for annote in js['annotations']:
@@ -30,5 +30,5 @@ for image in js['images']:
 print(len(js2['images']))
 print(len(js2['annotations']))
 
-with open('qt-coyotes-merged-no-dens.json', 'w') as f:
+with open('qt-coyotes-merged-only-dens.json', 'w') as f:
     json.dump(js2, f, indent=4)
