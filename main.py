@@ -18,7 +18,6 @@ from logs import (
     get_row,
     log_to_gsheet,
     log_to_json,
-    extract_lightning_logs,
 )
 from losses import (
     BinaryExpectedCostLoss,
