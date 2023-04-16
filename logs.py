@@ -119,8 +119,6 @@ def get_row(logs):
     row.append(logs["time_elapsed"])
     row.append(None)
 
-    row.append("")
-
     model = logs["args"]["model"]
     if model == "ResNet":
         model = logs["args"]["resnet_model"]
@@ -180,7 +178,7 @@ def get_row(logs):
     row.append(None)
 
     row.extend(logs["cv_metrics"]["ExpectedCost5"])
-    
+
     return row
 
 
