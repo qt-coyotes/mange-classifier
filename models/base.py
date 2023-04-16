@@ -92,7 +92,15 @@ class BaseModel(LightningModule):
         x, y = batch
         logits = self.forward(x)
         yhat = torch.sigmoid(logits)
-        if isinstance(self.criterion, nn.BCEWithLogitsLoss):
+        if self.criterion == "dwBCELoss":
+            if isinstance(y, tuple):
+                y, w = y
+                criterion = nn.BCEWithLogitsLoss(weight=w)
+                loss = criterion(logits, y.float(), weight=w)
+            else:
+                criterion = nn.BCEWithLogitsLoss()
+                loss = criterion(logits, y.float())
+        elif isinstance(self.criterion, nn.BCEWithLogitsLoss):
             loss = self.criterion(logits, y.float())
         elif isinstance(self.criterion, HybridLoss):
             loss = self.criterion(logits, y.float(), batch_idx)

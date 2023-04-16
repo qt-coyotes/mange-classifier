@@ -24,6 +24,7 @@ class COCOImageDataset(Dataset):
         tabular_transform=None,
         target_transform=None,
         pos_weight=None,
+        weights=None,
     ):
         self.images = images
         self.labels = labels
@@ -34,6 +35,7 @@ class COCOImageDataset(Dataset):
         self.args = args
         self.pos_weight = pos_weight
         self.locations = set(image["location"] for image in images)
+        self.weights = weights
 
         years = np.array([image["year"] for image in images])
         self.year_mean = years.mean()
@@ -86,6 +88,8 @@ class COCOImageDataset(Dataset):
             img = self.image_transform(img)
         if self.target_transform:
             label = self.target_transform(label)
+        if self.weights:
+            label = (label, self.weights[idx])
         return (img, tabular), label
 
 
@@ -222,8 +226,8 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     },
                 }
 
+            groups_trainval = [groups[i] for i in trainval_indexes]
             if self.args.internal_group:
-                groups_trainval = [groups[i] for i in trainval_indexes]
                 trainval_sgkf = StratifiedGroupKFold(
                     n_splits=self.args.internal_k,
                     shuffle=False,
@@ -247,12 +251,33 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
 
                 train_X = [X_trainval[i] for i in train_indexes]
                 train_y = [y_trainval[i] for i in train_indexes]
+                train_groups = [groups_trainval[i] for i in train_indexes]
                 val_X = [X_trainval[i] for i in val_indexes]
                 val_y = [y_trainval[i] for i in val_indexes]
 
                 n1 = sum(train_y)
                 n0 = len(train_y) - n1
                 p = n0 / n1
+
+                group_p = {}
+                for group in set(groups_trainval):
+                    group_p[group] = (
+                        len(train_groups) - train_groups.count(group)
+                    ) / len(train_groups)
+
+                w_train, w_val = None, None
+                if self.args.criterion == "dwBCELoss":
+                    w_train = torch.zeros(len(train_y))
+                    w_train[train_y == 0] = 1
+                    w_train[train_y == 1] = p
+                    for i, group in enumerate(train_groups):
+                        w_train[i] *= group_p[group]
+
+                    w_val = torch.zeros(len(val_y))
+                    w_val[val_y == 0] = 1
+                    w_val[val_y == 1] = p
+                    for i, group in enumerate(val_y):
+                        w_val[i] *= group_p[group]
 
                 train_dataset = COCOImageDataset(
                     train_X,
@@ -262,6 +287,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     image_transform=equal_size_transform,
                     tabular_transform=tabular_transform,
                     pos_weight=p,
+                    weights=w_train
                 )
                 train_datasets.append(train_dataset)
                 val_dataset = COCOImageDataset(
@@ -271,6 +297,8 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     self.args,
                     image_transform=equal_size_transform,
                     tabular_transform=tabular_transform,
+                    pos_weight=p,
+                    weights=w_val,
                 )
                 val_datasets.append(val_dataset)
 

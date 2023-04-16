@@ -79,6 +79,7 @@ BATCH_SIZES = {
 
 CRITERIONS = {
     "awBCELoss",
+    "dwBCELoss",
     "BCELoss",
     "ExpectedCostLoss",
     # "wBCELoss",
@@ -291,6 +292,7 @@ def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule)
         "wBCELoss": nn.BCEWithLogitsLoss(
             pos_weight=torch.tensor(args.criterion_pos_weight)
         ),
+        "dwBCELoss": "dwBCELoss",
         "awBCELoss": "awBCELoss",
         "MacroSoftFBetaLoss": BinaryMacroSoftFBetaLoss(args.criterion_beta),
         "ExpectedCostLoss": BinaryExpectedCostLoss(cfn=args.criterion_cfn),
@@ -316,14 +318,12 @@ def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule)
         datamodule_i.setup(None)
         p = datamodule_i.train_dataset().pos_weight
         criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(p))
-    if criterion == "HybridLoss":
+    elif criterion == "HybridLoss":
         criterion = HybridLoss(
             criterion, BinaryExpectedCostLoss(cfn=args.criterion_cfn)
         )
-    if criterion == "HybridLoss":
-        criterion = HybridLoss(
-            criterion, BinaryExpectedCostLoss(cfn=args.criterion_cfn)
-        )
+    elif criterion == "dwBCELoss":
+        criterion = "dwBCELoss"
     if architecture is not None:
         model = Model(criterion, args, architecture=architecture)
     else:
