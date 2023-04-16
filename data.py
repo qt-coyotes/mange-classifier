@@ -249,10 +249,10 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
             for j in range(self.args.internal_k):
                 train_indexes, val_indexes = trainval_splits[j]
 
-                train_X = torch.tensor([X_trainval[i] for i in train_indexes])
+                train_X = [X_trainval[i] for i in train_indexes]
                 train_y = torch.tensor([y_trainval[i] for i in train_indexes])
                 train_groups = [groups_trainval[i] for i in train_indexes]
-                val_X = torch.tensor([X_trainval[i] for i in val_indexes])
+                val_X = [X_trainval[i] for i in val_indexes]
                 val_y = torch.tensor([y_trainval[i] for i in val_indexes])
                 val_groups = [groups_trainval[i] for i in val_indexes]
 
