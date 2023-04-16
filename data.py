@@ -279,6 +279,8 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     w_val[val_y == 1] = p
                     for i, group in enumerate(val_groups):
                         w_val[i] *= group_p[group]
+                    print(w_train)
+                    print(w_val)
 
                 train_dataset = COCOImageDataset(
                     train_X,

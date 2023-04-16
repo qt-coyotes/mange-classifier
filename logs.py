@@ -27,7 +27,9 @@ def generate_logs(
         test_metric_metric = test_metric["test_metric"]
         for key, value in test_metric_metric.items():
             key = key.replace("Binary", "")
-            cv_metrics[key] = cv_metrics.get(key, []) + value.item()
+            if key not in cv_metrics:
+                cv_metrics[key] = []
+            cv_metrics[key].append(value.item())
         cv_metrics["metric_confusion_matrix"].append(
             [
                 [
@@ -40,9 +42,9 @@ def generate_logs(
                 ],
             ]
         )
-        cv_metrics["loss"] = (
-            cv_metrics.get("loss", []) + test_metric["test_loss"]
-        )
+        if "loss" not in cv_metrics:
+            cv_metrics["loss"] = []
+        cv_metrics["loss"].append(test_metric["test_loss"])
 
     confidence = 0.95
     for metric in cv_metrics:
