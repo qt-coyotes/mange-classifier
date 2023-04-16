@@ -1,7 +1,5 @@
 4090:
-	python3 main.py --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model AllPositive --criterion dwBCELoss --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --message "Baseline"
-	python3 main.py --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model AllNegative --criterion dwBCELoss --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --message "Baseline"
-	python3 main.py --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model Random --criterion dwBCELoss --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --message "Baseline"
+	python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet50 --criterion dwBCELoss --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --message "Alternative dwBCE"
 
 CHIL:
 	python3 main.py --batch_size 16 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion dwBCE --monitor val_loss --no_crop --no_tabular_features --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json --message "pretrained + data augmentation"

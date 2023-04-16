@@ -268,8 +268,6 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                 for group in set(groups_trainval):
                     group_w[group] = max_group_count / groups_trainval.count(group)
 
-                print(group_w)
-
                 w_train, w_val = None, None
 
                 if self.args.criterion == "dwBCELoss":
