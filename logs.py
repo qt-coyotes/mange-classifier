@@ -53,11 +53,13 @@ def generate_logs(
             continue
         cv_stats[f"{metric}_std"] = np.array(cv_metrics[metric]).std()
         cv_stats[f"{metric}_mean"] = np.array(cv_metrics[metric]).mean()
-        cv_stats[f"{metric}_{int(confidence * 100)}_CI"] = scipy.stats.t.interval(
+        t_interval = scipy.stats.t.interval(
             confidence, len(cv_metrics[metric])-1,
             loc=cv_stats[f"{metric}_mean"],
             scale=scipy.stats.sem(cv_metrics[metric])
         )
+        t_interval = np.nan_to_num(t_interval, nan=-1)
+        cv_stats[f"{metric}_{int(confidence * 100)}_CI"] = t_interval
 
     logs = {
         "args": vars(args),
