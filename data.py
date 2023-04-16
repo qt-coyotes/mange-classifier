@@ -254,6 +254,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                 train_groups = [groups_trainval[i] for i in train_indexes]
                 val_X = [X_trainval[i] for i in val_indexes]
                 val_y = [y_trainval[i] for i in val_indexes]
+                val_groups = [groups_trainval[i] for i in val_indexes]
 
                 n1 = sum(train_y)
                 n0 = len(train_y) - n1
@@ -276,7 +277,7 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     w_val = torch.zeros(len(val_y))
                     w_val[val_y == 0] = 1
                     w_val[val_y == 1] = p
-                    for i, group in enumerate(val_y):
+                    for i, group in enumerate(val_groups):
                         w_val[i] *= group_p[group]
 
                 train_dataset = COCOImageDataset(
