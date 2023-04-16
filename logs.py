@@ -48,7 +48,7 @@ def generate_logs(
 
     confidence = 0.95
     for metric in cv_metrics:
-        if isinstance(cv_metrics[metric], list):
+        if metric == "metric_confusion_matrix":
             continue
         cv_metrics[f"{metric}_std"] = np.array(cv_metrics[metric]).std()
         cv_metrics[f"{metric}_mean"] = np.array(cv_metrics[metric]).mean()
@@ -153,7 +153,7 @@ def get_row(logs):
     row.append(logs["cv_metrics"]["AveragePrecision_mean"])
     row.append(logs["cv_metrics"]["AUROC_mean"])
     row.append(logs["cv_metrics"]["Accuracy_mean"])
-    row.append(str(logs["cv_metrics"]["loss"]))
+    row.append(str(logs["cv_metrics"]["loss_mean"]))
     row.append(None)
 
     row.append(logs["args"]["metadata_path"])
