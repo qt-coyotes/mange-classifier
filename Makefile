@@ -13,8 +13,7 @@ auto:
 	python3 main.py --auto_scale_batch_size true --auto_lr_find true --num_sanity_val_steps 1
 
 fast:
-	python3 main.py --fast_dev_run --num_sanity_val_steps 1 --patience 5 --model SuperLearner --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json --message "superlearner v1"
-	python3 main.py --fast_dev_run --learning_rate 0.00001 --num_sanity_val_steps 1 --patience 5 --model ResNet18 --criterion awBCELoss --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json --no_tabular_features
+	python3 main.py --fast_dev_run --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion dwBCELoss --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --message "Try a doubly weighted BCE loss, weighted on both mange and location"
 
 clean:
 	rm -f logs_*.json
