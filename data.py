@@ -249,11 +249,11 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
             for j in range(self.args.internal_k):
                 train_indexes, val_indexes = trainval_splits[j]
 
-                train_X = [X_trainval[i] for i in train_indexes]
-                train_y = [y_trainval[i] for i in train_indexes]
+                train_X = torch.tensor([X_trainval[i] for i in train_indexes])
+                train_y = torch.tensor([y_trainval[i] for i in train_indexes])
                 train_groups = [groups_trainval[i] for i in train_indexes]
-                val_X = [X_trainval[i] for i in val_indexes]
-                val_y = [y_trainval[i] for i in val_indexes]
+                val_X = torch.tensor([X_trainval[i] for i in val_indexes])
+                val_y = torch.tensor([y_trainval[i] for i in val_indexes])
                 val_groups = [groups_trainval[i] for i in val_indexes]
 
                 n1 = sum(train_y)
@@ -265,9 +265,9 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     group_w[group] = (
                         len(groups_trainval) - groups_trainval.count(group)
                     ) / len(groups_trainval)
-                print(group_w)
 
                 w_train, w_val = None, None
+                print(p)
                 if self.args.criterion == "dwBCELoss":
                     w_train = torch.zeros(len(train_y))
                     w_train[train_y == 0] = 1
