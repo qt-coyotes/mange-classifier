@@ -260,11 +260,12 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                 n0 = len(train_y) - n1
                 p = n0 / n1
 
-                group_p = {}
+                group_w = {}
                 for group in set(groups_trainval):
-                    group_p[group] = (
-                        len(train_groups) - train_groups.count(group)
-                    ) / len(train_groups)
+                    group_w[group] = (
+                        len(groups_trainval) - groups_trainval.count(group)
+                    ) / len(groups_trainval)
+                print(group_w)
 
                 w_train, w_val = None, None
                 if self.args.criterion == "dwBCELoss":
@@ -272,15 +273,15 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     w_train[train_y == 0] = 1
                     w_train[train_y == 1] = p
                     for i, group in enumerate(train_groups):
-                        w_train[i] *= group_p[group]
+                        w_train[i] *= group_w[group]
 
                     w_val = torch.zeros(len(val_y))
                     w_val[val_y == 0] = 1
                     w_val[val_y == 1] = p
                     for i, group in enumerate(val_groups):
-                        w_val[i] *= group_p[group]
-                    print(w_train)
-                    print(w_val)
+                        w_val[i] *= group_w[group]
+                    print(w_train.sum())
+                    print(w_val.sum())
 
                 train_dataset = COCOImageDataset(
                     train_X,
