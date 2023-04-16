@@ -107,14 +107,13 @@ def get_row(logs):
     )
     row.append(None)
 
-    row.append(logs["cv_metrics"]["ExpectedCost5"])
-    row.append(logs["cv_metrics"]["Precision"])
-    row.append(logs["cv_metrics"]["Recall"])
+    row.append(logs["cv_metrics"]["ExpectedCost5_mean"])
+    row.append(logs["cv_metrics"]["Precision_mean"])
+    row.append(logs["cv_metrics"]["Recall_mean"])
     row.append(json.dumps(logs["cv_metrics"]["metric_confusion_matrix"]))
     row.append(logs["time_elapsed"])
     row.append(None)
 
-    EC5_std = logs["cv_metrics"]["ExpectedCost5_std"]
     row.append("")
 
     model = logs["args"]["model"]
@@ -145,13 +144,13 @@ def get_row(logs):
     row.append(ref.commit.hexsha)
     row.append(None)
 
-    row.append(logs["cv_metrics"]["ExpectedCost50"])
-    row.append(logs["cv_metrics"]["ExpectedCost10"])
-    row.append(logs["cv_metrics"]["F2"])
-    row.append(logs["cv_metrics"]["F1"])
-    row.append(logs["cv_metrics"]["AveragePrecision"])
-    row.append(logs["cv_metrics"]["AUROC"])
-    row.append(logs["cv_metrics"]["Accuracy"])
+    row.append(logs["cv_metrics"]["ExpectedCost50_mean"])
+    row.append(logs["cv_metrics"]["ExpectedCost10_mean"])
+    row.append(logs["cv_metrics"]["F2_mean"])
+    row.append(logs["cv_metrics"]["F1_mean"])
+    row.append(logs["cv_metrics"]["AveragePrecision_mean"])
+    row.append(logs["cv_metrics"]["AUROC_mean"])
+    row.append(logs["cv_metrics"]["Accuracy_mean"])
     row.append(str(logs["cv_metrics"]["loss"]))
     row.append(None)
 
@@ -161,6 +160,18 @@ def get_row(logs):
         coco = json.load(f)
 
     row.append(coco["info"]["version"])
+    row.append(None)
+
+    row.extend(logs["cv_metrics"]["ExpectedCost5_95_CI"])
+    row.append(logs["cv_metrics"]["Precision_95_CI"])
+    row.append(logs["cv_metrics"]["Recall_95_CI"])
+    row.append(logs["cv_metrics"]["ExpectedCost50_95_CI"])
+    row.append(logs["cv_metrics"]["ExpectedCost10_95_CI"])
+    row.append(logs["cv_metrics"]["F2_95_CI"])
+    row.append(logs["cv_metrics"]["F1_95_CI"])
+    row.append(logs["cv_metrics"]["AveragePrecision_95_CI"])
+    row.append(logs["cv_metrics"]["AUROC_95_CI"])
+    row.append(logs["cv_metrics"]["Accuracy_95_CI"])
 
     return row
 
