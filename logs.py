@@ -177,7 +177,10 @@ def get_row(logs):
     row.extend(logs["cv_stats"]["AveragePrecision_95_CI"])
     row.extend(logs["cv_stats"]["AUROC_95_CI"])
     row.extend(logs["cv_stats"]["Accuracy_95_CI"])
+    row.append(None)
 
+    row.extend(logs["cv_metrics"]["ExpectedCost5"])
+    
     return row
 
 
