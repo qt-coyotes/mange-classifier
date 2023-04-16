@@ -95,11 +95,11 @@ class BaseModel(LightningModule):
             x, y = batch
         logits = self.forward(x)
         yhat = torch.sigmoid(logits)
-        if self.criterion == "dwBCELoss" and len(batch) == 3:
-            criterion = nn.BCEWithLogitsLoss(weight=w)
-            loss = criterion(logits, y.float(), weight=w)
-        elif self.criterion == "dwBCELoss":
-            criterion = nn.BCEWithLogitsLoss()
+        if self.criterion == "dwBCELoss":
+            if len(batch) == 3:
+                criterion = nn.BCEWithLogitsLoss(weight=w)
+            else:
+                criterion = nn.BCEWithLogitsLoss()
             loss = criterion(logits, y.float())
         elif isinstance(self.criterion, nn.BCEWithLogitsLoss):
             loss = self.criterion(logits, y.float())
