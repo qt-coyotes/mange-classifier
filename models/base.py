@@ -89,17 +89,18 @@ class BaseModel(LightningModule):
         return y
 
     def step(self, batch: Tuple[Tensor], batch_idx: int, stage: str):
-        x, y = batch
+        if len(batch) == 3:
+            x, y, w = batch
+        else:
+            x, y = batch
         logits = self.forward(x)
         yhat = torch.sigmoid(logits)
-        if self.criterion == "dwBCELoss":
-            if isinstance(y, tuple):
-                y, w = y
-                criterion = nn.BCEWithLogitsLoss(weight=w)
-                loss = criterion(logits, y.float(), weight=w)
-            else:
-                criterion = nn.BCEWithLogitsLoss()
-                loss = criterion(logits, y.float())
+        if self.criterion == "dwBCELoss" and len(batch) == 3:
+            criterion = nn.BCEWithLogitsLoss(weight=w)
+            loss = criterion(logits, y.float(), weight=w)
+        elif self.criterion == "dwBCELoss":
+            criterion = nn.BCEWithLogitsLoss()
+            loss = criterion(logits, y.float())
         elif isinstance(self.criterion, nn.BCEWithLogitsLoss):
             loss = self.criterion(logits, y.float())
         elif isinstance(self.criterion, HybridLoss):

@@ -143,7 +143,7 @@ def parse_args(argv=None):
         "--metadata_path",
         help="Path to COCO metadata file",
         type=str,
-        default="data/qt-coyotes-merged-only-dens.json",
+        default="data/qt-coyotes-merged.json",
     )
     group.add_argument(
         "--num_workers",
