@@ -3,13 +3,12 @@ import csv
 import glob
 import json
 import os
-import random
-import shutil
-import uuid
 from datetime import datetime, timedelta
 from functools import lru_cache
+import scipy.stats
 
 import git
+import numpy as np
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -28,7 +27,7 @@ def generate_logs(
         test_metric_metric = test_metric["test_metric"]
         for key, value in test_metric_metric.items():
             key = key.replace("Binary", "")
-            cv_metrics[key] = cv_metrics.get(key, 0) + value.item()
+            cv_metrics[key] = cv_metrics.get(key, []) + value.item()
         cv_metrics["metric_confusion_matrix"].append(
             [
                 [
@@ -42,13 +41,19 @@ def generate_logs(
             ]
         )
         cv_metrics["loss"] = (
-            cv_metrics.get("loss", 0) + test_metric["test_loss"]
+            cv_metrics.get("loss", []) + test_metric["test_loss"]
         )
 
+    confidence = 0.95
     for metric in cv_metrics:
         if isinstance(cv_metrics[metric], list):
             continue
-        cv_metrics[metric] /= args.k
+        cv_metrics[f"{metric}_std"] = np.array(cv_metrics[metric]).std()
+        cv_metrics[f"{metric}_mean"] = np.array(cv_metrics[metric]).mean()
+        cv_metrics[f"{metric}_{int(confidence * 100)}_CI"] = scipy.stats.t.interval(
+            confidence, len(cv_metrics[metric])-1,
+            loc=cv_metrics[f"{metric}_mean"], scale=scipy.stats.sem(cv_metrics[metric])
+        )
 
     logs = {
         "args": vars(args),
@@ -108,6 +113,9 @@ def get_row(logs):
     row.append(json.dumps(logs["cv_metrics"]["metric_confusion_matrix"]))
     row.append(logs["time_elapsed"])
     row.append(None)
+
+    EC5_std = logs["cv_metrics"]["ExpectedCost5_std"]
+    row.append("")
 
     model = logs["args"]["model"]
     if model == "ResNet":
