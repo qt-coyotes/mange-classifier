@@ -332,7 +332,7 @@ def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule)
         model = torch.compile(model)
     if args.auto_scale_batch_size or args.auto_lr_find:
         datamodule_i.setup(None)
-        X, _ = next(iter(datamodule_i.train_dataloader()))
+        X, *_ = next(iter(datamodule_i.train_dataloader()))
         _ = model(X)
         trainer.tune(model, datamodule=datamodule_i)
         print(
