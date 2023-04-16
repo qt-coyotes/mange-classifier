@@ -1,5 +1,5 @@
 4090:
-	python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 20 --model AllPositive --criterion BCELoss --no_crop --no_tabular_features --monitor val_loss --internal_k 10 --message "All positive only dens"
+	python3 main.py --batch_size 32 --num_sanity_val_steps 1 --patience 20 --model AllPositive --criterion BCELoss --no_crop --no_tabular_features --monitor val_loss --internal_k 10 --message "All positive only dens"
 	python3 main.py --batch_size 32 --learning_rate 0.001 --num_sanity_val_steps 1 --patience 20 --model AllNegative --criterion BCELoss --no_crop --no_tabular_features  --internal_k 10 --no_data_augmentation --monitor val_loss --message "All negative only dens"
 	python3 main.py --batch_size 32 --learning_rate 0.001 --num_sanity_val_steps 1 --patience 20 --model Random --criterion BCELoss --no_crop --no_tabular_features  --internal_k 10 --no_data_augmentation --monitor val_loss --message "All random only dens"
 
