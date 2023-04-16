@@ -261,10 +261,14 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                 p = n0 / n1
 
                 group_w = {}
+                max_group_count = 0
                 for group in set(groups_trainval):
-                    group_w[group] = (
-                        len(groups_trainval) - groups_trainval.count(group)
-                    ) / len(groups_trainval)
+                    max_group_count = max(max_group_count, groups_trainval.count(group))
+
+                for group in set(groups_trainval):
+                    group_w[group] = max_group_count / groups_trainval.count(group)
+
+                print(group_w)
 
                 w_train, w_val = None, None
 
