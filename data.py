@@ -88,7 +88,7 @@ class COCOImageDataset(Dataset):
             img = self.image_transform(img)
         if self.target_transform:
             label = self.target_transform(label)
-        if self.weights:
+        if self.weights is not None:
             label = (label, self.weights[idx])
         return (img, tabular), label
 
