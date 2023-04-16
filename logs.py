@@ -112,9 +112,9 @@ def get_row(logs):
     )
     row.append(None)
 
-    row.append(logs["cv_metrics"]["ExpectedCost5_mean"])
-    row.append(logs["cv_metrics"]["Precision_mean"])
-    row.append(logs["cv_metrics"]["Recall_mean"])
+    row.append(logs["cv_stats"]["ExpectedCost5_mean"])
+    row.append(logs["cv_stats"]["Precision_mean"])
+    row.append(logs["cv_stats"]["Recall_mean"])
     row.append(json.dumps(logs["cv_metrics"]["metric_confusion_matrix"]))
     row.append(logs["time_elapsed"])
     row.append(None)
