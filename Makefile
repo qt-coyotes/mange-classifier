@@ -1,4 +1,6 @@
 4090:
+	python3 main.py --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model AllPositive --criterion dwBCELoss --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --message "Alternative dwBCE"
+	python3 main.py --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model AllNegative --criterion dwBCELoss --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --message "Alternative dwBCE"
 	python3 main.py --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion dwBCELoss --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --message "Alternative dwBCE with data augmentation"
 
 CHIL:
