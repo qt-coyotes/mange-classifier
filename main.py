@@ -243,7 +243,7 @@ def parse_args(argv=None):
     )
     group.add_argument(
         "--criterion_cfn",
-        help="Cost false negative for ExpectedCostLoss",
+        help="Cost false negative",
         type=float,
         default=5.0,
     )
@@ -316,7 +316,7 @@ def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule)
     )
     if args.criterion == "awBCELoss" or args.criterion == "HybridLoss":
         datamodule_i.setup(None)
-        p = datamodule_i.train_dataset().pos_weight
+        p = datamodule_i.train_dataset().pos_weight * args.criterion_cfn
         criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(p))
     if args.criterion == "HybridLoss":
         criterion = HybridLoss(
