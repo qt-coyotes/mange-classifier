@@ -85,7 +85,7 @@ CRITERIONS = {
     # "wBCELoss",
     # "MacroSoftFBetaLoss",
     # "SurrogateFBetaLoss",
-    # "HybridLoss",
+    "HybridLoss",
 }
 
 
@@ -314,13 +314,14 @@ def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule)
         callbacks=callbacks,
         log_every_n_steps=1000,
     )
-    if criterion == "awBCELoss" or criterion == "HybridLoss":
+    if args.criterion == "awBCELoss" or args.criterion == "HybridLoss":
         datamodule_i.setup(None)
         p = datamodule_i.train_dataset().pos_weight
         criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(p))
-    elif criterion == "HybridLoss":
+    if args.criterion == "HybridLoss":
         criterion = HybridLoss(
-            criterion, BinaryExpectedCostLoss(cfn=args.criterion_cfn)
+            criterion,
+            BinaryExpectedCostLoss(cfn=args.criterion_cfn)
         )
     elif criterion == "dwBCELoss":
         criterion = "dwBCELoss"
