@@ -11,7 +11,7 @@ from lightning.pytorch.accelerators import CUDAAccelerator
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from torch import nn
 
-from data import StratifiedGroupKFoldDataModule
+from data import CopyOfStratifiedGroupKFoldDataModule
 from logs import (
     aggregate_logs,
     generate_logs,
@@ -389,7 +389,7 @@ def internal_cross_validation(datamodule: LightningDataModule):
 def external_cross_validation(args: argparse.Namespace):
     start_time = time.perf_counter()
     test_metrics = []
-    datamodule = StratifiedGroupKFoldDataModule(args)
+    datamodule = CopyOfStratifiedGroupKFoldDataModule(args)
     args_copy = args
     for datamodule_i in datamodule:
         seed_everything(args.random_state, workers=True)
