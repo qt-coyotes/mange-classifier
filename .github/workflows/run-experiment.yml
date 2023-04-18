@@ -50,4 +50,3 @@ jobs:
         path: |
           logs.tsv
           logs_*.json
-          lightning_logs
