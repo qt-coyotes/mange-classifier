@@ -525,7 +525,6 @@ class StratifiedGroupDataModule(LightningDataModule):
             self.dataset_val.append(val_dataset)
 
     def train_dataset(self):
-        print(self.dataset_train)
         return self.dataset_train[self.j]
 
     def train_dataloader(self):
