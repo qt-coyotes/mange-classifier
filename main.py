@@ -9,22 +9,12 @@ import torch
 from lightning.pytorch import Trainer, seed_everything
 from lightning.pytorch.accelerators import CUDAAccelerator
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
+from pytorch_lightning import LightningDataModule
 from torch import nn
 
-from data import CopyOfStratifiedGroupKFoldDataModule
-from logs import (
-    aggregate_logs,
-    generate_logs,
-    get_row,
-    log_to_gsheet,
-    log_to_json,
-)
-from losses import (
-    BinaryExpectedCostLoss,
-    BinaryMacroSoftFBetaLoss,
-    BinarySurrogateFBetaLoss,
-    HybridLoss,
-)
+from data import StratifiedGroupKFoldDataModule, StratifiedGroupDataModule
+from logs import aggregate_logs, generate_logs, get_row, log_to_gsheet, log_to_json
+from losses import BinaryExpectedCostLoss, BinaryMacroSoftFBetaLoss, BinarySurrogateFBetaLoss, HybridLoss
 from models.all_negative import AllNegativeModel
 from models.all_positive import AllPositiveModel
 from models.densenet import DenseNetModel
@@ -32,8 +22,6 @@ from models.random import RandomModel
 from models.resnet import ResNetModel
 from models.vit import ViTModel
 from models.yolo import YoloModel
-from pytorch_lightning import LightningDataModule
-
 
 NO_TRAIN_MODELS = {
     "AllPositive": (AllPositiveModel, None),
@@ -269,6 +257,11 @@ def parse_args(argv=None):
         action="store_true",
         help="Backup the checkpoint",
     )
+    group.add_argument(
+        "--train_final_model",
+        action="store_true",
+        help="Train final model",
+    )
     group.add_argument("--message", help="Message to log", type=str)
     args = parser.parse_args(argv)
     if args.accelerator is None:
@@ -280,8 +273,10 @@ def parse_args(argv=None):
 def main():
     args = parse_args()
     print(args)
-    external_cross_validation(args)
-    # train_final_model(args)
+    if args.train_final_model:
+        train_final_model(args)
+    else:
+        external_cross_validation(args)
 
 
 def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule):
@@ -389,7 +384,7 @@ def internal_cross_validation(datamodule: LightningDataModule):
 def external_cross_validation(args: argparse.Namespace):
     start_time = time.perf_counter()
     test_metrics = []
-    datamodule = CopyOfStratifiedGroupKFoldDataModule(args)
+    datamodule = StratifiedGroupKFoldDataModule(args)
     args_copy = args
     for datamodule_i in datamodule:
         seed_everything(args.random_state, workers=True)
@@ -432,8 +427,23 @@ def external_cross_validation(args: argparse.Namespace):
         gsheet_range = "v17!A1:A1"
     log_to_gsheet(row, gsheet_range)
 
+
 def train_final_model(args: argparse.Namespace):
-    pass
+    start_time = time.perf_counter()
+    datamodule = StratifiedGroupDataModule(args)
+    args_copy = args
+    seed_everything(args.random_state, workers=True)
+    if args_copy.model == "SuperLearner":
+        args, model_checkpoint = internal_cross_validation(datamodule)
+        model, trainer, _ = model_from_args(args, datamodule)
+    else:
+        model, trainer, model_checkpoint = model_from_args(args, datamodule)
+        if args.model not in NO_TRAIN_MODELS:
+            trainer.fit(model=model, train_dataloaders=datamodule)
+
+    end_time = time.perf_counter()
+    time_elapsed = timedelta(seconds=end_time - start_time)
+    print(f"Time elapsed: {time_elapsed}")
 
 
 if __name__ == "__main__":

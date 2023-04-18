@@ -363,8 +363,8 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
             raise StopIteration
 
 
-class CopyOfStratifiedGroupKFoldDataModule(LightningDataModule):
-    """ Train on everything! """
+class StratifiedGroupDataModule(LightningDataModule):
+    """Train on everything"""
     def __init__(self, args: argparse.Namespace):
         super().__init__()
         self.i = -1
@@ -374,7 +374,6 @@ class CopyOfStratifiedGroupKFoldDataModule(LightningDataModule):
         self.args = args
         self.dataset_train = []
         self.dataset_val = []
-        self.dataset_test = []
 
     def prepare_data(self):
         pass
@@ -420,185 +419,118 @@ class CopyOfStratifiedGroupKFoldDataModule(LightningDataModule):
         y = [0] * len(no_mange_annotations) + [1] * len(mange_annotations)
 
         groups = []
-        if not self.args.no_external_group:
-            for image in X:
-                groups.append(image["location"])
-            trainvaltest_sgkf = StratifiedGroupKFold(
-                n_splits=self.args.k,
-                shuffle=self.args.shuffle,
-                random_state=self.args.random_state,
+        for image in X:
+            groups.append(image["location"])
+
+        tabular_transform = None
+        if not self.args.no_tabular_features:
+            years = np.array([image["year"] for image in X])
+            months = np.array([image["month"] for image in X])
+            hours = np.array([image["hour"] for image in X])
+            latitudes = np.array([image["latitude"] for image in X])
+            longitudes = np.array([image["longitude"] for image in X])
+
+            tabular_transform = {
+                "mean": {
+                    "year": years.mean(),
+                    "month": months.mean(),
+                    "hour": hours.mean(),
+                    "latitude": latitudes.mean(),
+                    "longitude": longitudes.mean(),
+                },
+                "std": {
+                    "year": years.std(),
+                    "month": months.std(),
+                    "hour": hours.std(),
+                    "latitude": latitudes.std(),
+                    "longitude": longitudes.std(),
+                },
+            }
+
+        if self.args.internal_group:
+            trainval_sgkf = StratifiedGroupKFold(
+                n_splits=self.args.internal_k,
+                shuffle=False,
+                random_state=None,
             )
-            trainvaltest_splits = list(trainvaltest_sgkf.split(X, y, groups=groups))
+            trainval_splits = list(
+                trainval_sgkf.split(X, y, groups=groups)
+            )
         else:
-            print("WARNING: No external grouping!")
-            trainvaltest_skf = StratifiedKFold(
-                n_splits=self.args.k,
-                shuffle=self.args.shuffle,
-                random_state=self.args.random_state,
+            trainval_skf = StratifiedKFold(
+                n_splits=self.args.internal_k,
+                shuffle=False,
+                random_state=None,
             )
-            trainvaltest_splits = list(trainvaltest_skf.split(X, y))
+            trainval_splits = list(trainval_skf.split(X, y))
 
-        for i in range(self.args.k):
-            trainval_indexes, test_indexes = trainvaltest_splits[i]
+        for j in range(self.args.internal_k):
+            train_indexes, val_indexes = trainval_splits[j]
 
-            test_X = [X[i] for i in test_indexes]
-            test_y = [y[i] for i in test_indexes]
+            train_X = [X[i] for i in train_indexes]
+            train_y = torch.tensor([y[i] for i in train_indexes])
+            train_groups = [groups[i] for i in train_indexes]
+            val_X = [X[i] for i in val_indexes]
+            val_y = torch.tensor([y[i] for i in val_indexes])
+            val_groups = [groups[i] for i in val_indexes]
 
-            # Append all testing to train/val
-            X_trainval = [X[i] for i in trainval_indexes + test_X]
-            y_trainval = [y[i] for i in trainval_indexes + test_y]
+            n1 = sum(train_y)
+            n0 = len(train_y) - n1
+            p = n0 / n1
 
-            test_X = test_y = []
+            group_w = {}
+            max_group_count = 0
+            for group in set(groups):
+                max_group_count = max(max_group_count, groups.count(group))
 
-            tabular_transform = None
-            if not self.args.no_tabular_features:
-                years = np.array([image["year"] for image in X_trainval])
-                months = np.array([image["month"] for image in X_trainval])
-                hours = np.array([image["hour"] for image in X_trainval])
-                latitudes = np.array([image["latitude"] for image in X_trainval])
-                longitudes = np.array([image["longitude"] for image in X_trainval])
+            for group in set(groups):
+                group_w[group] = max_group_count / groups.count(group)
 
-                tabular_transform = {
-                    "mean": {
-                        "year": years.mean(),
-                        "month": months.mean(),
-                        "hour": hours.mean(),
-                        "latitude": latitudes.mean(),
-                        "longitude": longitudes.mean(),
-                    },
-                    "std": {
-                        "year": years.std(),
-                        "month": months.std(),
-                        "hour": hours.std(),
-                        "latitude": latitudes.std(),
-                        "longitude": longitudes.std(),
-                    },
-                }
+            w_train, w_val = None, None
 
-            tabular_transform = None
-            if not self.args.no_tabular_features:
-                years = np.array([image["year"] for image in X_trainval])
-                months = np.array([image["month"] for image in X_trainval])
-                hours = np.array([image["hour"] for image in X_trainval])
-                latitudes = np.array([image["latitude"] for image in X_trainval])
-                longitudes = np.array([image["longitude"] for image in X_trainval])
+            if self.args.criterion == "dwBCELoss":
+                w_train = torch.zeros(len(train_y))
+                w_train[train_y == 0] = 1
+                w_train[train_y == 1] = p
+                for i, group in enumerate(train_groups):
+                    w_train[i] *= group_w[group]
 
-                tabular_transform = {
-                    "mean": {
-                        "year": years.mean(),
-                        "month": months.mean(),
-                        "hour": hours.mean(),
-                        "latitude": latitudes.mean(),
-                        "longitude": longitudes.mean(),
-                    },
-                    "std": {
-                        "year": years.std(),
-                        "month": months.std(),
-                        "hour": hours.std(),
-                        "latitude": latitudes.std(),
-                        "longitude": longitudes.std(),
-                    },
-                }
+                w_val = torch.zeros(len(val_y))
+                w_val[val_y == 0] = 1
+                w_val[val_y == 1] = p
+                for i, group in enumerate(val_groups):
+                    w_val[i] *= group_w[group]
 
-            groups_trainval = [groups[i] for i in trainval_indexes]
-            if self.args.internal_group:
-                trainval_sgkf = StratifiedGroupKFold(
-                    n_splits=self.args.internal_k,
-                    shuffle=False,
-                    random_state=None,
-                )
-                trainval_splits = list(
-                    trainval_sgkf.split(X_trainval, y_trainval, groups=groups_trainval)
-                )
-            else:
-                trainval_skf = StratifiedKFold(
-                    n_splits=self.args.internal_k,
-                    shuffle=False,
-                    random_state=None,
-                )
-                trainval_splits = list(trainval_skf.split(X_trainval, y_trainval))
-
-            train_datasets = []
-            val_datasets = []
-            for j in range(self.args.internal_k):
-                train_indexes, val_indexes = trainval_splits[j]
-
-                train_X = [X_trainval[i] for i in train_indexes]
-                train_y = torch.tensor([y_trainval[i] for i in train_indexes])
-                train_groups = [groups_trainval[i] for i in train_indexes]
-                val_X = [X_trainval[i] for i in val_indexes]
-                val_y = torch.tensor([y_trainval[i] for i in val_indexes])
-                val_groups = [groups_trainval[i] for i in val_indexes]
-
-                n1 = sum(train_y)
-                n0 = len(train_y) - n1
-                p = n0 / n1
-
-                group_w = {}
-                max_group_count = 0
-                for group in set(groups_trainval):
-                    max_group_count = max(max_group_count, groups_trainval.count(group))
-
-                for group in set(groups_trainval):
-                    group_w[group] = max_group_count / groups_trainval.count(group)
-
-                w_train, w_val = None, None
-
-                if self.args.criterion == "dwBCELoss":
-                    w_train = torch.zeros(len(train_y))
-                    w_train[train_y == 0] = 1
-                    w_train[train_y == 1] = p
-                    for i, group in enumerate(train_groups):
-                        w_train[i] *= group_w[group]
-
-                    w_val = torch.zeros(len(val_y))
-                    w_val[val_y == 0] = 1
-                    w_val[val_y == 1] = p
-                    for i, group in enumerate(val_groups):
-                        w_val[i] *= group_w[group]
-
-                train_dataset = COCOImageDataset(
-                    train_X,
-                    train_y,
-                    self.data_path,
-                    self.args,
-                    image_transform=equal_size_transform,
-                    tabular_transform=tabular_transform,
-                    pos_weight=p,
-                    weights=w_train
-                )
-                train_datasets.append(train_dataset)
-                val_dataset = COCOImageDataset(
-                    val_X,
-                    val_y,
-                    self.data_path,
-                    self.args,
-                    image_transform=equal_size_transform,
-                    tabular_transform=tabular_transform,
-                    pos_weight=p,
-                    weights=w_val,
-                )
-                val_datasets.append(val_dataset)
-
-            self.dataset_test.append(
-                COCOImageDataset(
-                    test_X,
-                    test_y,
-                    self.data_path,
-                    self.args,
-                    image_transform=equal_size_transform,
-                    tabular_transform=tabular_transform,
-                )
+            train_dataset = COCOImageDataset(
+                train_X,
+                train_y,
+                self.data_path,
+                self.args,
+                image_transform=equal_size_transform,
+                tabular_transform=tabular_transform,
+                pos_weight=p,
+                weights=w_train
             )
-            self.dataset_train.append(train_datasets)
-            self.dataset_val.append(val_datasets)
+            self.dataset_train.append(train_dataset)
+            val_dataset = COCOImageDataset(
+                val_X,
+                val_y,
+                self.data_path,
+                self.args,
+                image_transform=equal_size_transform,
+                tabular_transform=tabular_transform,
+                pos_weight=p,
+                weights=w_val,
+            )
+            self.dataset_val.append(val_dataset)
 
     def train_dataset(self):
-        return self.dataset_train[self.i][self.j]
+        print(self.dataset_train)
+        return self.dataset_train[self.j]
 
     def train_dataloader(self):
         return DataLoader(
-            self.dataset_train[self.i][self.j],
+            self.dataset_train[self.j],
             batch_size=self.args.batch_size,
             num_workers=self.args.num_workers,
             persistent_workers=self.args.persistent_workers,
@@ -608,19 +540,14 @@ class CopyOfStratifiedGroupKFoldDataModule(LightningDataModule):
 
     def val_dataloader(self):
         return DataLoader(
-            self.dataset_val[self.i][self.j],
+            self.dataset_val[self.j],
             batch_size=self.args.batch_size,
             num_workers=self.args.num_workers,
             persistent_workers=self.args.persistent_workers,
         )
 
     def test_dataloader(self):
-        return DataLoader(
-            self.dataset_test[self.i],
-            batch_size=self.args.batch_size,
-            num_workers=self.args.num_workers,
-            persistent_workers=self.args.persistent_workers,
-        )
+        return None
 
     def teardown(self, stage):
         pass
