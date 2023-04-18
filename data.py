@@ -59,9 +59,7 @@ class COCOImageDataset(Dataset):
             image_path = self.data_path / image["file_name"]
             if self.args.use_pt:
                 image_path = image_path.with_suffix(".pt")
-                img = torch.load(
-                    str(image_path), map_location=torch.device("cuda")
-                )
+                img = torch.load(str(image_path))
             else:
                 img = read_image(str(image_path))
         else:
