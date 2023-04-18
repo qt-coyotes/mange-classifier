@@ -1,9 +1,9 @@
-target: 4090
+target: debug
 
 debug:
 	python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 12 --message "Profiling with pt files" --use_pt --profiler simple
 
-4090:
+part1:
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 13 --message "30 Runs of ResNet34 --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 14 --message "30 Runs of ResNet34 --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 15 --message "30 Runs of ResNet34 --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
@@ -112,6 +112,7 @@ debug:
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 28 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 29 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
 
+part2:
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 1 --message "30 Runs of ResNet34 --crop --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 2 --message "30 Runs of ResNet34 --crop --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 3 --message "30 Runs of ResNet34 --crop --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
