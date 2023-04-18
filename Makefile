@@ -1,102 +1,169 @@
-target: part1 part2
+target: part1
 
 debug:
 	python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 12 --message "Profiling with pt files" --use_pt --profiler simple
 
 part1:
-	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 27 --message "30 Runs of ResNet34 --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
-	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 28 --message "30 Runs of ResNet34 --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
-	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 29 --message "30 Runs of ResNet34 --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
-
-	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 1 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
-	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 2 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
-	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 3 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
-	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 4 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
-	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 5 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
-	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 6 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
-	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 7 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
-	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 8 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 9 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 10 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 11 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 12 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 13 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 14 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 15 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 16 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 17 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 18 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 19 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 20 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 21 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 22 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 23 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 24 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 25 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 26 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 27 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 28 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --nonpretrained --monitor val_loss --internal_k 5 --nondeterministic --random_state 29 --message "30 Runs of ResNet34 --nonpretrained --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 1 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 2 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 3 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 4 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 5 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 6 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 7 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 8 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 9 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 10 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 11 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 12 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 13 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 14 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 15 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 16 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 17 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 18 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 19 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 20 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 21 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 22 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 23 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 24 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 25 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 26 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 27 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 28 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 29 --message "30 Runs of ResNet34 --data_augmentation --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 1 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 2 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 3 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 4 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 5 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 6 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 7 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 8 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 9 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 10 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 11 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 12 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 13 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 14 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 15 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 16 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 17 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 18 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 19 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 20 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 21 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 22 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 23 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 24 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 25 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 26 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 27 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 28 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion BCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 29 --message "30 Runs of ResNet34 --criterion BCELoss --criterion_cfn 5 --auto_lr_find"
+	rm -rf lightning_logs
 
 part2:
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 1 --message "30 Runs of ResNet34 --crop --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
