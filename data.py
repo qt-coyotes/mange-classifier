@@ -57,7 +57,12 @@ class COCOImageDataset(Dataset):
         image = self.images[idx]
         if self.args.no_crop:
             image_path = self.data_path / image["file_name"]
-            img = read_image(str(image_path))
+            if self.args.use_pt:
+                img = torch.load(
+                    str(image_path), map_location=torch.device("cuda")
+                )
+            else:
+                img = read_image(str(image_path))
         else:
             try:
                 cropped_image_path = (

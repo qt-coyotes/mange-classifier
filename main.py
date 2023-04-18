@@ -207,6 +207,11 @@ def parse_args(argv=None):
         action="store_true",
     )
     group.add_argument(
+        "--use_pt",
+        help="Use pt files instead of jpg files",
+        action="store_true",
+    )
+    group.add_argument(
         "--compile",
         help="Compile the model",
         action="store_true",
