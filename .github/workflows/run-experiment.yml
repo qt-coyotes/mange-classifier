@@ -16,10 +16,6 @@ jobs:
       with:
         clean: false
 
-    - name: Run clean
-      run: make clean
-
-
     - name: Install python dependencies
       run: |
         python3 -m pip install -U pip
@@ -37,7 +33,7 @@ jobs:
     - name: Run experiment
       run: |
         make clean
-        make 4090
+        make
       env:
         GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
       timeout-minutes: 10080
