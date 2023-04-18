@@ -34,8 +34,9 @@ from captum.attr import GradientShap
 from captum.attr import Occlusion
 from captum.attr import NoiseTunnel
 from captum.attr import visualization as viz
+import matplotlib.pyplot as plt
 
-# Steven's important continued
+# Steven's imports continued
 from data import StratifiedGroupKFoldDataModule, StratifiedGroupDataModule
 from logs import aggregate_logs, generate_logs, get_row, log_to_gsheet, log_to_json
 from losses import (
@@ -527,11 +528,15 @@ def captum_identify(args: argparse.Namespace):
             ]
         )
 
-        input = transform(img)
+        integrated_gradients = IntegratedGradients(model)
+        noise_tunnel = NoiseTunnel(integrated_gradients)
+        input = transform(image)
         input = input.unsqueeze(0)
         output = model.forward(input)
         output = F.softmax(output, dim=0)
-        label = torch.tensor([[1 if torch.sigmoid(output) > 0.5 else 0]]).squeeze()
+        label = torch.tensor(
+            [[1 if torch.sigmoid(output) > 0.5 else 0]]
+        ).squeeze()
         attributions_ig = integrated_gradients.attribute(input, n_steps=200)
         attributions_ig_nt = noise_tunnel.attribute(
             input, nt_samples=10, nt_type="smoothgrad_sq"
@@ -551,7 +556,7 @@ def captum_identify(args: argparse.Namespace):
             cmap=default_cmap,
             show_colorbar=True,
         )
-        plt.savefig(f"{onn}_ig.out.png", format=png)
+        plt.savefig(f"{onn}_ig.out.png")
 
         fig, ax = viz.visualize_image_attr_multiple(
             np.transpose(
@@ -563,7 +568,7 @@ def captum_identify(args: argparse.Namespace):
             cmap=default_cmap,
             show_colorbar=True,
         )
-        plt.savefig(f"{onn}_ig_nt.out.png", format=png)
+        plt.savefig(f"{onn}_ig_nt.out.png")
 
 
 if __name__ == "__main__":
