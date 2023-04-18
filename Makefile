@@ -1,5 +1,5 @@
 4090:
-	-python3 main.py --learning_rate --auto_lr_finder --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 0 --message "30 Runs of ResNet34 --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
+	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 0 --message "30 Runs of ResNet34 --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
 
 CHIL:
 	python3 main.py --batch_size 16 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet --resnet_model ResNet34 --criterion dwBCE --monitor val_loss --no_crop --no_tabular_features --metadata_path data/CHIL/CHIL_uwin_mange_Marit_07242020.json --message "pretrained + data augmentation"
