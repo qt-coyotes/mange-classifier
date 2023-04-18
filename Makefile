@@ -1,4 +1,4 @@
-target: part2
+target: part1 part2
 
 debug:
 	python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 12 --message "Profiling with pt files" --use_pt --profiler simple
