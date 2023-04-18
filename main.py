@@ -2,19 +2,48 @@ import argparse
 import gc
 import itertools
 import os
+import sys
 import time
 from datetime import timedelta
 
 import torch
+import torch.nn.functional as F
 from lightning.pytorch import Trainer, seed_everything
 from lightning.pytorch.accelerators import CUDAAccelerator
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning import LightningDataModule
 from torch import nn
 
+# Cat imports
+import torch
+import torch.nn.functional as F
+
+from PIL import Image
+
+import os
+import json
+import numpy as np
+from matplotlib.colors import LinearSegmentedColormap
+
+import torchvision
+from torchvision import models
+from torchvision import transforms
+
+from captum.attr import IntegratedGradients
+from captum.attr import GradientShap
+from captum.attr import Occlusion
+from captum.attr import NoiseTunnel
+from captum.attr import visualization as viz
+
+# Steven's important continued
 from data import StratifiedGroupKFoldDataModule, StratifiedGroupDataModule
 from logs import aggregate_logs, generate_logs, get_row, log_to_gsheet, log_to_json
-from losses import BinaryExpectedCostLoss, BinaryMacroSoftFBetaLoss, BinarySurrogateFBetaLoss, HybridLoss
+from losses import (
+    BinaryExpectedCostLoss,
+    BinaryMacroSoftFBetaLoss,
+    BinarySurrogateFBetaLoss,
+    HybridLoss,
+)
 from models.all_negative import AllNegativeModel
 from models.all_positive import AllPositiveModel
 from models.densenet import DenseNetModel
@@ -247,6 +276,18 @@ def parse_args(argv=None):
         action="store_true",
     )
     group.add_argument(
+        "--captum_load",
+        help="Load weights from else where",
+        type=str,
+        default=None,
+    )
+    group.add_argument(
+        "--captum_on",
+        help="Load weights from else where",
+        type=str,
+        action="append",
+    )
+    group.add_argument(
         "--monitor",
         help="Metric to monitor",
         type=str,
@@ -273,7 +314,10 @@ def parse_args(argv=None):
 def main():
     args = parse_args()
     print(args)
-    if args.train_final_model:
+
+    if args.captum_load is not None:
+        captum_identify(args)
+    elif args.train_final_model:
         train_final_model(args)
     else:
         external_cross_validation(args)
@@ -315,8 +359,7 @@ def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule)
         criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(p))
     if args.criterion == "HybridLoss":
         criterion = HybridLoss(
-            criterion,
-            BinaryExpectedCostLoss(cfn=args.criterion_cfn)
+            criterion, BinaryExpectedCostLoss(cfn=args.criterion_cfn)
         )
     elif criterion == "dwBCELoss":
         criterion = "dwBCELoss"
@@ -331,9 +374,7 @@ def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule)
         X, *_ = next(iter(datamodule_i.train_dataloader()))
         _ = model(X)
         trainer.tune(model, datamodule=datamodule_i)
-        print(
-            f"Automatically found learning rate: {model.learning_rate}"
-        )
+        print(f"Automatically found learning rate: {model.learning_rate}")
         args.learning_rate = model.learning_rate
     if args.auto_scale_batch_size:
         print(f"Automatically found batch size: P={model.batch_size}")
@@ -347,15 +388,21 @@ def internal_cross_validation(datamodule: LightningDataModule):
     best_EC5 = torch.inf
     best_args = None
     best_checkpoint = None
-    argvs = list(itertools.product(
-        ("--model",), SUPER_LEARNER_MODELS,
-        ("--criterion",), CRITERIONS,
-        ("--learning_rate",), map(str, LEARNING_RATES),
-        ("--batch_size",), map(str, BATCH_SIZES),
-        ("--no_crop", ""),
-        ("--no_data_augmentation", ""),
-        ("--no_tabular_features", ""),
-    ))
+    argvs = list(
+        itertools.product(
+            ("--model",),
+            SUPER_LEARNER_MODELS,
+            ("--criterion",),
+            CRITERIONS,
+            ("--learning_rate",),
+            map(str, LEARNING_RATES),
+            ("--batch_size",),
+            map(str, BATCH_SIZES),
+            ("--no_crop", ""),
+            ("--no_data_augmentation", ""),
+            ("--no_tabular_features", ""),
+        )
+    )
     print(f"Number of hyperparameter configurations: {len(argvs)}")
     for c, argv in enumerate(argvs):
         argv = list(argv)
@@ -370,7 +417,16 @@ def internal_cross_validation(datamodule: LightningDataModule):
         trainer.fit(model, datamodule=datamodule)
         EC5 = model_checkpoint.best_model_score
         print(f"EC5: {EC5}")
-        log_to_gsheet([f"{EC5}", f"{c / len(argvs)}", f"{c}", f"{len(argvs)}", f"{' '.join(argv)}"], "SuperLearner!A1:A1")
+        log_to_gsheet(
+            [
+                f"{EC5}",
+                f"{c / len(argvs)}",
+                f"{c}",
+                f"{len(argvs)}",
+                f"{' '.join(argv)}",
+            ],
+            "SuperLearner!A1:A1",
+        )
         if EC5 < best_EC5:
             best_EC5 = EC5
             best_args = args
@@ -418,10 +474,7 @@ def external_cross_validation(args: argparse.Namespace):
     log_to_json(logs)
     aggregate_logs()
     row = get_row(logs)
-    if (
-        logs["args"]["metadata_path"]
-        == "data/CHIL/CHIL_uwin_mange_Marit_07242020.json"
-    ):
+    if logs["args"]["metadata_path"] == "data/CHIL/CHIL_uwin_mange_Marit_07242020.json":
         gsheet_range = "CHIL!A1:A1"
     else:
         gsheet_range = "v17!A1:A1"
@@ -444,6 +497,73 @@ def train_final_model(args: argparse.Namespace):
     end_time = time.perf_counter()
     time_elapsed = timedelta(seconds=end_time - start_time)
     print(f"Time elapsed: {time_elapsed}")
+
+
+def captum_identify(args: argparse.Namespace):
+    if not args.captum_on:
+        print("No images provided to captum on", file=sys.stderr)
+        exit(1)
+
+    for i in StratifiedGroupKFoldDataModule(args):
+        data_mod = i
+        break
+
+    model, _, _ = model_from_args(args, data_mod)
+    model.load_state_dict(
+        torch.load(args.captum_load, map_location=torch.device("cpu"))["state_dict"],
+        strict=False,
+    )
+
+    model.eval()
+
+    for onn in args.captum_on:
+        print(f"Interpreting image {onn}")
+        image = Image.open(onn)
+        transform = transforms.Compose(
+            [
+                transforms.Resize(224),
+                # transforms.CenterCrop(224),
+                transforms.ToTensor(),
+            ]
+        )
+
+        input = transform(img)
+        input = input.unsqueeze(0)
+        output = model.forward(input)
+        output = F.softmax(output, dim=0)
+        label = torch.tensor([[1 if torch.sigmoid(output) > 0.5 else 0]]).squeeze()
+        attributions_ig = integrated_gradients.attribute(input, n_steps=200)
+        attributions_ig_nt = noise_tunnel.attribute(
+            input, nt_samples=10, nt_type="smoothgrad_sq"
+        )
+
+        default_cmap = LinearSegmentedColormap.from_list(
+            "custom blue", [(0, "#ffffff"), (0.25, "#000000"), (1, "#000000")], N=256
+        )
+
+        fig, ax = viz.visualize_image_attr_multiple(
+            np.transpose(
+                attributions_ig.squeeze().cpu().detach().numpy(), (1, 2, 0)
+            ),
+            np.transpose(input.squeeze().cpu().detach().numpy(), (1, 2, 0)),
+            ["original_image", "heat_map"],
+            ["all", "positive"],
+            cmap=default_cmap,
+            show_colorbar=True,
+        )
+        plt.savefig(f"{onn}_ig.out.png", format=png)
+
+        fig, ax = viz.visualize_image_attr_multiple(
+            np.transpose(
+                attributions_ig_nt.squeeze().cpu().detach().numpy(), (1, 2, 0)
+            ),
+            np.transpose(input.squeeze().cpu().detach().numpy(), (1, 2, 0)),
+            ["original_image", "heat_map"],
+            ["all", "positive"],
+            cmap=default_cmap,
+            show_colorbar=True,
+        )
+        plt.savefig(f"{onn}_ig_nt.out.png", format=png)
 
 
 if __name__ == "__main__":
