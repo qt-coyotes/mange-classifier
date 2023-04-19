@@ -79,7 +79,6 @@ class COCOImageDataset(Dataset):
                     image["is_color"],
                     (image["hour"] - self.tabular_transform["mean"]["hour"])
                     / self.tabular_transform["std"]["hour"],
-                    image["is_color"],
                     (image["year"] - self.year_mean) / self.year_std,
                     (image["month"] - self.month_mean) / self.month_std,
                     image["latitude"] / 90.0,
