@@ -135,6 +135,8 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     ),
                 ]
             )
+        else:
+            equal_size_transform = None
 
         no_mange_annotations = []
         mange_annotations = []
