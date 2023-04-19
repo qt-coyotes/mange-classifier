@@ -11,7 +11,7 @@ class SquarePad(torch.nn.Module):
         self.padding_mode = padding_mode
 
     def forward(self, img: Tensor):
-        w, h = img.shape[:2]
+        _, h, w = img.shape
         s = np.max([w, h])
         padding = [
             int(np.ceil((s - w) / 2)),

@@ -309,6 +309,11 @@ def parse_args(argv=None):
         action="store_true",
         help="Train final model",
     )
+    group.add_argument(
+        "--no_equal_size_transform",
+        action="store_true",
+        help="Train final model",
+    )
     group.add_argument("--message", help="Message to log", type=str)
     args = parser.parse_args(argv)
     if args.accelerator is None:
