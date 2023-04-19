@@ -116,7 +116,7 @@ def parse_args(argv=None):
         help="Which model to use",
         type=str,
         choices=list(MODELS.keys()),
-        default="ResNet",
+        default="ResNet34",
     )
     group.add_argument(
         "--criterion",
