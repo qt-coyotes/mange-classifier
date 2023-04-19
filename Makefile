@@ -1,4 +1,4 @@
-target: resume_part1
+target: captum
 
 toronto:
 	python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 1 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --metadata_path data/qt-coyotes-toronto.json --random_state 0 --message "Toronto: Our Model 0"
@@ -360,6 +360,9 @@ auto:
 
 fast:
 	python3 main.py --fast_dev_run --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion dwBCELoss --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --message "Try a doubly weighted BCE loss, weighted on both mange and location"
+
+captum:
+	python3 main.py --captum_load fully_trained.ckpt --captum_on coyote1.jpg --captum_on coyote2.jpg --message "Captum run 1"
 
 clean:
 	rm -f logs_*.json
