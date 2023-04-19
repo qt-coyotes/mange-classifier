@@ -133,6 +133,8 @@ part2:
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 18 --message "30 Runs of ResNet34 --crop --criterion awBCELoss --criterion_cfn 5 --auto_lr_find 18"
 	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 19 --message "30 Runs of ResNet34 --crop --criterion awBCELoss --criterion_cfn 5 --auto_lr_find 19"
+
+resume_part2:
 	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 20 --message "30 Runs of ResNet34 --crop --criterion awBCELoss --criterion_cfn 5 --auto_lr_find 20"
 	rm -rf lightning_logs
