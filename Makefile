@@ -369,3 +369,4 @@ clean:
 	rm -f logs*.tsv
 	rm -rf lightning_logs
 	rm -rf stripped_logs
+	find . -type f -name '*.out.png' -delete
