@@ -365,7 +365,7 @@ final:
 	python3 main.py --train_final_model --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --train_final_model
 
 captum:
-	python3 main.py --captum_load final2.ckpt --captum_on data/coyote-dens/KinnardB/KinnardB_Nov16.100RECNX.IMG_1288.JPG --captum_on data/coyote-dens/RowlandE/RowlandE_April5.DCIM.101_BTCF.IMG_0240.JPG --captum_on data/coyote-dens/WagnerB/WagnerB_April4.DCIM.100RECNX.IMG_0711.JPG --message "Captum run 2"
+	python3 main.py --captum_load final2.ckpt --captum_on data/CHIL-earlier/Summer 2010/D09-BON2-SU10(8).JPG --captum_on data/mange_Toronto/TUW5.10160776.JPG --captum_on data/mange_Toronto/TUW31.04060473.JPG --message "Captum run 3"
 
 clean:
 	rm -f logs_*.json
