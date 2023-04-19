@@ -83,7 +83,7 @@ class BaseModel(LightningModule):
             i = i[self.return_node]
         i = self.flatten(i)
         t = self.tabular_backbone(t)
-        x = i #torch.cat((i, t), dim=1)
+        x = torch.cat((i, t), dim=1)
         x = self.classifier(x)
         y = x.flatten()
         return y
