@@ -72,9 +72,9 @@ class BaseModel(LightningModule):
         self.test_EC5 = BinaryExpectedCost(cfn=5.0)
         self.metrics = nn.ModuleDict(metrics)
 
-    def forward(self, x: Tuple[Tensor, Tensor]):
-        i, t = x
+    def forward(self, i: Tensor):
         i = i.float()
+        t = torch.zeros((i.shape[0], 6))
         if not self.no_data_augmentation and self.training:
             i = self.augmentations(i)
         i = self.transforms(i)
