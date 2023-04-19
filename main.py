@@ -1,17 +1,44 @@
 import argparse
 import gc
+import itertools
 import os
+import sys
 import time
 from datetime import timedelta
 
 import torch
+import torch.nn.functional as F
 from lightning.pytorch import Trainer, seed_everything
 from lightning.pytorch.accelerators import CUDAAccelerator
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
+from pytorch_lightning import LightningDataModule
 from torch import nn
 
-from data import StratifiedGroupKFoldDataModule
-from logs import aggregate_logs, generate_logs, log_to_gsheet, log_to_json
+# Cat imports
+import torch
+import torch.nn.functional as F
+
+from PIL import Image
+
+import os
+import json
+import numpy as np
+from matplotlib.colors import LinearSegmentedColormap
+
+import torchvision
+from torchvision import models
+from torchvision import transforms
+
+from captum.attr import IntegratedGradients
+from captum.attr import GradientShap
+from captum.attr import Occlusion
+from captum.attr import NoiseTunnel
+from captum.attr import visualization as viz
+import matplotlib.pyplot as plt
+
+# Steven's imports continued
+from data import StratifiedGroupKFoldDataModule, StratifiedGroupDataModule
+from logs import aggregate_logs, generate_logs, get_row, log_to_gsheet, log_to_json
 from losses import (
     BinaryExpectedCostLoss,
     BinaryMacroSoftFBetaLoss,
@@ -20,35 +47,67 @@ from losses import (
 )
 from models.all_negative import AllNegativeModel
 from models.all_positive import AllPositiveModel
-from models.base import BaseModel
 from models.densenet import DenseNetModel
 from models.random import RandomModel
 from models.resnet import ResNetModel
 from models.vit import ViTModel
 from models.yolo import YoloModel
 
-NO_TRAIN_MODELS = {"Random", "AllPositive", "AllNegative"}
+NO_TRAIN_MODELS = {
+    "AllPositive": (AllPositiveModel, None),
+    "AllNegative": (AllNegativeModel, None),
+    "Random": (RandomModel, None),
+    "SuperLearner": (None, None),
+}
+
+SUPER_LEARNER_MODELS = {
+    "ResNet18": (ResNetModel, 18),
+    "ResNet34": (ResNetModel, 34),
+    "ResNet50": (ResNetModel, 50),
+    # "ResNet101": (ResNetModel, 101),
+    # "ResNet152": (ResNetModel, 152),
+    "ViT-B/16": (ViTModel, "B/16"),
+    # "ViT-B/32": (ViTModel, "B/32"),
+    # "ViT-L/16": (ViTModel, "L/16"),
+    # "ViT-L/32": (ViTModel, "L/32"),
+    "DenseNet121": (DenseNetModel, 121),
+    # "DenseNet161": (DenseNetModel, 161),
+    # "DenseNet169": (DenseNetModel, 169),
+    # "DenseNet201": (DenseNetModel, 201),
+    # "yolov8n-cls.pt": (YoloModel, "yolov8n-cls.pt"),
+    "yolov8s-cls.pt": (YoloModel, "yolov8s-cls.pt"),
+    # "yolov8m-cls.pt": (YoloModel, "yolov8m-cls.pt"),
+    # "yolov8l-cls.pt": (YoloModel, "yolov8l-cls.pt"),
+    # "yolov8x-cls.pt": (YoloModel, "yolov8x-cls.pt"),
+}
+
+MODELS = {**NO_TRAIN_MODELS, **SUPER_LEARNER_MODELS}
+
+LEARNING_RATES = {
+    # 0.001,
+    0.0001,
+    # 0.00001,
+    "--auto_lr_find",
+}
+
+BATCH_SIZES = {
+    # 16,
+    32,
+}
+
+CRITERIONS = {
+    "awBCELoss",
+    "dwBCELoss",
+    "BCELoss",
+    "ExpectedCostLoss",
+    # "wBCELoss",
+    # "MacroSoftFBetaLoss",
+    # "SurrogateFBetaLoss",
+    "HybridLoss",
+}
 
 
-def main():
-    models = {
-        "DenseNet": DenseNetModel,
-        "ResNet": ResNetModel,
-        "ViT": ViTModel,
-        "YOLO": YoloModel,
-        "Random": RandomModel,
-        "AllPositive": AllPositiveModel,
-        "AllNegative": AllNegativeModel,
-    }
-    criterions_set = {
-        "BCELoss",
-        "wBCELoss",
-        "awBCELoss",
-        "MacroSoftFBetaLoss",
-        "ExpectedCostLoss",
-        "SurrogateFBetaLoss",
-        "HybridLoss",
-    }
+def parse_args(argv=None):
     parser = argparse.ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
     group = parser.add_argument_group("qt.coyote")
@@ -56,14 +115,14 @@ def main():
         "--model",
         help="Which model to use",
         type=str,
-        choices=list(models.keys()),
-        default="ResNet",
+        choices=list(MODELS.keys()),
+        default="ResNet34",
     )
     group.add_argument(
         "--criterion",
         help="Which criterion to use",
         type=str,
-        choices=criterions_set,
+        choices=CRITERIONS,
         default="ExpectedCostLoss",
     )
     group.add_argument("--batch_size", help="Batch size", type=int, default=32)
@@ -148,6 +207,11 @@ def main():
         action="store_true",
     )
     group.add_argument(
+        "--use_pt",
+        help="Use pt files instead of jpg files",
+        action="store_true",
+    )
+    group.add_argument(
         "--compile",
         help="Compile the model",
         action="store_true",
@@ -186,30 +250,6 @@ def main():
         default=4,
     )
     group.add_argument(
-        "--yolo_model",
-        help="Yolo pretrained model",
-        type=str,
-        default="yolov8n-cls.pt",
-    )
-    group.add_argument(
-        "--resnet_model",
-        help="ResNet model",
-        type=str,
-        default="ResNet18",
-    )
-    group.add_argument(
-        "--densenet_model",
-        help="DenseNet model",
-        type=str,
-        default="DenseNet121",
-    )
-    group.add_argument(
-        "--vit_model",
-        help="DenseNet model",
-        type=str,
-        default="ViT-B_16",
-    )
-    group.add_argument(
         "--crop_size",
         help="Crop size",
         type=int,
@@ -226,15 +266,9 @@ def main():
     )
     group.add_argument(
         "--criterion_cfn",
-        help="Cost false negative for ExpectedCostLoss",
+        help="Cost false negative",
         type=float,
         default=5.0,
-    )
-    group.add_argument(
-        "--dropout_p",
-        help="Dropout probability",
-        type=float,
-        default=0.2,
     )
     group.add_argument(
         "--tabular_hidden_size",
@@ -248,23 +282,62 @@ def main():
         action="store_true",
     )
     group.add_argument(
+        "--captum_load",
+        help="Load weights from else where",
+        type=str,
+        default=None,
+    )
+    group.add_argument(
+        "--captum_on",
+        help="Load weights from else where",
+        type=str,
+        action="append",
+    )
+    group.add_argument(
         "--monitor",
         help="Metric to monitor",
         type=str,
         default="val_EC5",
     )
+    group.add_argument(
+        "--no_save_checkpoint",
+        action="store_true",
+        help="Backup the checkpoint",
+    )
+    group.add_argument(
+        "--train_final_model",
+        action="store_true",
+        help="Train final model",
+    )
     group.add_argument("--message", help="Message to log", type=str)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.accelerator is None:
         args.accelerator = "auto"
+
+    return args
+
+
+def main():
+    args = parse_args()
     print(args)
+
+    if args.captum_load is not None:
+        captum_identify(args)
+    elif args.train_final_model:
+        train_final_model(args)
+    else:
+        external_cross_validation(args)
+
+
+def model_from_args(args: argparse.Namespace, datamodule_i: LightningDataModule):
     torch.backends.cudnn.deterministic = not args.nondeterministic
-    Model = models[args.model]
+    Model, architecture = MODELS[args.model]
     criterions = {
         "BCELoss": nn.BCEWithLogitsLoss(),
         "wBCELoss": nn.BCEWithLogitsLoss(
             pos_weight=torch.tensor(args.criterion_pos_weight)
         ),
+        "dwBCELoss": "dwBCELoss",
         "awBCELoss": "awBCELoss",
         "MacroSoftFBetaLoss": BinaryMacroSoftFBetaLoss(args.criterion_beta),
         "ExpectedCostLoss": BinaryExpectedCostLoss(cfn=args.criterion_cfn),
@@ -272,65 +345,123 @@ def main():
         "HybridLoss": "HybridLoss",
     }
     criterion = criterions[args.criterion]
-    cross_validate(Model, criterion, args)
-    # TODO: train final model
+    callbacks = []
+    if not args.no_early_stopping:
+        callbacks.append(
+            EarlyStopping(args.monitor, patience=args.patience, mode="min")
+        )
+        model_checkpoint = ModelCheckpoint(
+            monitor=args.monitor,
+        )
+        callbacks.append(model_checkpoint)
+    trainer = Trainer.from_argparse_args(
+        args,
+        callbacks=callbacks,
+        log_every_n_steps=1000,
+    )
+    if args.criterion == "awBCELoss" or args.criterion == "HybridLoss":
+        datamodule_i.setup(None)
+        p = datamodule_i.train_dataset().pos_weight * args.criterion_cfn
+        criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(p))
+    if args.criterion == "HybridLoss":
+        criterion = HybridLoss(
+            criterion, BinaryExpectedCostLoss(cfn=args.criterion_cfn)
+        )
+    elif criterion == "dwBCELoss":
+        criterion = "dwBCELoss"
+    if architecture is not None:
+        model = Model(criterion, args, architecture=architecture)
+    else:
+        model = Model(criterion, args)
+    if args.compile and isinstance(trainer.accelerator, CUDAAccelerator):
+        model = torch.compile(model)
+    if args.auto_scale_batch_size or args.auto_lr_find:
+        datamodule_i.setup(None)
+        X, *_ = next(iter(datamodule_i.train_dataloader()))
+        _ = model(X)
+        trainer.tune(model, datamodule=datamodule_i)
+        print(f"Automatically found learning rate: {model.learning_rate}")
+        args.learning_rate = model.learning_rate
+    if args.auto_scale_batch_size:
+        print(f"Automatically found batch size: P={model.batch_size}")
+        args.batch_size = model.batch_size
+    if not args.max_epochs:
+        args.max_epochs = 100
+    return model, trainer, model_checkpoint
 
 
-def cross_validate(
-    Model: BaseModel, criterion: nn.Module, args: argparse.Namespace
-):
-    # cross validation
+def internal_cross_validation(datamodule: LightningDataModule):
+    best_EC5 = torch.inf
+    best_args = None
+    best_checkpoint = None
+    argvs = list(
+        itertools.product(
+            ("--model",),
+            SUPER_LEARNER_MODELS,
+            ("--criterion",),
+            CRITERIONS,
+            ("--learning_rate",),
+            map(str, LEARNING_RATES),
+            ("--batch_size",),
+            map(str, BATCH_SIZES),
+            ("--no_crop", ""),
+            ("--no_data_augmentation", ""),
+            ("--no_tabular_features", ""),
+        )
+    )
+    print(f"Number of hyperparameter configurations: {len(argvs)}")
+    for c, argv in enumerate(argvs):
+        argv = list(argv)
+        if "--auto_lr_find" in argv:
+            argv.remove("--learning_rate")
+        argv = list(filter(len, argv))
+        print(f"Hyperparameter configuration: {c}/{len(argvs)}")
+        args = parse_args(argv)
+        model = model_from_args(args, datamodule)
+        model, trainer, model_checkpoint = model_from_args(args, datamodule)
+        # internal leakage of pos_weight and early stopping
+        trainer.fit(model, datamodule=datamodule)
+        EC5 = model_checkpoint.best_model_score
+        print(f"EC5: {EC5}")
+        log_to_gsheet(
+            [
+                f"{EC5}",
+                f"{c / len(argvs)}",
+                f"{c}",
+                f"{len(argvs)}",
+                f"{' '.join(argv)}",
+            ],
+            "SuperLearner!A1:A1",
+        )
+        if EC5 < best_EC5:
+            best_EC5 = EC5
+            best_args = args
+            best_checkpoint = model_checkpoint
+    print(f"Best EC5: {best_EC5}")
+    print(f"Best args: {best_args}")
+    log_to_gsheet([f"{best_EC5}", f"{best_args}"], "SuperLearner!A1:A1")
+    return best_args, best_checkpoint
+
+
+def external_cross_validation(args: argparse.Namespace):
     start_time = time.perf_counter()
     test_metrics = []
     datamodule = StratifiedGroupKFoldDataModule(args)
+    args_copy = args
     for datamodule_i in datamodule:
         seed_everything(args.random_state, workers=True)
-        callbacks = []
-        if not args.no_early_stopping:
-            callbacks.append(
-                EarlyStopping(args.monitor, patience=args.patience, mode="min")
-            )
-            model_checkpoint = ModelCheckpoint(
-                monitor=args.monitor,
-            )
-            callbacks.append(model_checkpoint)
-        trainer = Trainer.from_argparse_args(
-            args,
-            callbacks=callbacks,
-        )
-        if criterion == "awBCELoss" or criterion == "HybridLoss":
-            datamodule_i.setup(None)
-            p = datamodule_i.train_dataset().pos_weight
-            criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(p))
-        if criterion == "HybridLoss":
-            criterion = HybridLoss(
-                criterion, BinaryExpectedCostLoss(cfn=args.criterion_cfn)
-            )
-        model = Model(criterion, args)
-        if args.compile and isinstance(trainer.accelerator, CUDAAccelerator):
-            model = torch.compile(model)
-
-        if args.auto_scale_batch_size or args.auto_lr_find:
-            datamodule_i.setup(None)
-            X, _ = next(iter(datamodule_i.train_dataloader()))
-            _ = model(X)
-            trainer.tune(model, datamodule=datamodule_i)
-            if args.auto_lr_find:
-                print(
-                    f"Automatically found learning rate: {model.learning_rate}"
-                )
-                args.learning_rate = model.learning_rate
-            if args.auto_scale_batch_size:
-                print("Automatically found batch size")
-                print("Replace --auto_scale_batch_size with")
-                print(f"--batch_size {model.batch_size}")
-                break
-        if args.model not in NO_TRAIN_MODELS:
-            trainer.fit(model=model, train_dataloaders=datamodule_i)
+        if args_copy.model == "SuperLearner":
+            args, model_checkpoint = internal_cross_validation(datamodule_i)
+            model, trainer, _ = model_from_args(args, datamodule_i)
+        else:
+            model, trainer, model_checkpoint = model_from_args(args, datamodule_i)
+            if args.model not in NO_TRAIN_MODELS:
+                trainer.fit(model=model, train_dataloaders=datamodule_i)
         if args.fast_dev_run or args.model in NO_TRAIN_MODELS:
             test_metric = trainer.test(model, dataloaders=datamodule)
         elif not args.no_early_stopping:
             test_metric = trainer.test(
+                model=model,
                 ckpt_path=model_checkpoint.best_model_path,
                 dataloaders=datamodule,
             )
@@ -345,10 +476,104 @@ def cross_validate(
 
     end_time = time.perf_counter()
     time_elapsed = timedelta(seconds=end_time - start_time)
-    logs = generate_logs(test_metrics, time_elapsed, args)
+    logs = generate_logs(test_metrics, time_elapsed, args_copy)
     log_to_json(logs)
     aggregate_logs()
-    log_to_gsheet(logs)
+    row = get_row(logs)
+    if logs["args"]["metadata_path"] == "data/CHIL/CHIL_uwin_mange_Marit_07242020.json":
+        gsheet_range = "CHIL!A1:A1"
+    else:
+        gsheet_range = "v17!A1:A1"
+    log_to_gsheet(row, gsheet_range)
+
+
+def train_final_model(args: argparse.Namespace):
+    start_time = time.perf_counter()
+    datamodule = StratifiedGroupDataModule(args)
+    args_copy = args
+    seed_everything(args.random_state, workers=True)
+    if args_copy.model == "SuperLearner":
+        args, model_checkpoint = internal_cross_validation(datamodule)
+        model, trainer, _ = model_from_args(args, datamodule)
+    else:
+        model, trainer, model_checkpoint = model_from_args(args, datamodule)
+        if args.model not in NO_TRAIN_MODELS:
+            trainer.fit(model=model, train_dataloaders=datamodule)
+
+    end_time = time.perf_counter()
+    time_elapsed = timedelta(seconds=end_time - start_time)
+    print(f"Time elapsed: {time_elapsed}")
+
+
+def captum_identify(args: argparse.Namespace):
+    if not args.captum_on:
+        print("No images provided to captum on", file=sys.stderr)
+        exit(1)
+
+    for i in StratifiedGroupKFoldDataModule(args):
+        data_mod = i
+        break
+
+    model, _, _ = model_from_args(args, data_mod)
+    model.load_state_dict(
+        torch.load(args.captum_load, map_location=torch.device("cpu"))["state_dict"],
+        strict=False,
+    )
+
+    model.eval()
+
+    for onn in args.captum_on:
+        print(f"Interpreting image {onn}")
+        image = Image.open(onn)
+        transform = transforms.Compose(
+            [
+                transforms.Resize(224),
+                # transforms.CenterCrop(224),
+                transforms.ToTensor(),
+            ]
+        )
+
+        integrated_gradients = IntegratedGradients(model)
+        noise_tunnel = NoiseTunnel(integrated_gradients)
+        input = transform(image)
+        input = input.unsqueeze(0)
+        output = model.forward(input)
+        output = F.softmax(output, dim=0)
+        label = torch.tensor(
+            [[1 if torch.sigmoid(output) > 0.5 else 0]]
+        ).squeeze()
+        attributions_ig = integrated_gradients.attribute(input, n_steps=200)
+        attributions_ig_nt = noise_tunnel.attribute(
+            input, nt_samples=10, nt_type="smoothgrad_sq"
+        )
+
+        default_cmap = LinearSegmentedColormap.from_list(
+            "custom blue", [(0, "#ffffff"), (0.25, "#000000"), (1, "#000000")], N=256
+        )
+
+        fig, ax = viz.visualize_image_attr_multiple(
+            np.transpose(
+                attributions_ig.squeeze().cpu().detach().numpy(), (1, 2, 0)
+            ),
+            np.transpose(input.squeeze().cpu().detach().numpy(), (1, 2, 0)),
+            ["original_image", "heat_map"],
+            ["all", "positive"],
+            cmap=default_cmap,
+            show_colorbar=True,
+        )
+        plt.savefig(f"{onn}_ig.out.png")
+
+        fig, ax = viz.visualize_image_attr_multiple(
+            np.transpose(
+                attributions_ig_nt.squeeze().cpu().detach().numpy(), (1, 2, 0)
+            ),
+            np.transpose(input.squeeze().cpu().detach().numpy(), (1, 2, 0)),
+            ["original_image", "heat_map"],
+            ["all", "positive"],
+            cmap=default_cmap,
+            show_colorbar=True,
+        )
+        plt.savefig(f"{onn}_ig_nt.out.png")
 
 
 if __name__ == "__main__":

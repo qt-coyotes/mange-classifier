@@ -4,14 +4,18 @@ import glob
 import json
 import os
 from datetime import datetime, timedelta
+from functools import lru_cache
+import scipy.stats
 
 import git
+import numpy as np
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 SPREADSHEET_ID = "1nFRtoKX3q4MXsyvjImYz-_jdtw4LmSAaZPXffv1C2js"
+STRIP_DIR = "stripped_logs"
 
 
 def generate_logs(
@@ -23,7 +27,9 @@ def generate_logs(
         test_metric_metric = test_metric["test_metric"]
         for key, value in test_metric_metric.items():
             key = key.replace("Binary", "")
-            cv_metrics[key] = cv_metrics.get(key, 0) + value.item()
+            if key not in cv_metrics:
+                cv_metrics[key] = []
+            cv_metrics[key].append(value.item())
         cv_metrics["metric_confusion_matrix"].append(
             [
                 [
@@ -36,18 +42,29 @@ def generate_logs(
                 ],
             ]
         )
-        cv_metrics["loss"] = (
-            cv_metrics.get("loss", 0) + test_metric["test_loss"]
-        )
+        if "loss" not in cv_metrics:
+            cv_metrics["loss"] = []
+        cv_metrics["loss"].append(test_metric["test_loss"])
 
+    confidence = 0.95
+    cv_stats = {}
     for metric in cv_metrics:
-        if isinstance(cv_metrics[metric], list):
+        if metric == "metric_confusion_matrix":
             continue
-        cv_metrics[metric] /= args.k
+        cv_stats[f"{metric}_std"] = np.array(cv_metrics[metric]).std()
+        cv_stats[f"{metric}_mean"] = np.array(cv_metrics[metric]).mean()
+        t_interval = scipy.stats.t.interval(
+            confidence, len(cv_metrics[metric])-1,
+            loc=cv_stats[f"{metric}_mean"],
+            scale=scipy.stats.sem(cv_metrics[metric])
+        )
+        t_interval = np.nan_to_num(t_interval, nan=-1).tolist()
+        cv_stats[f"{metric}_{int(confidence * 100)}_CI"] = t_interval
 
     logs = {
         "args": vars(args),
         "cv_metrics": cv_metrics,
+        "cv_stats": cv_stats,
         "time_elapsed": str(time_elapsed),
         "timestamp": datetime.now().isoformat(),
     }
@@ -97,9 +114,9 @@ def get_row(logs):
     )
     row.append(None)
 
-    row.append(logs["cv_metrics"]["ExpectedCost5"])
-    row.append(logs["cv_metrics"]["Precision"])
-    row.append(logs["cv_metrics"]["Recall"])
+    row.append(logs["cv_stats"]["ExpectedCost5_mean"])
+    row.append(logs["cv_stats"]["Precision_mean"])
+    row.append(logs["cv_stats"]["Recall_mean"])
     row.append(json.dumps(logs["cv_metrics"]["metric_confusion_matrix"]))
     row.append(logs["time_elapsed"])
     row.append(None)
@@ -132,23 +149,43 @@ def get_row(logs):
     row.append(ref.commit.hexsha)
     row.append(None)
 
-    row.append(logs["cv_metrics"]["ExpectedCost50"])
-    row.append(logs["cv_metrics"]["ExpectedCost10"])
-    row.append(logs["cv_metrics"]["F2"])
-    row.append(logs["cv_metrics"]["F1"])
-    row.append(logs["cv_metrics"]["AveragePrecision"])
-    row.append(logs["cv_metrics"]["AUROC"])
-    row.append(logs["cv_metrics"]["Accuracy"])
-    row.append(logs["cv_metrics"]["loss"])
+    row.append(logs["cv_stats"]["ExpectedCost50_mean"])
+    row.append(logs["cv_stats"]["ExpectedCost10_mean"])
+    row.append(logs["cv_stats"]["F2_mean"])
+    row.append(logs["cv_stats"]["F1_mean"])
+    row.append(logs["cv_stats"]["AveragePrecision_mean"])
+    row.append(logs["cv_stats"]["AUROC_mean"])
+    row.append(logs["cv_stats"]["Accuracy_mean"])
+    row.append(str(logs["cv_stats"]["loss_mean"]))
     row.append(None)
 
     row.append(logs["args"]["metadata_path"])
 
+    with open(logs["args"]["metadata_path"]) as f:
+        coco = json.load(f)
+
+    row.append(coco["info"]["version"])
+    row.append(None)
+
+    row.extend(logs["cv_stats"]["ExpectedCost5_95_CI"])
+    row.extend(logs["cv_stats"]["Precision_95_CI"])
+    row.extend(logs["cv_stats"]["Recall_95_CI"])
+    row.extend(logs["cv_stats"]["ExpectedCost50_95_CI"])
+    row.extend(logs["cv_stats"]["ExpectedCost10_95_CI"])
+    row.extend(logs["cv_stats"]["F2_95_CI"])
+    row.extend(logs["cv_stats"]["F1_95_CI"])
+    row.extend(logs["cv_stats"]["AveragePrecision_95_CI"])
+    row.extend(logs["cv_stats"]["AUROC_95_CI"])
+    row.extend(logs["cv_stats"]["Accuracy_95_CI"])
+    row.append(None)
+
+    row.extend(logs["cv_metrics"]["ExpectedCost5"])
+
     return row
 
 
-def log_to_gsheet(logs):
-    row = get_row(logs)
+@lru_cache(maxsize=1)
+def get_gsheet_creds():
     if os.environ.get("GITHUB_ACTIONS"):
         with open("service-account-key.json", "w") as f:
             f.write(os.environ.get("GDRIVE_CREDENTIALS_DATA"))
@@ -156,21 +193,18 @@ def log_to_gsheet(logs):
         "service-account-key.json",
         scopes=SCOPES,
     )
+    return creds
 
-    if (
-        logs["args"]["metadata_path"]
-        == "data/CHIL/CHIL_uwin_mange_Marit_07242020.json"
-    ):
-        RANGE_NAME = "CHIL!A1:A1"
-    else:
-        RANGE_NAME = "v12c!A1:A1"
+
+def log_to_gsheet(row, gsheet_range):
+    creds = get_gsheet_creds()
 
     try:
         service = build("sheets", "v4", credentials=creds)
         sheet = service.spreadsheets()
         sheet.values().append(
             spreadsheetId=SPREADSHEET_ID,
-            range=RANGE_NAME,
+            range=gsheet_range,
             body={
                 "majorDimension": "ROWS",
                 "values": [row],

@@ -16,28 +16,30 @@ jobs:
       with:
         clean: false
 
-    - name: Run clean
-      run: make clean
-
-
     - name: Install python dependencies
       run: |
         python3 -m pip install -U pip
         python3 -m pip install -r requirements.txt
 
+    - name: Clean
+      run: |
+        make clean
+
     # https://github.com/iterative/dvc/pull/7213/
     - name: Pull data
       run: |
         dvc remote modify gdrive --local gdrive_use_service_account true
-        dvc pull
+        dvc pull -f
       env:
         GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Run experiment
-      run: make 4090
+      run:
+        make
       env:
         GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+      timeout-minutes: 10080
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
@@ -47,3 +49,4 @@ jobs:
         path: |
           logs.tsv
           logs_*.json
+          **/*.out.png

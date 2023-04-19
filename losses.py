@@ -91,9 +91,10 @@ class HybridLoss(nn.Module):
         self.loss_b = loss_b
         self.max_batch_idx = -1
 
-    def forward(self, yhat: Tensor, y: Tensor, batch_idx: int):
+    def forward(self, logits: Tensor, y: Tensor, batch_idx: int):
         if batch_idx > self.max_batch_idx:
             self.max_batch_idx = batch_idx
-            return self.loss_a(yhat, y)
+            return self.loss_a(logits, y)
         else:
+            yhat = torch.sigmoid(logits)
             return self.loss_b(yhat, y)

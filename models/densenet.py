@@ -11,22 +11,23 @@ class DenseNetModel(BaseModel):
         self,
         criterion: nn.Module,
         args: argparse.Namespace,
+        architecture: int = 121,
     ):
         super().__init__(criterion, args)
-        if args.densenet_model == "DenseNet121":
+        if architecture == 121:
             weights = models.DenseNet121_Weights.DEFAULT
             backbone = models.densenet121
-        elif args.densenet_model == "DenseNet161":
+        elif architecture == 161:
             weights = models.DenseNet161_Weights.DEFAULT
             backbone = models.densenet161
-        elif args.densenet_model == "DenseNet169":
+        elif architecture == 169:
             weights = models.DenseNet169_Weights.DEFAULT
             backbone = models.densenet169
-        elif args.densenet_model == "DenseNet201":
+        elif architecture == 201:
             weights = models.DenseNet201_Weights.DEFAULT
             backbone = models.densenet201
         else:
-            raise ValueError(f"Unknown DenseNet model: {args.densenet_model}")
+            raise ValueError(f"Unknown DenseNet architecture: {architecture}")
         backbone = backbone(
             weights=None if args.nonpretrained else weights
         )
