@@ -537,7 +537,6 @@ def captum_identify(args: argparse.Namespace):
         noise_tunnel = NoiseTunnel(integrated_gradients)
         input = transform(image)
         input = input.unsqueeze(0)
-        input = (input, torch.tensor([]))
         output = model.forward(input)
         output = F.softmax(output, dim=0)
         label = torch.tensor(
