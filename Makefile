@@ -1,4 +1,4 @@
-target: part2_1
+target: part3_2
 
 toronto:
 	python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 1 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --metadata_path data/qt-coyotes-toronto.json --random_state 0 --message "Toronto: Our Model 0"
@@ -212,7 +212,8 @@ part3:
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 16 --message "30 Runs of ResNet34 --tabular_features --criterion awBCELoss --criterion_cfn 5 --auto_lr_find 16"
 	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 17 --message "30 Runs of ResNet34 --tabular_features --criterion awBCELoss --criterion_cfn 5 --auto_lr_find 17"
-	rm -rf lightning_logs
+
+part3_2:
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 18 --message "30 Runs of ResNet34 --tabular_features --criterion awBCELoss --criterion_cfn 5 --auto_lr_find 18"
 	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 19 --message "30 Runs of ResNet34 --tabular_features --criterion awBCELoss --criterion_cfn 5 --auto_lr_find 19"
@@ -224,7 +225,8 @@ part3:
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 22 --message "30 Runs of ResNet34 --tabular_features --criterion awBCELoss --criterion_cfn 5 --auto_lr_find 22"
 	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 23 --message "30 Runs of ResNet34 --tabular_features --criterion awBCELoss --criterion_cfn 5 --auto_lr_find 23"
-	rm -rf lightning_logs
+
+part3_3:
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 24 --message "30 Runs of ResNet34 --tabular_features --criterion awBCELoss --criterion_cfn 5 --auto_lr_find 24"
 	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 25 --message "30 Runs of ResNet34 --tabular_features --criterion awBCELoss --criterion_cfn 5 --auto_lr_find 25"
