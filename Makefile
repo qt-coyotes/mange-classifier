@@ -362,7 +362,7 @@ fast:
 	python3 main.py --fast_dev_run --batch_size 32 --auto_lr_find --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion dwBCELoss --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --message "Try a doubly weighted BCE loss, weighted on both mange and location"
 
 captum:
-	python3 main.py --captum_load fully_trained.ckpt --captum_on coyote1.jpg --captum_on coyote2.jpg --message "Captum run 1"
+	python3 main.py --captum_load fully_trained.ckpt --captum_on coyote1.JPG --captum_on coyote2.JPG --message "Captum run 1"
 
 clean:
 	rm -f logs_*.json
