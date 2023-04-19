@@ -73,7 +73,7 @@ class BaseModel(LightningModule):
         self.metrics = nn.ModuleDict(metrics)
 
     def forward(self, x: Tuple[Tensor, Tensor]):
-        if isinstance(x, tuple):
+        if isinstance(x, tuple) or isinstance(x, list):
             i, t = x
         else:
             i = x
@@ -85,7 +85,7 @@ class BaseModel(LightningModule):
         if self.return_node:
             i = i[self.return_node]
         i = self.flatten(i)
-        if isinstance(x, tuple):
+        if isinstance(x, tuple) or isinstance(x, list):
             t = self.tabular_backbone(t)
             x = torch.cat((i, t), dim=1)
         else:
