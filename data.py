@@ -126,6 +126,8 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
         if self.args.no_crop:
             equal_size_transform = None
         elif not self.args.no_equal_size_transform:
+            equal_size_transform = None
+        else:
             equal_size_transform = T.Compose(
                 [
                     SquarePad(),
@@ -135,8 +137,6 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
                     ),
                 ]
             )
-        else:
-            equal_size_transform = None
 
         no_mange_annotations = []
         mange_annotations = []
