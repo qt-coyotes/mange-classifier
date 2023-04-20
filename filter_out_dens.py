@@ -3,7 +3,7 @@ import os
 import re
 import json
 
-Tiziana = re.compile('Tiziana')
+sage = re.compile('Sage Raymond')
 
 with open('data/qt-coyotes-merged.json', 'r') as f:
     js = json.load(f)
@@ -19,7 +19,7 @@ print(len(js['images']))
 print(len(js['annotations']))
 
 for image in js['images']:
-    if Tiziana.match(image['rights_holder']):
+    if not sage.match(image['rights_holder']):
         this_id = image['id']
 
         for annote in js['annotations']:
@@ -30,5 +30,5 @@ for image in js['images']:
 print(len(js2['images']))
 print(len(js2['annotations']))
 
-with open('qt-coyotes-toronto.json', 'w') as f:
+with open('qt-coyotes-no-dens.json', 'w') as f:
     json.dump(js2, f, indent=4)

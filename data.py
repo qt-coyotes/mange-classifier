@@ -79,7 +79,6 @@ class COCOImageDataset(Dataset):
                     image["is_color"],
                     (image["hour"] - self.tabular_transform["mean"]["hour"])
                     / self.tabular_transform["std"]["hour"],
-                    image["is_color"],
                     (image["year"] - self.year_mean) / self.year_std,
                     (image["month"] - self.month_mean) / self.month_std,
                     image["latitude"] / 90.0,
@@ -125,6 +124,8 @@ class StratifiedGroupKFoldDataModule(LightningDataModule):
         no_mange_category_ids = {2}
 
         if self.args.no_crop:
+            equal_size_transform = None
+        elif not self.args.no_equal_size_transform:
             equal_size_transform = None
         else:
             equal_size_transform = T.Compose(
