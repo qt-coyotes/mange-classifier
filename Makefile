@@ -1,4 +1,4 @@
-target: part5_7
+target: part5_3b
 
 toronto:
 	python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 1 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --metadata_path data/qt-coyotes-toronto.json --random_state 0 --message "Toronto: Our Model 0"
@@ -338,6 +338,8 @@ part5_3:
 	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet50 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_data_augmentation --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 14 --message "30 Runs of ResNet50 --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
 	rm -rf lightning_logs
+
+part5_3b:
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet50 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_data_augmentation --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 15 --message "30 Runs of ResNet50 --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
 	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet50 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_data_augmentation --no_tabular_features --monitor val_loss --internal_k 5 --nondeterministic --random_state 16 --message "30 Runs of ResNet50 --criterion awBCELoss --criterion_cfn 5 --auto_lr_find"
