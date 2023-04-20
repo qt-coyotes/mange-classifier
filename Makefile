@@ -1,4 +1,4 @@
-target: part2_2b
+target: part2_3b
 
 toronto:
 	python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 1 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --metadata_path data/qt-coyotes-toronto.json --random_state 0 --message "Toronto: Our Model 0"
@@ -167,7 +167,8 @@ part2_3:
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 24 --no_equal_size_transform --message "30 Runs of ResNet34 --cropV2 --criterion awBCELoss --criterion_cfn 5 --auto_lr_find 24"
 	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 25 --no_equal_size_transform --message "30 Runs of ResNet34 --cropV2 --criterion awBCELoss --criterion_cfn 5 --auto_lr_find 25"
-	rm -rf lightning_logs
+
+part2_3b:
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 26 --no_equal_size_transform --message "30 Runs of ResNet34 --cropV2 --criterion awBCELoss --criterion_cfn 5 --auto_lr_find 26"
 	rm -rf lightning_logs
 	-python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 5 --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --random_state 27 --no_equal_size_transform --message "30 Runs of ResNet34 --cropV2 --criterion awBCELoss --criterion_cfn 5 --auto_lr_find 27"
