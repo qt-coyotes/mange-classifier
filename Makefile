@@ -1,5 +1,5 @@
 target: nodens
-# 9
+# 0
 
 nodensbaselines:
 	python3 main.py --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model AllPositive --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --metadata_path data/qt-coyotes-no-dens.json --nondeterministic --message "NO DENS"
@@ -97,7 +97,7 @@ nodensbaselines:
 
 
 nodens:
-	python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet18 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --metadata_path data/qt-coyotes-no-dens.json --nondeterministic --message "NO DENS"
+	python3 main.py --learning_rate 0.00001 --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet18 --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --metadata_path data/qt-coyotes-no-dens.json --nondeterministic --message "NO DENS"
 
 toronto:
 	python3 main.py --auto_lr_find --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model ResNet34 --criterion awBCELoss --criterion_cfn 1 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --nondeterministic --metadata_path data/qt-coyotes-toronto.json --random_state 0 --message "Toronto: Our Model 0"
