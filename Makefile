@@ -1,5 +1,5 @@
 target: nodens
-# 7
+# 8
 
 nodensbaselines:
 	python3 main.py --batch_size 32 --num_sanity_val_steps 1 --patience 5 --model AllPositive --criterion awBCELoss --criterion_cfn 5 --no_crop --no_tabular_features --no_data_augmentation --monitor val_loss --internal_k 5 --metadata_path data/qt-coyotes-no-dens.json --nondeterministic --message "NO DENS"
